@@ -1,0 +1,34 @@
+[INFO] 01:02:32:320 kernel/(4246:4246): Soy el kernel! Hice uso de la shared!
+[INFO] 01:16:42:687 kernel/(4946:4946): El valor del puerto es 7848 
+
+[INFO] 01:16:42:688 kernel/(4946:4946): SOCKET INICIALIZADO
+[INFO] 01:31:51:991 kernel/(5621:5621): El valor del puerto es 7848 
+
+[INFO] 01:31:51:991 kernel/(5621:5621): SOCKET INICIALIZADO
+[INFO] 01:32:50:559 kernel/(5698:5698): El valor del puerto es 7848 
+
+[INFO] 01:32:50:560 kernel/(5698:5698): SOCKET INICIALIZADO
+[INFO] 02:07:44:639 kernel/(7066:7066): El valor del puerto es 7848 
+
+[INFO] 02:07:44:639 kernel/(7066:7066): SOCKET INICIALIZADO
+[INFO] 03:24:54:251 kernel/(7624:7624): El valor del puerto es 7848 
+
+[INFO] 03:24:54:251 kernel/(7624:7624): SOCKET INICIALIZADO
+[INFO] 03:44:59:001 kernel/(8337:8337): El valor del puerto es 7848 
+
+[INFO] 03:44:59:002 kernel/(8337:8337): SOCKET INICIALIZADO
+[INFO] 03:58:37:059 kernel/(9087:9087): El valor del puerto es 7848 
+
+[INFO] 03:58:37:059 kernel/(9087:9087): SOCKET INICIALIZADO
+[INFO] 04:15:15:992 kernel/(9758:9758): El valor del puerto es 7848 
+
+[INFO] 04:15:15:993 kernel/(9758:9758): SOCKET INICIALIZADO
+[INFO] 04:20:30:492 kernel/(10095:10095): El valor del puerto es 7848 
+
+[INFO] 04:20:30:492 kernel/(10095:10095): SOCKET INICIALIZADO
+[INFO] 04:23:23:615 kernel/(10315:10315): El valor del puerto es 7848 
+
+[INFO] 04:23:23:615 kernel/(10315:10315): SOCKET INICIALIZADO
+[INFO] 18:52:36:541 kernel/(2471:2471): El valor del puerto es 7848 
+
+[INFO] 18:52:36:542 kernel/(2471:2471): SOCKET INICIALIZADO

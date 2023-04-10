@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "cpu"
+		},
+		{
+			"path": "consola"
+		},
+		{
+			"path": "kernel"
+		},
+		{
+			"path": "memoria"
+		},
+		{
+			"path": "filesystem"
+		},
+		{
+			"path": "shared"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.h": "c",
+        	"*.c": "c",
+			"*.sh": "shellscript"
+		}
+	}
+}
