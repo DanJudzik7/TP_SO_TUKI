@@ -31,3 +31,13 @@
 [INFO] 18:53:24:588 consola/(2586:2586): El valor de la ip es 127.0.0.1 y del puerto es 7848 
 
 [INFO] 18:53:24:589 consola/(2586:2586): Conexion establecida con kernel
+[INFO] 20:59:14:990 consola/(9267:9267): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 20:59:20:284 consola/(9267:9267): Agrego al paquete el primer parametro: buenass
+[INFO] 20:59:20:284 consola/(9267:9267): Enviando paquete...
+[INFO] 21:01:24:446 consola/(9603:9603): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 21:04:46:422 consola/(10026:10026): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 21:04:51:341 consola/(10026:10026): Agrego al paquete el primer parametro: tuki
+[INFO] 21:04:51:341 consola/(10026:10026): Enviando paquete...

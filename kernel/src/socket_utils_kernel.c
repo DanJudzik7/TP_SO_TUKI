@@ -60,22 +60,15 @@ int socket_recv_operation(int socket_cliente)
 	}
 }
 
-void* socket_recv_buffer(int* size, int socket_cliente)
-{
-	void * buffer;
-
-	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
-	buffer = malloc(*size);
-	recv(socket_cliente, buffer, *size, MSG_WAITALL);
-
-	return buffer;
-}
 
 void socket_recv_message(int socket_cliente)
 {
-
 	int size;
-	char* buffer = socket_recv_buffer(&size, socket_cliente);
+	char* buffer = serialize_recv_buffer(&size, socket_cliente);
 	printf( "Me llego el mensaje %s \n", buffer);
 	free(buffer);
+}
+
+t_list* socket_recv_package(int socket_cliente){
+	return serialize_recv_package(socket_cliente);
 }

@@ -19,28 +19,13 @@ int socket_initialize_connect(char *ip,char *puerto)
 						server_info->ai_protocol);
 	// Ahora que tenemos el socket, vamos a conectarlo
  	int connection = connect(socket_servidor, server_info->ai_addr, server_info->ai_addrlen);
-	if ( connection == 0 ){
+	if ( connection == (-1) ){
 		printf("\nERROR AL CONECTARME CON EL SERVIDOR PROPORCIONADO");
 	}
 	printf("\nConexion establecida en el puerto %s con la ip %s \n",puerto,ip);
 	freeaddrinfo(server_info);
 
 	return socket_servidor;
-}
-
-void* serialize_package(t_paquete* paquete, int bytes)
-{
-	void * magic = malloc(bytes);
-	int desplazamiento = 0;
-
-	memcpy(magic + desplazamiento, &(paquete->codigo_operacion), sizeof(int));
-	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, &(paquete->buffer->size), sizeof(int));
-	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, paquete->buffer->stream, paquete->buffer->size);
-	desplazamiento+= paquete->buffer->size;
-
-	return magic;
 }
 
 void socket_send_message(char* mensaje, int socket_cliente)
@@ -67,13 +52,26 @@ void socket_send_message(char* mensaje, int socket_cliente)
 	delete_package(paquete);
 }
 
+
+void socket_send_package(t_paquete* paquete, int socket_cliente)
+{
+	int bytes = paquete->buffer->size + 2*sizeof(int);
+
+	void* a_enviar = serialize_package(paquete, bytes);
+	printf("\nEnviando mensaje a kernel");
+	int mess_send = send(socket_cliente, a_enviar, bytes, 0);
+
+	if(mess_send == (-1) ) {
+		printf("\nERROR AL ENVIAR MENSAJE");
+	}
+
+	
+	free(a_enviar);
+	delete_package(paquete);
+}
+
 void socket_end(int socket_cliente){
 	close(socket_cliente);
 }
 
-void delete_package(t_paquete* paquete)
-{
-	free(paquete->buffer->stream);
-	free(paquete->buffer);
-	free(paquete);
-}
+

@@ -6,4 +6,7 @@
 #include "shared_utils.h"
 #include "socket_utils_kernel.h"
 #include "tests.h"
+
+void iterator(char* value);
+
 #endif

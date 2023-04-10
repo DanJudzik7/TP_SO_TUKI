@@ -3,31 +3,35 @@
 
 int main(int argc, char ** argv){
 
-    char* ip;
-	char* puerto;
-    t_config* config;
-    t_log *logger ;
 
-
-    printf("Iniciando la consola");
     //Inicia el logger
-	logger= iniciar_logger("consola");
+	t_log* logger= iniciar_logger("consola");
     //Carga archivo de configuracion
-    config = iniciar_config("consola");
+    t_config* config = iniciar_config("consola");
 
     //Obtiene la ip y el puerto
-    ip = config_get_string_value(config, "IP_KERNEL");
-	puerto = config_get_string_value(config, "PUERTO_KERNEL");
+    char* ip = config_get_string_value(config, "IP_KERNEL");
+	char* puerto = config_get_string_value(config, "PUERTO_KERNEL");
     
     log_info(logger,"El valor de la ip es %s y del puerto es %s \n",ip,puerto);    
     
     int conexion_kernel = socket_initialize_connect(ip, puerto);
 
-	log_info(logger, "Conexion establecida con kernel");
-
-	char* mensaje =  "Handsake ready"; 
+	char* mensaje =  "Handsake de consola ready"; 
 
 	socket_send_message( mensaje , conexion_kernel);
+
+    char* leido;
+    t_paquete* paquete = create_package(I_O);  //hardcodeado el codigo de operacion con I/O
+	// Leemos INSTRUCCIONES
+    leido = readline("> ");
+	log_info(logger, "Agrego al paquete el primer parametro: %s", leido);
+    add_to_package(paquete,leido, strlen(leido + 1));
+	free(leido);
+
+	log_info(logger, "Enviando paquete...");
+
+	socket_send_package(paquete, conexion_kernel);
     
     socket_end(conexion_kernel);
 
@@ -42,3 +46,11 @@ int main(int argc, char ** argv){
 
 }
 
+void load_basic_config( char* ip,
+	                    char* puerto,
+                        t_config* config,
+                        t_log *logger ) {
+
+    
+    
+}
