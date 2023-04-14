@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "consola.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "readline.h": "c",
+        "socket_utils_consola.h": "c",
+        "shared_utils.h": "c"
     }
 }

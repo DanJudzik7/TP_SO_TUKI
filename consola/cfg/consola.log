@@ -41,3 +41,86 @@
 
 [INFO] 21:04:51:341 consola/(10026:10026): Agrego al paquete el primer parametro: tuki
 [INFO] 21:04:51:341 consola/(10026:10026): Enviando paquete...
+[INFO] 00:54:35:680 consola/(2805:2805): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 00:56:01:541 consola/(2914:2914): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 00:57:54:874 consola/(3052:3052): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 00:57:54:876 consola/(3052:3052): Enviando paquete...
+[INFO] 00:59:11:400 consola/(3138:3138): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 01:51:23:459 consola/(4802:4802): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 01:53:14:548 consola/(5110:5110): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 01:54:44:919 consola/(5242:5242): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 01:56:13:343 consola/(5367:5367): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:00:08:963 consola/(5901:5901): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:12:46:282 consola/(6493:6493): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:14:43:397 consola/(6766:6766): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:15:44:155 consola/(6923:6923): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:16:46:015 consola/(7051:7051): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:18:27:349 consola/(7282:7282): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:18:42:667 consola/(7357:7357): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:19:18:567 consola/(7506:7506): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:24:28:085 consola/(7843:7843): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:27:07:314 consola/(8167:8167): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:29:40:982 consola/(8479:8479): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:30:37:214 consola/(8618:8618): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:32:17:176 consola/(8772:8772): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:32:45:100 consola/(8911:8911): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:35:30:075 consola/(9173:9173): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:40:26:225 consola/(9475:9475): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:41:13:998 consola/(9692:9692): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:43:45:665 consola/(9935:9935): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:44:27:077 consola/(10102:10102): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:52:24:249 consola/(10662:10662): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:55:06:893 consola/(10810:10810): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:55:29:892 consola/(10946:10946): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:56:13:439 consola/(11091:11091): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 02:58:12:077 consola/(11267:11267): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:00:20:810 consola/(11448:11448): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:00:55:143 consola/(11557:11557): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:02:49:473 consola/(11713:11713): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:03:58:848 consola/(11844:11844): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:04:49:572 consola/(12026:12026): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:06:27:497 consola/(12133:12133): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:08:46:493 consola/(12329:12329): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:09:16:765 consola/(12484:12484): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+
+[INFO] 03:09:55:239 consola/(12565:12565): El valor de la ip es 127.0.0.1 y del puerto es 7848 
+

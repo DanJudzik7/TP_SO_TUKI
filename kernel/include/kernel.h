@@ -7,6 +7,10 @@
 #include "socket_utils_kernel.h"
 #include "tests.h"
 
+
+
 void iterator(char* value);
+t_instruccion_package_0* deserializar_instruction_0(t_buffer* buffer);
+
 
 #endif

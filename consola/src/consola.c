@@ -15,12 +15,20 @@ int main(int argc, char ** argv){
     
     log_info(logger,"El valor de la ip es %s y del puerto es %s \n",ip,puerto);    
     
+    t_list *instruccions = list_create(); //Creamos una lista para almacenar las instrucciones
+
+    
     int conexion_kernel = socket_initialize_connect(ip, puerto);
 
 	char* mensaje =  "Handsake de consola ready"; 
-
 	socket_send_message( mensaje , conexion_kernel);
 
+    
+    list_instruccions(instruccions); //leemos el archivo y listamos instrucciones
+    process_instruccions(instruccions, conexion_kernel); //procesamos la cantidad de parametros y la agregamos al struct correspondiente
+
+
+    /*
     char* leido;
     t_paquete* paquete = create_package(I_O);  //hardcodeado el codigo de operacion con I/O
 	// Leemos INSTRUCCIONES
@@ -28,17 +36,12 @@ int main(int argc, char ** argv){
 	log_info(logger, "Agrego al paquete el primer parametro: %s", leido);
     add_to_package(paquete,leido, strlen(leido + 1));
 	free(leido);
-
 	log_info(logger, "Enviando paquete...");
 
-    
-    list_instruccions(instruccions);
-    process_instruccions(instruccions);
-    
 	socket_send_package(paquete, conexion_kernel);
     
     socket_end(conexion_kernel);
-
+    */
     /*
     if(argc > 1 && strcmp(argv[1],"-test")==0)
         return run_tests();
@@ -75,7 +78,7 @@ void list_instruccions(t_list *instruccions)
     char buffer[256];
     while(fgets(buffer,sizeof(buffer),file_instruccions)){
         char *line = strdup(buffer); // crear una copia de la línea
-        printf("lei: %s",line);
+        //printf("lei: %s",line);
         list_add(instruccions,line); //agrega los elementos leidos a la lista de instrucciones
     }
     
@@ -85,37 +88,30 @@ void list_instruccions(t_list *instruccions)
     free(file_directory);
 }
 
-void process_instruccions(t_list* instruccions){
+
+void process_instruccions(t_list* instruccions, int socket_cliente){ //con esto procesamos y dependiendo de la cantidad de espacios declaramos la estructura correspondiendte de cada instruccion
      for (int i = 0; i < list_size(instruccions); i++) {
         char* instruccion = list_get(instruccions, i);
-        printf("%i _ %s\n", count_spaces(instruccion),list_get(instruccions, i)); 
         int spaces = count_spaces(instruccion);//cuenta los espacios y dependiendo los espacios sera la cantidad de parametros 
+        
         switch (spaces) {
             case 0:
-            
-                t_instruccion_package_0 inst;
-                inst.instruccion = malloc(strlen(instruccion)+1);
-                inst.instruccion_long = (strlen(instruccion)+1);
-                strcpy(inst.instruccion, instruccion);
+                socket_send_0_params(instruccion,spaces,socket_cliente);
                 break;
             case 1:
-                printf("Ha seleccionado la opcion 1.\n");
                 break;
             case 2:
-                printf("Ha seleccionado la opcion 2.\n");
                 break;
             case 3:
-                printf("Ha seleccionado la opcion 3.\n");
                 break;
             default:
-                printf("Error con la cantidad de parametros");
                 break;
         }
     }
 
 }
 
-int count_spaces(char *instruction_text) {
+int count_spaces(char *instruction_text) { //con esta funcion obtenemos la cantidad de espacios que tiene cada instrucciuon, y asi saber que tipo de estructura tiene
     int count = 0;
     for(int i = 0; i < strlen(instruction_text); i++) {
         if(instruction_text[i] == ' ') {
