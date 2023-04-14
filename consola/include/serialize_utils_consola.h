@@ -25,6 +25,11 @@ typedef enum
 	YIELD
 }op_code;
 
+typedef enum{
+	ERROR,
+	RECIVE_OK
+} op_code_reception;
+
 typedef struct
 {
 	op_code codigo_operacion;
@@ -41,5 +46,6 @@ t_paquete* create_package(int cod_op);
 void delete_package(t_paquete* paquete);
 
 void create_buffer(t_paquete* paquete);
+
 
 #endif

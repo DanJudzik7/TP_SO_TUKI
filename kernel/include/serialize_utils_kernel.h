@@ -6,23 +6,23 @@
 
 typedef enum
 {
-	MENSAJE,
-	F_READ,
-	F_WRITE,
-	SET,
-	MOV_IN,
-	MOV_OUT,
-	F_TRUNCATE,
-	F_SEEK,
-	CREATE_SEGMENT,
-	I_O,
-	WAIT,
-	SIGNAL,
-	F_OPEN,
-	F_CLOSE,
-	DELETE_SEGMENT,
-	EXIT,
-	YIELD
+	MENSAJE, 				// 0
+	F_READ, 				// 1
+	F_WRITE,				// 2
+	SET,					// 3
+	MOV_IN,					// 4
+	MOV_OUT,				// 5
+	F_TRUNCATE, 			// 6
+	F_SEEK,					// 7
+	CREATE_SEGMENT,			// 8
+	I_O,					// 9
+	WAIT,					// 10
+	SIGNAL,					// 11
+	F_OPEN,					// 12
+	F_CLOSE,				// 13	
+	DELETE_SEGMENT,			// 14
+	EXIT,					// 15
+	YIELD					// 16
 }op_code;
 
 typedef struct

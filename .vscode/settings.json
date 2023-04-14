@@ -4,6 +4,11 @@
         "stdbool.h": "c",
         "readline.h": "c",
         "socket_utils_consola.h": "c",
-        "shared_utils.h": "c"
+        "shared_utils.h": "c",
+        "type_traits": "c",
+        "stdio.h": "c",
+        "serialize_utils_kernel.h": "c",
+        "list.h": "c",
+        "log.h": "c"
     }
 }

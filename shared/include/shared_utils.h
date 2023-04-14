@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <commons/config.h>
 #include <commons/collections/list.h>
+#include <commons/string.h>
 #include <commons/log.h>
 #include <stdbool.h>
 #include <netdb.h>
@@ -35,7 +36,7 @@ typedef struct {
     char* param_1;
     uint32_t size_param_2;
     char* param_2;
-} t_instruccion_package2;
+} t_instruccion_package_2;
 typedef struct {
     uint32_t instruccion_long;
     char* instruccion;
