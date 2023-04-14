@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "consola.h": "c",
+        "stdbool.h": "c"
+    }
+}
