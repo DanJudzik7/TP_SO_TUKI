@@ -7,8 +7,10 @@
 #include <stdbool.h>
 #include "shared_utils.h"
 #include "tests.h"
+#include "socket_utils_consola.h"
+#include "serialize_utils_consola.h"
 #include "handler_instruction_consola.h"
-
+#include <readline/readline.h>
 
 
 #endif
