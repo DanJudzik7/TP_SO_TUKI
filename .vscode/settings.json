@@ -9,6 +9,14 @@
         "stdio.h": "c",
         "serialize_utils_kernel.h": "c",
         "list.h": "c",
-        "log.h": "c"
+        "log.h": "c",
+        "kernel.h": "c",
+        "netdb.h": "c",
+        "socket.h": "c",
+        "handler_instruction_consola.h": "c",
+        "tests.h": "c",
+        "basic.h": "c",
+        "instruction_handler_kernel.h": "c",
+        "handler_instruction_kernel.h": "c"
     }
 }

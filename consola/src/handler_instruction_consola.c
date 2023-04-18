@@ -56,11 +56,11 @@ int string_array_length(char** array) {
 //Maneja la instrucciones de la linea, y nos devuelve un paquete
 t_paquete* handler_instruction_package(char* lineinstruccion){
     //Limpio las lineas por si tienen alguna separacion rara
-	string_trim(lineinstruccion);
+	//string_trim(lineinstruccion); //RESOLVER LUEGO
     //Devuelve una lista de arreglo string con las instrucciones separadas por un espacio
     char** parametros= string_split( lineinstruccion , " ");
     op_code cod_op = return_opcode(parametros[0]);
-	//Creamos el paquete 
+	//Creamos el paquete con el operation code correspondiente
     t_paquete* paquete = create_package(cod_op);
     
     for(int i = 1;i < string_array_length(parametros) ;i++){
@@ -68,6 +68,16 @@ t_paquete* handler_instruction_package(char* lineinstruccion){
     }
 
     return paquete;
+}
+
+op_code_reception opcode_recive(char* code) {
+     if (strcmp(code, "RECIVE_OK") == 0) {
+        return RECIVE_OK;
+    } else if (strcmp(code, "ERROR") == 0) {
+        return ERROR;
+    } else {
+        return (-1); // Otra opción de manejo de error, si lo deseas
+    }
 }
 //Devuelve el op_code dependiendo el mensaje leido
 op_code return_opcode(char* code) {
