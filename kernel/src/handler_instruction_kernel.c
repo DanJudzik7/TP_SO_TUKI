@@ -1,8 +1,8 @@
 #include "handler_instruction_kernel.h"
 
-int instruction_handler_console(int cliente_fd){ 
+int instruction_handler_kernel(int cliente_fd){ 
 
-    t_list* list_instructions;
+    t_list* payload;
 
 	while (1) {
 		int cod_op = socket_recv_operation(cliente_fd);
@@ -13,7 +13,7 @@ int instruction_handler_console(int cliente_fd){
                 break;
             case F_READ: 
             case F_WRITE:
-                list_instructions = socket_recv_package(cliente_fd);
+                payload = socket_recv_package(cliente_fd);
                 //list_iterate(list_instructions, (void*) iterator);
                 break;
             case SET:
@@ -22,7 +22,7 @@ int instruction_handler_console(int cliente_fd){
             case F_TRUNCATE:
             case F_SEEK:
             case CREATE_SEGMENT:
-                list_instructions = socket_recv_package(cliente_fd);
+                payload = socket_recv_package(cliente_fd);
                 //list_iterate(list_instructions, (void*) iterator);
                 break;
             case I_O:
@@ -31,12 +31,12 @@ int instruction_handler_console(int cliente_fd){
             case F_OPEN:
             case F_CLOSE:
             case DELETE_SEGMENT:
-                list_instructions = socket_recv_package(cliente_fd);
+                payload = socket_recv_package(cliente_fd);
                 //list_iterate(list_instructions, (void*) iterator);
                 break;  
             case EXIT:
             case YIELD:
-                list_instructions = socket_recv_package(cliente_fd);
+                payload = socket_recv_package(cliente_fd);
                 printf("\nME LLEGO UN EXIT O YIELD:\n");
                 //list_iterate(list_instructions, (void*) iterator);
                 break;  

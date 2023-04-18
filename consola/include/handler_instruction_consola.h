@@ -14,6 +14,7 @@ t_paquete* handler_instruction_package( char* lineanstruccion);
 op_code return_opcode(char* code);
 int string_array_length(char** array);
 op_code_reception opcode_recive(char* code) ;
+
 #endif
 
 

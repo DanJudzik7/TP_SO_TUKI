@@ -1,5 +1,8 @@
 #include "shared_utils.h"
 
+char* deserialize_payload(t_list* payload){
+    return "IMPLEMENTAR";
+}
 
 char* mi_funcion_compartida(){
     return "Hice uso de la shared!";

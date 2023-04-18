@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include "shared_utils.h"
 
-int instruction_handler_console(int cliente_fd);
-void iterator(char* value);
+int instruction_handler_kernel(int cliente_fd);
 
 #endif

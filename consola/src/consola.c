@@ -28,7 +28,7 @@ int main(int argc, char ** argv){
     while(1){
         read(conexion_kernel, buffer, 1024);
         op_code_reception codop_console_recived = opcode_recive(buffer);
-        if( codop_console_recived == RECIVE_OK)
+        if( codop_console_recived == OK)
         { log_info(logger,"Recibimos un OK por parte del kernel \n");  }
         if( codop_console_recived == ERROR)
         { log_info(logger,"Recibimos un ERROR por parte del kernel \n");  }

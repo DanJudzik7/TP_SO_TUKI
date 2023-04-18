@@ -37,7 +37,7 @@ typedef enum
 
 typedef enum{
 	ERROR,
-	RECIVE_OK
+	OK
 } op_code_reception;
 
 typedef struct
@@ -55,6 +55,9 @@ typedef struct
 char* obtener_cfg_type(char* process_name,char* file_type);
 t_config* iniciar_config(char* process_name);
 t_log* iniciar_logger(char* process_name);
+
+//TODO IMPLEMTENAR PARA DESERIALIZAR EL PAYLOAD, CAPAZ ESTO DEPENDA DEL TIPO QUE NECESITEMOS ESTILO INT O CHAR*
+char* deserialize_payload(t_list* payload);
 
 /* Inicializa un socket servidor y lo vincula a un puerto específico. Retorna el descriptor del socket creado. */
 int socket_initialize(char* puerto);
@@ -92,13 +95,12 @@ void add_to_package(t_paquete* paquete, void* valor, int tamanio);
 /* Serializa el paquete especificado en un buffer de bytes de tamaño específico y retorna un puntero al buffer. */
 void* serialize_package(t_paquete* paquete, int bytes); 
 
-/* Deserializa un paquete a partir de un buffer de bytes recibido. */
-void* deserialize_package(); 
-
 /* Libera la memoria asignada a un paquete especificado. */
 void delete_package(t_paquete* paquete); 
 
 /* Crea un buffer para el paquete especificado. */
 void create_buffer(t_paquete* paquete); 
+
+t_list* socket_recv_package(int socket_cliente);
 
 #endif

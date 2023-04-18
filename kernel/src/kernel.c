@@ -19,14 +19,14 @@ int main(int argc, char ** argv){
     log_info(logger,"SOCKET INICIALIZADO");    
     //Pongo el socket en modo de aceptar las escuchas
 	int cliente_fd = socket_accept(server_fd);
-	int recive_instrucction = instruction_handler_console(cliente_fd);
+	int recive_instrucction = instruction_handler_kernel(cliente_fd);
     if( recive_instrucction == (-1) ) {
         printf("Hubo un error !!! "); //esto deberia pasar al logger   --TODO
     }
 
     //Si el proceso o los procesos terminan de ejecutarse envio un mensaje de ok,
     //if() { 
-    t_paquete* paquete = create_package(RECIVE_OK);
+    t_paquete* paquete = create_package(OK);
     socket_send_package(paquete, cliente_fd);
     /*}else{
         t_paquete* paquete = create_package("ERROR_RI");
