@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include <commons/config.h>
 #include <commons/collections/list.h>
 #include <commons/string.h>
@@ -34,11 +35,46 @@ typedef enum
 	EXIT,					// 15
 	YIELD					// 16
 }op_code;
+//REVISAR
+typedef struct{
+	int id;
+	void* segment_table_direction;
+	uint8_t size_data_segment
+}segment_table;
+//TODO
+typedef struct{
+
+} cpu_register;
+
+typedef struct{
+	void* file_direction;
+} file;
+
+typedef enum{
+	NEW,
+	READY,
+	EXEC,
+	BLOCK,
+	EXIT
+} state_pcb;
+
+typedef struct {
+    int pid;
+	state_pcb state_pcb;
+    op_code* instructions; //RECORDAR QUE DEBE HACERSE puntero a opcode
+    int program_counter;
+    cpu_register cpu_register;
+    segment_table segment_table;
+    int aprox_burst_time;
+    time_t last_ready_time;
+    file* table_open_files;
+} pcb;
+
 
 typedef enum{
 	ERROR,
 	OK
-} op_code_reception;
+} op_code_reception; 
 
 typedef struct
 {

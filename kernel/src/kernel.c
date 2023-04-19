@@ -23,7 +23,6 @@ int main(int argc, char ** argv){
     if( recive_instrucction == (-1) ) {
         printf("Hubo un error !!! "); //esto deberia pasar al logger   --TODO
     }
-
     //Si el proceso o los procesos terminan de ejecutarse envio un mensaje de ok,
     //if() { 
     t_paquete* paquete = create_package(OK);
