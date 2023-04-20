@@ -8,6 +8,7 @@
 #include <time.h>
 #include <commons/config.h>
 #include <commons/collections/list.h>
+#include <commons/collections/queue.h>
 #include <commons/string.h>
 #include <commons/log.h>
 #include <stdbool.h>
@@ -39,14 +40,18 @@ typedef enum
 typedef struct{
 	int id;
 	void* segment_table_direction;
-	uint8_t size_data_segment
+	uint8_t size_data_segment;
 }segment_table;
 //TODO
 typedef struct{
-
+	int acumulator;
+	int register_base;
+	int counter;
+	int register_data;  
 } cpu_register;
 
 typedef struct{
+	uint32_t size_file;
 	void* file_direction;
 } file;
 
@@ -55,7 +60,7 @@ typedef enum{
 	READY,
 	EXEC,
 	BLOCK,
-	EXIT
+	EXIT_PROCESS
 } state_pcb;
 
 typedef struct {

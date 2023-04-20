@@ -19,7 +19,7 @@ int main(int argc, char ** argv){
     log_info(logger,"SOCKET INICIALIZADO");    
     //Pongo el socket en modo de aceptar las escuchas
 	int cliente_fd = socket_accept(server_fd);
-	int recive_instrucction = instruction_handler_kernel(cliente_fd);
+	int recive_instrucction = instruction_handler_reciver(cliente_fd);
     if( recive_instrucction == (-1) ) {
         printf("Hubo un error !!! "); //esto deberia pasar al logger   --TODO
     }
