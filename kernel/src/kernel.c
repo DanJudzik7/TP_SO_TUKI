@@ -19,7 +19,12 @@ int main(int argc, char ** argv){
     int server_fd = socket_initialize(puerto);
     log_info(logger,"SOCKET INICIALIZADO");    
 
-    conect_modulos(config,logger,"CPU");
+    //Conect_modules conecta al modulo que le envias como tercer parametro
+    int conexion_cpu =  conect_modules(config,logger,"CPU");
+    //int conexion_memoria = conect_modules(config,logger,"MEMORIA");
+    //int conexion_memoria = conect_modules(config,logger,"FILESYSTEM");
+
+    
     //Pongo el socket en modo de aceptar las escuchas
 	int cliente_fd = socket_accept(server_fd);
 	int recive_instrucction = instruction_handler_reciver(cliente_fd);

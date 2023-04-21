@@ -134,7 +134,7 @@ int socket_initialize(char *puerto){
 	listen(socket_servidor, SOMAXCONN);
 
 	freeaddrinfo(servinfo);
-	printf("Listo para escuchar a mi cliente");
+	printf("Listo para escuchar a mi cliente\n");
 
 	return socket_servidor;
 }
@@ -283,15 +283,38 @@ t_list* socket_recv_package(int socket_cliente){
 	return serialize_recv_package(socket_cliente);
 }
 
-void conect_modulos(t_config* config,t_log* logger,char* modulo){
-	
-    char* puerto_modulo = config_get_string_value(config, "PUERTO_CPU");
-    char* ip_modulo= config_get_string_value(config,"IP_CPU");
-	printf("pruebaaaaaaaa.\n");
+int conect_modules(t_config* config,t_log* logger,char* modulo){
+
+	char* puerto = malloc(strlen("PUERTO_") + strlen(modulo) + 1 );
+	sprintf(puerto,"PUERTO_%s",modulo);
+	char* ip = malloc(strlen("IP_") + strlen(modulo) + 1);
+	sprintf(ip,"IP_%s",modulo);
+
+    char* puerto_modulo = config_get_string_value(config, puerto);
+    char* ip_modulo= config_get_string_value(config,ip);
+
     int conexion_modulo = socket_initialize_connect(ip_modulo,puerto_modulo);
 
-	char* mensaje = "handshake ready"; 
-    socket_send_message(mensaje, conexion_modulo);
+	printf("Conexión con módulo %s establecida.\n",modulo);
+	char* mensaje = "prueba";
+	socket_send_message(mensaje,conexion_modulo);
 	
-    printf("Conexión con módulo establecida.\n");
+	return conexion_modulo;
+}
+
+int receive_modules(t_log* logger,t_config* config){
+	//Obtenemos el puerto con el que escucharemos conexiones
+	char* puerto = config_get_string_value(config, "PUERTO_ESCUCHA");
+
+    log_info(logger,"El valor del puerto es %s \n",puerto);    
+
+    //Inicializo el socket en el puerto cargado por la config
+    int server_fd = socket_initialize(puerto);
+    log_info(logger,"SOCKET INICIALIZADO");    
+    //Pongo el socket en modo de aceptar las escuchas
+	//int cliente_fd = socket_accept(server_fd);
+
+	
+
+	return socket_accept(server_fd);
 }

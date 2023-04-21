@@ -15,3 +15,70 @@
 [INFO] 15:57:17:153 cpu/(12035:12035): El valor del puerto es 8001 
 
 [INFO] 15:57:17:154 cpu/(12035:12035): SOCKET INICIALIZADO
+[INFO] 17:01:54:499 cpu/(2152:2152): El valor del puerto es 8001 
+
+[INFO] 17:01:54:500 cpu/(2152:2152): SOCKET INICIALIZADO
+[INFO] 17:09:19:630 cpu/(2858:2858): El valor del puerto es 8001 
+
+[INFO] 17:09:19:632 cpu/(2858:2858): SOCKET INICIALIZADO
+[INFO] 17:10:11:052 cpu/(3085:3085): El valor del puerto es 8001 
+
+[INFO] 17:10:11:054 cpu/(3085:3085): SOCKET INICIALIZADO
+[INFO] 17:15:20:363 cpu/(3591:3591): El valor del puerto es 8001 
+
+[INFO] 17:15:20:364 cpu/(3591:3591): SOCKET INICIALIZADO
+[INFO] 17:19:29:519 cpu/(4016:4016): El valor del puerto es 8001 
+
+[INFO] 17:19:29:523 cpu/(4016:4016): SOCKET INICIALIZADO
+[INFO] 17:21:09:795 cpu/(4200:4200): El valor del puerto es 8001 
+
+[INFO] 17:21:09:797 cpu/(4200:4200): SOCKET INICIALIZADO
+[INFO] 17:24:55:825 cpu/(4521:4521): El valor del puerto es 8001 
+
+[INFO] 17:24:55:828 cpu/(4521:4521): SOCKET INICIALIZADO
+[INFO] 17:30:14:598 cpu/(5007:5007): El valor del puerto es 8001 
+
+[INFO] 17:30:14:601 cpu/(5007:5007): SOCKET INICIALIZADO
+[INFO] 17:31:19:892 cpu/(5137:5137): El valor del puerto es 8001 
+
+[INFO] 17:31:19:895 cpu/(5137:5137): SOCKET INICIALIZADO
+[INFO] 17:31:29:939 cpu/(5137:5137): Handshake aceptado
+[INFO] 17:44:55:012 cpu/(5595:5595): El valor del puerto es 8001 
+
+[INFO] 17:44:55:013 cpu/(5595:5595): SOCKET INICIALIZADO
+[INFO] 17:49:23:533 cpu/(6039:6039): El valor del puerto es 8001 
+
+[INFO] 17:49:23:535 cpu/(6039:6039): SOCKET INICIALIZADO
+[INFO] 17:50:24:511 cpu/(6296:6296): El valor del puerto es 8001 
+
+[INFO] 17:50:24:513 cpu/(6296:6296): SOCKET INICIALIZADO
+[INFO] 17:51:01:874 cpu/(6493:6493): El valor del puerto es 8001 
+
+[INFO] 17:51:01:877 cpu/(6493:6493): SOCKET INICIALIZADO
+[INFO] 17:51:27:050 cpu/(6640:6640): El valor del puerto es 8001 
+
+[INFO] 17:51:27:054 cpu/(6640:6640): SOCKET INICIALIZADO
+[INFO] 17:56:01:722 cpu/(7164:7164): El valor del puerto es 8001 
+
+[INFO] 17:56:01:727 cpu/(7164:7164): SOCKET INICIALIZADO
+[INFO] 17:58:00:339 cpu/(7389:7389): El valor del puerto es 8001 
+
+[INFO] 17:58:00:340 cpu/(7389:7389): SOCKET INICIALIZADO
+[INFO] 17:58:11:328 cpu/(7456:7456): El valor del puerto es (null) 
+
+[INFO] 17:58:24:754 cpu/(7525:7525): El valor del puerto es (null) 
+
+[INFO] 17:59:12:413 cpu/(7621:7621): El valor del puerto es (null) 
+
+[INFO] 17:59:48:711 cpu/(7714:7714): El valor del puerto es 8001 
+
+[INFO] 17:59:48:713 cpu/(7714:7714): SOCKET INICIALIZADO
+[INFO] 18:00:48:645 cpu/(7860:7860): El valor del puerto es 8001 
+
+[INFO] 18:00:48:647 cpu/(7860:7860): SOCKET INICIALIZADO
+[INFO] 18:02:14:518 cpu/(8062:8062): El valor del puerto es 8001 
+
+[INFO] 18:02:14:521 cpu/(8062:8062): SOCKET INICIALIZADO
+[INFO] 18:02:55:733 cpu/(8289:8289): El valor del puerto es 8001 
+
+[INFO] 18:02:55:735 cpu/(8289:8289): SOCKET INICIALIZADO

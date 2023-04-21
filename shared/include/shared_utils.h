@@ -144,6 +144,7 @@ void create_buffer(t_paquete* paquete);
 
 t_list* socket_recv_package(int socket_cliente);
 
-void conect_modulos(t_config* config,t_log* logger,char* modulo);
+int conect_modules(t_config* config,t_log* logger,char* modulo);
 
+int receive_modules(t_log* logger,t_config* config);
 #endif

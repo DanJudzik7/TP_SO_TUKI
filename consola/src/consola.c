@@ -7,6 +7,8 @@ int main(int argc, char ** argv){
 	t_log* logger= iniciar_logger("consola");
     //Carga archivo de configuracion
     t_config* config = iniciar_config("consola");
+    //Creamos una lista para almacenar las instrucciones
+    t_list *instruccions = list_create(); 
 
     char buffer[1024] = {0};
     //Obtiene la ip y el puerto
@@ -14,8 +16,6 @@ int main(int argc, char ** argv){
 	char* puerto = config_get_string_value(config, "PUERTO_KERNEL");
     log_info(logger,"El valor de la ip es %s y del puerto es %s \n",ip,puerto);    
     
-    //Creamos una lista para almacenar las instrucciones
-    t_list *instruccions = list_create(); 
     list_instruccions(instruccions);
     int conexion_kernel = socket_initialize_connect(ip, puerto);
 	char* mensaje =  "Handsake de consola ready"; 
