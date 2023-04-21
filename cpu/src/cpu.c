@@ -7,6 +7,8 @@ int main(int argc, char ** argv){
 
     t_config* config = iniciar_config("cpu");
 
+
+
     //Obtenemos el puerto con el que escucharemos conexiones
 	char* puerto = config_get_string_value(config, "PUERTO_ESCUCHA");
 
@@ -17,5 +19,7 @@ int main(int argc, char ** argv){
     log_info(logger,"SOCKET INICIALIZADO");    
     //Pongo el socket en modo de aceptar las escuchas
 	int cliente_fd = socket_accept(server_fd);
+
     
+   
 }

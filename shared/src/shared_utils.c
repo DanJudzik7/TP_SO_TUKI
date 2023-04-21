@@ -179,7 +179,7 @@ void socket_send_message(char* mensaje, int socket_cliente)
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 
 	void* a_enviar = serialize_package(paquete, bytes);
-	printf("\nEnviando mensaje a kernel");
+	printf("\nEnviando mensaje a servidor \n");
 	int mess_send = send(socket_cliente, a_enviar, bytes, 0);
 
 	if(mess_send == (-1) ) {
@@ -195,7 +195,7 @@ void socket_send_package(t_paquete* paquete, int socket_cliente)
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 
 	void* a_enviar = serialize_package(paquete, bytes);
-	printf("\nEnviando mensaje a kernel");
+	printf("\nEnviando paquete al servidor \n");
 	int mess_send = send(socket_cliente, a_enviar, bytes, 0);
 
 	if(mess_send == (-1) ) {
@@ -249,11 +249,11 @@ int socket_accept(int socket_servidor)
 
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
 	if(socket_cliente == (-1)){
-		printf( "Error de conexion al kernel! \n ");
+		printf( "Error de conexion al servidor! \n ");
 	}
 	
 	if( socket_cliente ){
-		printf( "Se conecto alguien al kernel! \n ");
+		printf( "Se conecto alguien al servidor! \n ");
 	}
 
 	return socket_cliente;
@@ -281,4 +281,17 @@ void socket_recv_message(int socket_cliente)
 
 t_list* socket_recv_package(int socket_cliente){
 	return serialize_recv_package(socket_cliente);
+}
+
+void conect_modulos(t_config* config,t_log* logger,char* modulo){
+	
+    char* puerto_modulo = config_get_string_value(config, "PUERTO_CPU");
+    char* ip_modulo= config_get_string_value(config,"IP_CPU");
+	printf("pruebaaaaaaaa.\n");
+    int conexion_modulo = socket_initialize_connect(ip_modulo,puerto_modulo);
+
+	char* mensaje = "handshake ready"; 
+    socket_send_message(mensaje, conexion_modulo);
+	
+    printf("Conexión con módulo establecida.\n");
 }

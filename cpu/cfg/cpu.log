@@ -1,2 +1,17 @@
 [INFO] 00:34:02:718 cpu/(19986:19986): Soy el cpu! Hice uso de la shared!
 [INFO] 18:55:21:000 cpu/(4611:4611): Soy el cpu! Hice uso de la shared!
+[INFO] 15:04:36:719 cpu/(7010:7010): El valor del puerto es 8001 
+
+[INFO] 15:04:36:731 cpu/(7010:7010): SOCKET INICIALIZADO
+[INFO] 15:19:32:059 cpu/(8185:8185): El valor del puerto es 8001 
+
+[INFO] 15:19:32:068 cpu/(8185:8185): SOCKET INICIALIZADO
+[INFO] 15:22:38:634 cpu/(8642:8642): El valor del puerto es 8001 
+
+[INFO] 15:22:38:637 cpu/(8642:8642): SOCKET INICIALIZADO
+[INFO] 15:56:03:456 cpu/(11864:11864): El valor del puerto es 8001 
+
+[INFO] 15:56:03:458 cpu/(11864:11864): SOCKET INICIALIZADO
+[INFO] 15:57:17:153 cpu/(12035:12035): El valor del puerto es 8001 
+
+[INFO] 15:57:17:154 cpu/(12035:12035): SOCKET INICIALIZADO
