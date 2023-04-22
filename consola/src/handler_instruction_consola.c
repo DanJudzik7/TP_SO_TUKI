@@ -63,7 +63,7 @@ t_paquete* handler_instruction_package(char* lineinstruccion){
     t_paquete* paquete = create_package(cod_op);
     
     for(int i = 1;i < string_array_length(parametros) ;i++){
-         add_to_package(paquete, parametros[i], strlen(parametros[i] + 1));
+         add_to_package(paquete, parametros[i], strlen(parametros[i]) + 1);
     }
 
     return paquete;

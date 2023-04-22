@@ -24,7 +24,8 @@ int main(int argc, char ** argv){
 
     //leemos el archivo y lo mandamos a un handler instruction que maneja que hacer con lo leido
     process_instruccions(instruccions, conexion_kernel); 
-
+    char* mensaje_ok =  "OK_SEND_INSTRUCCTIONS"; 
+	socket_send_message( mensaje_ok , conexion_kernel);
     while(1){
         read(conexion_kernel, buffer, 1024);
         op_code_reception codop_console_recived = opcode_recive(buffer);

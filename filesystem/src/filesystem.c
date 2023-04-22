@@ -3,11 +3,14 @@ int main(int argc, char ** argv){
 
     printf("Iniciando el filesystem");
 
-    if(argc > 1 && strcmp(argv[1],"-test")==0)
-        return run_tests();
-    else{  
-        t_log* logger = log_create("./cfg/filesystem.log", "filesystem", true, LOG_LEVEL_INFO);
-        log_info(logger, "Soy el filesystem! %s", mi_funcion_compartida());
-        log_destroy(logger);
-    } 
+    t_log* logger = iniciar_logger("filesystem");
+    t_config* config = iniciar_config("filesystem");
+
+    int cliente_fd = receive_modules(logger,config);
+
+    //TODO: En el primer recv llega basura no se porque
+    socket_recv_message(cliente_fd);
+    socket_recv_message(cliente_fd); 
+
+    int conexion_memoria = conect_modules(config,logger,"MEMORIA"); 
 }

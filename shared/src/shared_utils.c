@@ -159,6 +159,7 @@ int socket_initialize_connect(char *ip,char *puerto)
  	int connection = connect(socket_servidor, server_info->ai_addr, server_info->ai_addrlen);
 	if ( connection == (-1) ){
 		printf("\nERROR AL CONECTARME CON EL SERVIDOR PROPORCIONADO");
+		exit(-1);
 	}
 	printf("\nConexion establecida en el puerto %s con la ip %s \n",puerto,ip);
 	freeaddrinfo(server_info);
@@ -221,14 +222,12 @@ void* serialize_recv_buffer(int* size, int socket_cliente)
 	return buffer;
 }
 
-t_list* serialize_recv_package(int socket_cliente)
-{
+t_list* serialize_recv_package(int socket_cliente){
     int size;
     int desplazamiento = 0;
     void *buffer;
     t_list *valores = list_create();
     int tamanio;
-
     buffer = serialize_recv_buffer(&size, socket_cliente);
     while (desplazamiento < size)
     {
@@ -313,8 +312,6 @@ int receive_modules(t_log* logger,t_config* config){
     log_info(logger,"SOCKET INICIALIZADO");    
     //Pongo el socket en modo de aceptar las escuchas
 	//int cliente_fd = socket_accept(server_fd);
-
-	
 
 	return socket_accept(server_fd);
 }

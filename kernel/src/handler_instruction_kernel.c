@@ -62,7 +62,21 @@ int instruction_handler_reciver_not_funcional(int cliente_fd){
 }
 
 int instruction_handler_reciver(int cliente_fd){ 
+/*
+    t_list* payload;
 
+	while (1) {
+		int cod_op = socket_recv_operation(cliente_fd);
+        printf("\nEl codigo de operacion es -> %i\n",cod_op);
+        payload = socket_recv_package(cliente_fd);
+        list_iterate(payload, (void*) iterator);
+        printf("\nEl codigo de operacion es -> %i\n",cod_op);
+        for (int i = 0; i < list_size(payload); i++) {
+            //Devuelve la linea de instruccion 
+            char*  instruccion = list_get(payload, i);
+            printf(instruccion);
+        }*/
+        
     t_list* payload;
 
 	while (1) {
@@ -75,7 +89,7 @@ int instruction_handler_reciver(int cliente_fd){
             case F_READ: 
             case F_WRITE:
                 payload = socket_recv_package(cliente_fd);
-                //list_iterate(list_instructions, (void*) iterator);
+                list_iterate(payload, (void*) iterator);
                 break;
             case SET:
             case MOV_IN:
@@ -104,10 +118,11 @@ int instruction_handler_reciver(int cliente_fd){
             case (-1): 
                 printf("\nError al recibir codigo de operacion \n");
                 return (-1);
-        }
-    }
-}
+           }
+     }
+ }
 
+ 
 void iterator(char* value) {
 	printf("%s\n", value);
 }
