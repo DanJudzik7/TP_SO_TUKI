@@ -31,12 +31,12 @@ int main(int argc, char ** argv){
     pcb pcb;
     pcb.state_pcb = NEW;
     int pid_counter = 1;
-    pcb.execution_context.pid = pid_counter;
+    pcb.pid = pid_counter;
     pid_counter ++;
     pcb.execution_context.instruccions = recive_instrucction;
-    pcb.execution_context.program_counter = 0;
+    pcb.execution_context.program_counter = 0;  
     // TODO: sigo completando el pcb de este proceso
-    log_info(logger,"Se crea el proceso %d en NEW \n",pcb.execution_context.pid);
+    log_info(logger,"Se crea el proceso %d en NEW \n",pcb.pid);
     
     
     if(strcmp(algorithm,"FIFO") == 0){

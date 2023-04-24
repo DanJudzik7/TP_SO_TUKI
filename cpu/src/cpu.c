@@ -13,6 +13,17 @@ int main(int argc, char ** argv){
     socket_recv_message(kernel_fd);
     socket_recv_message(kernel_fd);
     
+ //Creo el pcb para las instrucciones
+    t_list* instruccions;
+    pcb *pcb_test;
 
+
+    pcb_test -> state_pcb = NEW;
     
+    pcb_test -> pid = 2001;
+    
+    pcb_test -> execution_context -> instruccions = [ [SET, "AX", "HOLA"] ];
+    pcb_test -> execution_context-> program_counter = 0;  
+    // TODO: sigo completando el pcb de este proceso
+    log_info(logger,"Se crea el proceso %d en NEW \n",pcb_test -> pid);
 }

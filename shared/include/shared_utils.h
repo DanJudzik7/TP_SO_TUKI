@@ -77,24 +77,34 @@ typedef struct {
 } pcb;
 */
 typedef struct{
-	int pid;
 	t_list* instruccions;
 	int program_counter;
 	cpu_register cpu_register;
 	segment_table segment_table;
+	state_pcb state_pcb;
 }execution_context;
 
 typedef struct{
+	int pid;
 	execution_context execution_context;
 	int aprox_burst_time;
-    time_t last_ready_time;
-    file* table_open_files;
+       time_t last_ready_time;
+       file* table_open_files;
 	state_pcb state_pcb;
 } pcb;
 typedef enum{
 	ERROR,
 	OK
 } op_code_reception; 
+
+
+typedef struct {
+  char instruction;
+  char param1;
+  char param2;
+  char param3;
+}instruction_full;
+
 
 typedef struct
 {

@@ -20,6 +20,7 @@
         "handler_instruction_kernel.h": "c",
         "handler_instruction_memoria.h": "c",
         "create_memory.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "cpu.h": "c"
     }
 }

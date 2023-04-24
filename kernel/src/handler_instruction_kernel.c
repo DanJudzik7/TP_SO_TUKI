@@ -88,42 +88,14 @@ t_list* instruction_handler_reciver(int cliente_fd,t_log* logger){
             case MENSAJE:
                 flag = socket_recv_message(cliente_fd);
                 break;
-            case F_READ: 
-            case F_WRITE:
-                payload = socket_recv_package(cliente_fd);
-                list_iterate(payload, (void*) iterator);
-                list_add(instruccions,payload);
-                break;
-            case SET:
-            case MOV_IN:
-            case MOV_OUT:
-            case F_TRUNCATE:
-            case F_SEEK:
-            case CREATE_SEGMENT:
-                payload = socket_recv_package(cliente_fd);
-                //list_iterate(list_instructions, (void*) iterator);
-                list_add(instruccions,payload);
-                break;
-            case I_O:
-            case WAIT:
-            case SIGNAL:
-            case F_OPEN:
-            case F_CLOSE:
-            case DELETE_SEGMENT:
-                payload = socket_recv_package(cliente_fd);
-                //list_iterate(list_instructions, (void*) iterator);
-                list_add(instruccions,payload);
-                break;  
-            case EXIT:
-            case YIELD:
-                payload = socket_recv_package(cliente_fd);
-                //printf("\nME LLEGO UN EXIT O YIELD:\n");
-                list_add(instruccions,payload);
-                //list_iterate(list_instructions, (void*) iterator);
-                break;  
             case (-1): 
-               log_error(logger,"Hubo un error recibiendo las instrucciones \n"); 
+                log_error(logger,"Hubo un error recibiendo las instrucciones \n"); 
                 exit(1);
+            default: 
+                payload = socket_recv_package(cliente_fd);
+                //list_iterate(payload, (void*) iterator);
+                list_add(instruccions,payload);
+                break;
            }
         if(flag == 1){
             //Si recibe el mensaje de finalizacion de instrucciones, avisa que las recibio y las devuelve en forma de lista
