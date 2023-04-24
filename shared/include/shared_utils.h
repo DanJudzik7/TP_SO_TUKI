@@ -36,7 +36,7 @@ typedef enum
 	EXIT,					// 15
 	YIELD					// 16
 }op_code;
-//REVISAR
+
 typedef struct{
 	int id;
 	void* segment_table_direction;
@@ -77,7 +77,7 @@ typedef struct {
 } pcb;
 */
 typedef struct{
-	t_list* instruccions;
+	t_list** instructions;
 	int program_counter;
 	cpu_register cpu_register;
 	segment_table segment_table;
@@ -86,7 +86,7 @@ typedef struct{
 
 typedef struct{
 	int pid;
-	execution_context execution_context;
+	execution_context* execution_context;
 	int aprox_burst_time;
        time_t last_ready_time;
        file* table_open_files;
@@ -96,15 +96,6 @@ typedef enum{
 	ERROR,
 	OK
 } op_code_reception; 
-
-
-typedef struct {
-  char instruction;
-  char param1;
-  char param2;
-  char param3;
-}instruction_full;
-
 
 typedef struct
 {

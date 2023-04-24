@@ -14,16 +14,31 @@ int main(int argc, char ** argv){
     socket_recv_message(kernel_fd);
     
  //Creo el pcb para las instrucciones
-    t_list* instruccions;
-    pcb *pcb_test;
+    t_list* instructions;
+    pcb* pcb_test = malloc(sizeof(pcb));
+    
+
+                t_list* sublist1 = list_create();
+                list_add(sublist1, "SET");
+                list_add(sublist1, "AX");
+                list_add(sublist1, "HOLA");
+
+                t_list* sublist2 = list_create();
+                list_add(sublist2, "WAIT");
+                list_add(sublist2, "DISCO");
+
+                instructions = list_create();
+                list_add(instructions, sublist1);
+                list_add(instructions, sublist2);
 
 
     pcb_test -> state_pcb = NEW;
-    
     pcb_test -> pid = 2001;
-    
-    pcb_test -> execution_context -> instruccions = [ [SET, "AX", "HOLA"] ];
+
+    pcb_test-> execution_context-> instructions = instructions;
     pcb_test -> execution_context-> program_counter = 0;  
+
+
     // TODO: sigo completando el pcb de este proceso
     log_info(logger,"Se crea el proceso %d en NEW \n",pcb_test -> pid);
 }

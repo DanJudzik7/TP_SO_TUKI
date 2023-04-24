@@ -287,6 +287,10 @@ t_list* socket_recv_package(int socket_cliente){
 	return serialize_recv_package(socket_cliente);
 }
 
+/*pcb* socket_recv_pcb(int socket_cliente){
+	return serialize_recv_pcb(socket_cliente);
+}*/
+
 int conect_modules(t_config* config,t_log* logger,char* modulo){
 
 	char* puerto = malloc(strlen("PUERTO_") + strlen(modulo) + 1 );

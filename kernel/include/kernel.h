@@ -7,6 +7,7 @@
 #include "shared_utils.h"
 #include "handler_instruction_kernel.h"
 #include "handler_pcb.h"
+#include "planificador.h"
 #include "tests.h"
 
 #endif

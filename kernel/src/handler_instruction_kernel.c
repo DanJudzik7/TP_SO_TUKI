@@ -79,6 +79,7 @@ t_list* instruction_handler_reciver(int cliente_fd,t_log* logger){
         
     t_list* payload;
     t_list* instruccions = list_create();
+    t_queue* queue = queue_create();
 
 	while (1) {
 		int cod_op = socket_recv_operation(cliente_fd);
@@ -92,16 +93,17 @@ t_list* instruction_handler_reciver(int cliente_fd,t_log* logger){
                 log_error(logger,"Hubo un error recibiendo las instrucciones \n"); 
                 exit(1);
             default: 
-                payload = socket_recv_package(cliente_fd);
+                payload = socket_recv_package(cliente_fd);  
+                push(queue, payload);   
                 //list_iterate(payload, (void*) iterator);
-                list_add(instruccions,payload);
+                //list_add(instruccions,payload);
                 break;
            }
         if(flag == 1){
             //Si recibe el mensaje de finalizacion de instrucciones, avisa que las recibio y las devuelve en forma de lista
             char* confirmation = "Instrucciones recibidas por el Kernel ";
             socket_send_message(confirmation, cliente_fd);
-            return instruccions;
+            return queue;
         }
      }
  }
@@ -116,7 +118,7 @@ void iterator(char* value) {
 //Para dps si lo enviamos a la cpu podemos saber el tamaño de cada arg de la lista :D
 void list_instructions(char *instructions)
 {
-    t_queue* queue_create();
+    
     
 }
 

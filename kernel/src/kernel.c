@@ -24,26 +24,42 @@ int main(int argc, char ** argv){
 
     //Pongo el socket en modo de aceptar las escuchas
 	int consola_fd = socket_accept(server_fd);
-	t_list* recive_instrucction = instruction_handler_reciver(consola_fd,logger);
+	t_queue* queue_instructons = instruction_handler_reciver(consola_fd,logger);
+    
     log_info(logger, "El algoritmo de planficiacion es: %s\n",algorithm);
 
-    //Creo el pcb para las instrucciones
-    pcb pcb;
-    pcb.state_pcb = NEW;
-    int pid_counter = 1;
-    pcb.pid = pid_counter;
-    pid_counter ++;
-    pcb.execution_context.instruccions = recive_instrucction;
-    pcb.execution_context.program_counter = 0;  
+    //Creo el pcb para las instrucciones HARDCODEADO
+    t_list* instructions;
+    pcb* pcb_test = malloc(sizeof(pcb));
+    
+    t_list* sublist1 = list_create();
+    list_add(sublist1, "SET");
+    list_add(sublist1, "AX");
+    list_add(sublist1, "HOLA");
+
+    t_list* sublist2 = list_create();
+    list_add(sublist2, "WAIT");
+    list_add(sublist2, "DISCO");
+
+    instructions = list_create();
+    list_add(instructions, sublist1);
+    list_add(instructions, sublist2);
+
+    pcb_test -> state_pcb = NEW;
+    pcb_test -> pid = 2001;
+
+    pcb_test-> execution_context-> instructions = instructions;
+    pcb_test -> execution_context-> program_counter = 0;  
+
     // TODO: sigo completando el pcb de este proceso
-    log_info(logger,"Se crea el proceso %d en NEW \n",pcb.pid);
+    log_info(logger,"Se crea el proceso %d en NEW \n", pcb_test-> pid);
     
+  
+    t_queue* queue_global_pcb = queue_create();
     
-    if(strcmp(algorithm,"FIFO") == 0){
-        fifo(pcb);
-    } else{
-        hrrn(pcb);
-    }
+    pcb* pcb_send_cpu =  planficador_kernel(pcb_test,algorithm,queue_global_pcb);
+    
+
 
 
 
