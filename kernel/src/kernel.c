@@ -36,7 +36,7 @@ int main(int argc, char ** argv){
     pcb.execution_context.instruccions = recive_instrucction;
     pcb.execution_context.program_counter = 0;
     // TODO: sigo completando el pcb de este proceso
-    log_info(logger,"“Se crea el proceso %s en NEW \n",pcb.execution_context.pid);
+    log_info(logger,"Se crea el proceso %d en NEW \n",pcb.execution_context.pid);
     
     
     if(strcmp(algorithm,"FIFO") == 0){

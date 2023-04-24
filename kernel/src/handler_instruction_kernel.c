@@ -131,7 +131,6 @@ t_list* instruction_handler_reciver(int cliente_fd,t_log* logger){
             socket_send_message(confirmation, cliente_fd);
             return instruccions;
         }
-        printf("hola \n");
      }
  }
 
