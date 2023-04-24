@@ -26,6 +26,11 @@ int main(int argc, char ** argv){
     process_instruccions(instruccions, conexion_kernel); 
     char* mensaje_ok =  "OK_SEND_INSTRUCCTIONS"; 
 	socket_send_message( mensaje_ok , conexion_kernel);
+    socket_recv_message(conexion_kernel);
+    socket_recv_message(conexion_kernel);
+    exit(2);
+
+    //No entiendo para que esta el while
     while(1){
         read(conexion_kernel, buffer, 1024);
         op_code_reception codop_console_recived = opcode_recive(buffer);

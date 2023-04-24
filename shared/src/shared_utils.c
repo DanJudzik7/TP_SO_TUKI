@@ -270,12 +270,17 @@ int socket_recv_operation(int socket_cliente)
 	}
 }
 
-void socket_recv_message(int socket_cliente)
+int socket_recv_message(int socket_cliente)
 {
 	int size;
 	char* buffer = serialize_recv_buffer(&size, socket_cliente);
 	printf( "Me llego el mensaje %s \n", buffer);
+	if(strcmp(buffer,"OK_SEND_INSTRUCCTIONS") == 0){
+		free(buffer);
+		return 1;
+	}
 	free(buffer);
+	return 0;
 }
 
 t_list* socket_recv_package(int socket_cliente){

@@ -61,7 +61,7 @@ int instruction_handler_reciver_not_funcional(int cliente_fd){
     }
 }
 
-int instruction_handler_reciver(int cliente_fd){ 
+t_list* instruction_handler_reciver(int cliente_fd,t_log* logger){ 
 /*
     t_list* payload;
 
@@ -78,18 +78,21 @@ int instruction_handler_reciver(int cliente_fd){
         }*/
         
     t_list* payload;
+    t_list* instruccions = list_create();
 
 	while (1) {
 		int cod_op = socket_recv_operation(cliente_fd);
+        int flag = 0;
         printf("\nEl codigo de operacion es -> %i\n",cod_op);
 		switch (cod_op) {
             case MENSAJE:
-                socket_recv_message(cliente_fd);
+                flag = socket_recv_message(cliente_fd);
                 break;
             case F_READ: 
             case F_WRITE:
                 payload = socket_recv_package(cliente_fd);
                 list_iterate(payload, (void*) iterator);
+                list_add(instruccions,payload);
                 break;
             case SET:
             case MOV_IN:
@@ -99,6 +102,7 @@ int instruction_handler_reciver(int cliente_fd){
             case CREATE_SEGMENT:
                 payload = socket_recv_package(cliente_fd);
                 //list_iterate(list_instructions, (void*) iterator);
+                list_add(instruccions,payload);
                 break;
             case I_O:
             case WAIT:
@@ -108,17 +112,26 @@ int instruction_handler_reciver(int cliente_fd){
             case DELETE_SEGMENT:
                 payload = socket_recv_package(cliente_fd);
                 //list_iterate(list_instructions, (void*) iterator);
+                list_add(instruccions,payload);
                 break;  
             case EXIT:
             case YIELD:
                 payload = socket_recv_package(cliente_fd);
-                printf("\nME LLEGO UN EXIT O YIELD:\n");
+                //printf("\nME LLEGO UN EXIT O YIELD:\n");
+                list_add(instruccions,payload);
                 //list_iterate(list_instructions, (void*) iterator);
                 break;  
             case (-1): 
-                printf("\nError al recibir codigo de operacion \n");
-                return (-1);
+               log_error(logger,"Hubo un error recibiendo las instrucciones \n"); 
+                exit(1);
            }
+        if(flag == 1){
+            //Si recibe el mensaje de finalizacion de instrucciones, avisa que las recibio y las devuelve en forma de lista
+            char* confirmation = "Instrucciones recibidas por el Kernel ";
+            socket_send_message(confirmation, cliente_fd);
+            return instruccions;
+        }
+        printf("hola \n");
      }
  }
 

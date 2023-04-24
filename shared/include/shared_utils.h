@@ -63,6 +63,7 @@ typedef enum{
 	EXIT_PROCESS
 } state_pcb;
 
+/* Comento y despues vemos que version sirve
 typedef struct {
     int pid;
 	state_pcb state_pcb;
@@ -74,8 +75,22 @@ typedef struct {
     time_t last_ready_time;
     file* table_open_files;
 } pcb;
+*/
+typedef struct{
+	int pid;
+	t_list* instruccions;
+	int program_counter;
+	cpu_register cpu_register;
+	segment_table segment_table;
+}execution_context;
 
-
+typedef struct{
+	execution_context execution_context;
+	int aprox_burst_time;
+    time_t last_ready_time;
+    file* table_open_files;
+	state_pcb state_pcb;
+} pcb;
 typedef enum{
 	ERROR,
 	OK
@@ -119,7 +134,7 @@ void* socket_recv_buffer(int* size, int socket_cliente);
 void socket_send_message(char* mensaje, int socket_cliente); 
 
 /* Recibe y muestra un mensaje enviado por un cliente a través del socket especificado. */
-void socket_recv_message(int socket_cliente); 
+int socket_recv_message(int socket_cliente); 
 
 /* Envía un paquete a un cliente a través del socket especificado. */
 void socket_send_package(t_paquete* paquete, int socket_cliente); 

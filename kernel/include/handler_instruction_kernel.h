@@ -10,7 +10,7 @@ int instruction_handler_kernel();
 
 void iterator(char* value);
 //Manejador de instrucciones recibidas por consola
-int instruction_handler_reciver(int cliente_fd);
+t_list* instruction_handler_reciver(int cliente_fd, t_log* logger);
 
 int instruction_handler_reciver_not_funcional(int cliente_fd);
 
