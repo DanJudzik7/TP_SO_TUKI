@@ -4,10 +4,6 @@ char* deserialize_payload(t_list* payload){
     return "IMPLEMENTAR";
 }
 
-char* mi_funcion_compartida(){
-    return "Hice uso de la shared!";
-}
-
 t_config* iniciar_config(char* process_name){
 
     t_config *config = NULL;

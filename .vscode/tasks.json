@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Make",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/${input:program}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Make clear",
+            "type": "shell",
+            "command": "make clear",
+            "options": {
+                "cwd": "${workspaceFolder}/${input:program}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Valgrind",
+            "type": "shell",
+            "command": "valgrind --tool=memcheck --leak-check=yes --show-possibly-lost=no --show-reachable=no --num-callers=20 ${workspaceFolder}/${input:program}/${input:program}",
+            "options": {
+                "cwd": "${workspaceFolder}/${input:program}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "program",
+            "description": "Nombre del módulo",
+            "default": "consola",
+            "type": "pickString",
+            "options": [
+                "consola",
+                "kernel",
+                "cpu",
+                "filesystem",
+                "memoria"
+            ]
+        },
+    ]
+}
