@@ -21,6 +21,7 @@
         "handler_instruction_memoria.h": "c",
         "create_memory.h": "c",
         "string.h": "c",
-        "cpu.h": "c"
+        "cpu.h": "c",
+        "handler_pcb_cpu.h": "c"
     }
 }

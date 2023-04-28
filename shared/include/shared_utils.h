@@ -81,7 +81,7 @@ typedef struct{
 	int program_counter;
 	cpu_register cpu_register;
 	segment_table segment_table;
-	state_pcb state_pcb;
+	state_pcb state_pcb;  
 }execution_context;
 
 typedef struct{
@@ -90,7 +90,7 @@ typedef struct{
 	int aprox_burst_time;
        time_t last_ready_time;
        file* table_open_files;
-	state_pcb state_pcb;
+	state_pcb state_pcb;   
 } pcb;
 typedef enum{
 	ERROR,

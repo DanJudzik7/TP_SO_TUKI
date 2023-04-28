@@ -22,7 +22,7 @@ int main(int argc, char ** argv){
     
 
                 t_list* sublist1 = list_create();
-                list_add(sublist1, "SET");
+                list_add(sublist1,(void *) SET);  // Debo hacer el casteo a void siempre, dado que son enums
                 list_add(sublist1, "AX");
                 list_add(sublist1, "120");
 
@@ -38,17 +38,19 @@ int main(int argc, char ** argv){
     pcb_test -> state_pcb = NEW;
     pcb_test -> pid = 2001;
 
-    pcb_test->execution_context = malloc(sizeof(execution_context));
-    pcb_test-> execution_context-> instructions = instructions;
-    pcb_test -> execution_context-> program_counter = 0;  
+
+    execution_context* context = malloc(sizeof(execution_context));
+    context -> instructions = &instructions;
+    context -> program_counter = 0;  
+
+    pcb_test->execution_context = context; 
 
 
     // TODO: sigo completando el pcb de este proceso
     log_info(logger,"Se crea el proceso %d en NEW \n",pcb_test -> pid);
 
-    pcb_test -> state_pcb = EXEC;
     //Recibe los pcbs que aca estan harcodeados y los opera
-    execute(pcb_test -> execution_context);
+    instruction_cycle(pcb_test);
     free(pcb_test->execution_context);
     free(pcb_test);
 
