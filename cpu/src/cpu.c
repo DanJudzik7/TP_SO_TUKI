@@ -1,5 +1,7 @@
 #include "cpu.h"
 
+
+
 int main(int argc, char ** argv){
 
     printf("Iniciando la CPU\n");
@@ -22,7 +24,7 @@ int main(int argc, char ** argv){
                 t_list* sublist1 = list_create();
                 list_add(sublist1, "SET");
                 list_add(sublist1, "AX");
-                list_add(sublist1, "HOLA");
+                list_add(sublist1, "120");
 
                 t_list* sublist2 = list_create();
                 list_add(sublist2, "WAIT");

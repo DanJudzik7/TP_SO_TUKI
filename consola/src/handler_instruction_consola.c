@@ -78,8 +78,8 @@ op_code_reception opcode_recive(char* code) {
         return (-1); // Otra opción de manejo de error, si lo deseas
     }
 }
-//Devuelve el op_code dependiendo el mensaje leido
-op_code return_opcode(char* code) {
+//Devuelve el op_code dependiendo el mensaje leido, lo movi al shared
+/*op_code return_opcode(char* code) {
 
     if (strcmp(code, "MENSAJE") == 0) {
         return MENSAJE;
@@ -118,4 +118,4 @@ op_code return_opcode(char* code) {
     } else {
         return (-1); // Otra opción de manejo de error, si lo deseas
     }
-}
+}*/

@@ -163,4 +163,7 @@ t_list* socket_recv_package(int socket_cliente);
 int conect_modules(t_config* config,t_log* logger,char* modulo);
 
 int receive_modules(t_log* logger,t_config* config);
+
+op_code return_opcode(char* code);
+
 #endif
