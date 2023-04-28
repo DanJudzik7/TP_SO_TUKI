@@ -43,11 +43,30 @@ typedef struct{
 	uint8_t size_data_segment;
 }segment_table;
 //TODO
-typedef struct{
-	int acumulator;
-	int register_base;
-	int counter;
-	int register_data;  
+typedef struct {
+    unsigned char AX[4];
+    unsigned char BX[4];
+    unsigned char CX[4];
+    unsigned char DX[4];
+} cpu_register_4;
+
+typedef struct {
+    unsigned char EAX[8];
+    unsigned char EBX[8];
+    unsigned char ECX[8];
+    unsigned char EDX[8];
+} cpu_register_8;
+
+typedef struct {
+    unsigned char RAX[16];
+    unsigned char RBX[16];
+    unsigned char RCX[16];
+    unsigned char RDX[16];
+} cpu_register_16;
+typedef struct {
+    cpu_register_4 register_4;
+    cpu_register_8 register_8;
+    cpu_register_16 register_16;
 } cpu_register;
 
 typedef struct{
@@ -63,19 +82,6 @@ typedef enum{
 	EXIT_PROCESS
 } state_pcb;
 
-/* Comento y despues vemos que version sirve
-typedef struct {
-    int pid;
-	state_pcb state_pcb;
-    op_code* instructions; //RECORDAR QUE DEBE HACERSE puntero a opcode
-    int program_counter;
-    cpu_register cpu_register;
-    segment_table segment_table;
-    int aprox_burst_time;
-    time_t last_ready_time;
-    file* table_open_files;
-} pcb;
-*/
 typedef struct{
 	t_list** instructions;
 	int program_counter;

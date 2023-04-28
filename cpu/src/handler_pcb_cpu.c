@@ -37,48 +37,27 @@ void execute(op_code COD_OP,t_list* instruction,pcb* pcb){
             break;
         case MOV_IN:
         case MOV_OUT:
-        case F_TRUNCATE:
-        case F_SEEK:
-        case CREATE_SEGMENT:
         case I_O:
-        case WAIT:
-        case SIGNAL:
         case F_OPEN:
         case F_CLOSE:
+        case F_SEEK:
+        case F_READ:
+        case F_WRITE:
+        case F_TRUNCATE:
+        case WAIT:
+        case SIGNAL:
+        case CREATE_SEGMENT:
         case DELETE_SEGMENT:
-        case EXIT:
+            printf("Implementar funcion");
+            break;
         case YIELD:
+            yield(pcb);
+            break;
+        case EXIT:
+            exit(pcb);
+            break;
         default:
             // INSERTAR ERROR
             break;
         }
-}
-
-void set(execution_context* execution_context,t_list* instruction){
-
-     //almaceno el nombre del registro y el valor 
-     char* register_name = list_get( instruction , 1 );
-     //lo paso a un int con atoi el valor proporcionado en la lista
-     int value = atoi( list_get( instruction , 2) );
-
-     //comparo el registro y asigno el valor correspondiente
-
-    cpu_register *registers = &execution_context->cpu_register;
-
-     if(strcmp(register_name, "AX") == 0){
-
-          registers->acumulator = value;
-          
-     } else if(strcmp(register_name, "BX") == 0){
-
-         registers->register_base = value;
-     } else if(strcmp(register_name, "CX") == 0){
-
-         registers->counter = value;
-     } else if(strcmp(register_name, "DX") == 0){
-
-         registers->register_data = value;
-     }
-     
-     printf("El valor de %s es %i \n",register_name,value);
 }

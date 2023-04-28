@@ -25,6 +25,7 @@
         "handler_pcb_cpu.h": "c",
         "planificador.h": "c",
         "algorithms.h": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "handler_execute_instructions.h": "c"
     }
 }

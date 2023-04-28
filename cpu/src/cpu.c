@@ -24,7 +24,7 @@ int main(int argc, char ** argv){
                 t_list* sublist1 = list_create();
                 list_add(sublist1,(void *) SET);  // Debo hacer el casteo a void siempre, dado que son enums
                 list_add(sublist1, "AX");
-                list_add(sublist1, "120");
+                list_add(sublist1, "HOLA");
 
                 t_list* sublist2 = list_create();
                 list_add(sublist2,(void *) WAIT);
