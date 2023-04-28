@@ -94,7 +94,7 @@ t_list* instruction_handler_reciver(int cliente_fd,t_log* logger){
                 exit(1);
             default: 
                 payload = socket_recv_package(cliente_fd);  
-                push(queue, payload);   
+                queue_push(queue, payload);   
                 //list_iterate(payload, (void*) iterator);
                 //list_add(instruccions,payload);
                 break;
@@ -108,10 +108,6 @@ t_list* instruction_handler_reciver(int cliente_fd,t_log* logger){
      }
  }
 
- 
-void iterator(char* value) {
-	printf("%s\n", value);
-}
 
 //debemos hacer que cada vez que recibimos un payload,
 //esto se encarga de crear una cola, y va cargando una lista de instrucciones [ ["AUX", Arg1, Arg2] , [] ]

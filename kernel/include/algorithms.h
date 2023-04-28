@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "shared_utils.h"
 
-void fifo(pcb pcb);
-void hrrn(pcb pcb);
+pcb* fifo(pcb *pcb);
+pcb* hrrn(pcb *pcb);
 
 #endif

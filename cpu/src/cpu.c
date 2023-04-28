@@ -16,7 +16,7 @@ int main(int argc, char ** argv){
     //socket_recv_message(kernel_fd);
     //socket_recv_message(kernel_fd);
     
- //Creo el pcb para las instrucciones
+    //Creo el pcb para las instrucciones
     t_list* instructions;
     pcb* pcb_test = malloc(sizeof(pcb));
     
@@ -27,7 +27,7 @@ int main(int argc, char ** argv){
                 list_add(sublist1, "120");
 
                 t_list* sublist2 = list_create();
-                list_add(sublist2, "WAIT");
+                list_add(sublist2,(void *) WAIT);
                 list_add(sublist2, "DISCO");
 
                 instructions = list_create();
@@ -51,7 +51,7 @@ int main(int argc, char ** argv){
 
     //Recibe los pcbs que aca estan harcodeados y los opera
     instruction_cycle(pcb_test);
-    free(pcb_test->execution_context);
+    free(context);
     free(pcb_test);
 
 }

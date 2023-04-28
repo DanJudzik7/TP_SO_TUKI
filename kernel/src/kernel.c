@@ -28,28 +28,34 @@ int main(int argc, char ** argv){
     
     log_info(logger, "El algoritmo de planficiacion es: %s\n",algorithm);
 
-    //Creo el pcb para las instrucciones HARDCODEADO
+    //Creo el pcb para las instrucciones
     t_list* instructions;
     pcb* pcb_test = malloc(sizeof(pcb));
     
-    t_list* sublist1 = list_create();
-    list_add(sublist1, "SET");
-    list_add(sublist1, "AX");
-    list_add(sublist1, "HOLA");
 
-    t_list* sublist2 = list_create();
-    list_add(sublist2, "WAIT");
-    list_add(sublist2, "DISCO");
+                t_list* sublist1 = list_create();
+                list_add(sublist1,(void *) SET);  // Debo hacer el casteo a void siempre, dado que son enums
+                list_add(sublist1, "AX");
+                list_add(sublist1, "120");
 
-    instructions = list_create();
-    list_add(instructions, sublist1);
-    list_add(instructions, sublist2);
+                t_list* sublist2 = list_create();
+                list_add(sublist2, (void *) WAIT);
+                list_add(sublist2, "DISCO");
+
+                instructions = list_create();
+                list_add(instructions, sublist1);
+                list_add(instructions, sublist2);
+
 
     pcb_test -> state_pcb = NEW;
     pcb_test -> pid = 2001;
 
-    pcb_test-> execution_context-> instructions = instructions;
-    pcb_test -> execution_context-> program_counter = 0;  
+
+    execution_context* context = malloc(sizeof(execution_context));
+    context -> instructions = &instructions;
+    context -> program_counter = 0;  
+
+    pcb_test->execution_context = context; 
 
     // TODO: sigo completando el pcb de este proceso
     log_info(logger,"Se crea el proceso %d en NEW \n", pcb_test-> pid);
@@ -57,10 +63,11 @@ int main(int argc, char ** argv){
   
     t_queue* queue_global_pcb = queue_create();
     
-    pcb* pcb_send_cpu =  planficador_kernel(pcb_test,algorithm,queue_global_pcb);
+    pcb* pcb_send =  planficador_kernel(pcb_test,algorithm,queue_global_pcb);
     
 
-
+    free(context);
+    free(pcb_test);
 
 
     // Lo comento porque manejo el error y el ok en la funcion
