@@ -107,8 +107,15 @@ typedef struct {
 	t_log* logger;
 	int console;
 	t_queue* global_pcb;
+	char* algorithm;
 	int default_burst_time;
-} t_console_init;
+	int server_fd;
+	int conection_module;
+	t_pcb* pcb;
+} t_console_init;  // Debemos tener un struct igual pero para los planificadores,
+
+
+
 
 typedef struct {
 	uint32_t size;

@@ -7,6 +7,7 @@
 #include "shared_utils.h"
 
 
-t_pcb* planificador_kernel(t_log* logger,t_pcb *t_pcb, char* algorithm,t_queue* queue_global_pcb );
+void planificador_kernel(t_console_init* ci);
+op_code_reception* long_term_scheduler(t_console_init* ci);
 
 #endif
