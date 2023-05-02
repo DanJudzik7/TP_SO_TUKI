@@ -6,12 +6,12 @@
 #include "shared_utils.h"
 #include "handler_execute_instructions.h"
 
-void instruction_cycle(pcb* pcb);
+void instruction_cycle(t_pcb* t_pcb);
 
-t_list* fetch(pcb* pcb);
+t_list* fetch(t_pcb* t_pcb);
 
 op_code decode(t_list* next_instruction);
 
-void execute(op_code COD_OP,t_list* instruction,pcb* pcb);
+void execute(op_code COD_OP,t_list* instruction,t_pcb* t_pcb);
 
 #endif

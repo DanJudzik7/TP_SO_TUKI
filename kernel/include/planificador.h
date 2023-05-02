@@ -7,6 +7,6 @@
 #include "shared_utils.h"
 
 
-pcb* planificador_kernel(t_log* logger,pcb *pcb, char* algorithm,t_queue* queue_global_pcb );
+t_pcb* planificador_kernel(t_log* logger,t_pcb *t_pcb, char* algorithm,t_queue* queue_global_pcb );
 
 #endif

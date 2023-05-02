@@ -26,6 +26,9 @@
         "planificador.h": "c",
         "algorithms.h": "c",
         "queue.h": "c",
-        "handler_execute_instructions.h": "c"
-    }
+        "handler_execute_instructions.h": "c",
+        "pthread.h": "c",
+        "handler_pcb.h": "c"
+    },
+    "cmake.configureOnOpen": false
 }

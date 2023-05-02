@@ -41,14 +41,14 @@ void set(execution_context* execution_context,t_list* instruction){
         printf("El valor del registro %s es %s\n",register_name, registers->register_4.AX );
 }
 
-void yield(pcb* pcb){
+void yield(t_pcb* t_pcb){
     
 }
 
-void exit(pcb* pcb){
+void exitIns(t_pcb* t_pcb){
     
 }
 
-void dislodge(pcb* pcb){
+void dislodge(t_pcb* t_pcb){
 
 }

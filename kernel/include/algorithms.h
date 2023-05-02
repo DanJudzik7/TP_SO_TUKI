@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "shared_utils.h"
 
-pcb* fifo(t_queue* queue_global_pcb, pcb *pcb);
-pcb* hrrn(t_log* logger,t_queue* queue_global_pcb, pcb *pcb);
+t_pcb* fifo(t_queue* queue_global_pcb, t_pcb *t_pcb);
+t_pcb* hrrn(t_log* logger,t_queue* queue_global_pcb, t_pcb *t_pcb);
 
 #endif

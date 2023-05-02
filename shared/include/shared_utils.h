@@ -1,80 +1,79 @@
 #ifndef SHARED_UTILS_H
 #define SHARED_UTILS_H
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <commons/config.h>
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
-#include <commons/string.h>
+#include <commons/config.h>
 #include <commons/log.h>
-#include <stdbool.h>
+#include <commons/string.h>
 #include <netdb.h>
-#include <sys/socket.h>
 #include <readline/readline.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <time.h>
+#include <unistd.h>
 
-typedef enum
-{
-	MENSAJE, 				// 0     //Este existe de mas
-	F_READ, 				// 1
-	F_WRITE,				// 2
-	SET,					// 3
-	MOV_IN,					// 4
-	MOV_OUT,				// 5
-	F_TRUNCATE, 			// 6
-	F_SEEK,					// 7
-	CREATE_SEGMENT,			// 8
-	I_O,					// 9
-	WAIT,					// 10
-	SIGNAL,					// 11
-	F_OPEN,					// 12
-	F_CLOSE,				// 13	
-	DELETE_SEGMENT,			// 14
-	EXIT,					// 15
-	YIELD					// 16
-}op_code;
+typedef enum {
+	MENSAJE,		 // 0     //Este existe de mas
+	F_READ,			 // 1
+	F_WRITE,		 // 2
+	SET,			 // 3
+	MOV_IN,			 // 4
+	MOV_OUT,		 // 5
+	F_TRUNCATE,		 // 6
+	F_SEEK,			 // 7
+	CREATE_SEGMENT,	 // 8
+	I_O,			 // 9
+	WAIT,			 // 10
+	SIGNAL,			 // 11
+	F_OPEN,			 // 12
+	F_CLOSE,		 // 13
+	DELETE_SEGMENT,	 // 14
+	EXIT,			 // 15
+	YIELD			 // 16
+} op_code;
 
-typedef struct{
+typedef struct {
 	int id;
 	void* segment_table_direction;
 	uint8_t size_data_segment;
-}segment_table;
-//TODO
+} segment_table;
+// TODO
 typedef struct {
-    unsigned char AX[4];
-    unsigned char BX[4];
-    unsigned char CX[4];
-    unsigned char DX[4];
+	unsigned char AX[4];
+	unsigned char BX[4];
+	unsigned char CX[4];
+	unsigned char DX[4];
 } cpu_register_4;
 
 typedef struct {
-    unsigned char EAX[8];
-    unsigned char EBX[8];
-    unsigned char ECX[8];
-    unsigned char EDX[8];
+	unsigned char EAX[8];
+	unsigned char EBX[8];
+	unsigned char ECX[8];
+	unsigned char EDX[8];
 } cpu_register_8;
 
 typedef struct {
-    unsigned char RAX[16];
-    unsigned char RBX[16];
-    unsigned char RCX[16];
-    unsigned char RDX[16];
+	unsigned char RAX[16];
+	unsigned char RBX[16];
+	unsigned char RCX[16];
+	unsigned char RDX[16];
 } cpu_register_16;
 typedef struct {
-    cpu_register_4 register_4;
-    cpu_register_8 register_8;
-    cpu_register_16 register_16;
+	cpu_register_4 register_4;
+	cpu_register_8 register_8;
+	cpu_register_16 register_16;
 } cpu_register;
 
-typedef struct{
+typedef struct {
 	uint32_t size_file;
 	void* file_direction;
 } file;
 
-typedef enum{
+typedef enum {
 	NEW,
 	READY,
 	EXEC,
@@ -82,93 +81,93 @@ typedef enum{
 	EXIT_PROCESS
 } state_pcb;
 
-typedef struct{
-	t_list** instructions;
+typedef struct {
+	t_queue* instructions;
 	int program_counter;
 	cpu_register cpu_register;
 	segment_table segment_table;
-	state_pcb state_pcb;  
-}execution_context;
+	state_pcb state_pcb;
+} execution_context;
 
-typedef struct{
+typedef struct {
 	int pid;
 	execution_context* execution_context;
 	int aprox_burst_time;
-       time_t last_ready_time;
-       file* table_open_files;
-	state_pcb state_pcb;   
-} pcb;
-typedef enum{
+	time_t last_ready_time;
+	file* table_open_files;
+	state_pcb state_pcb;
+} t_pcb;
+
+typedef enum {
 	ERROR,
 	OK
-} op_code_reception; 
+} op_code_reception;
 
-typedef struct
-{
+typedef struct {
+	t_log* logger;
+	int console;
+	t_queue* global_pcb;
+	int default_burst_time;
+} t_console_init;
+
+typedef struct {
 	uint32_t size;
 	void* stream;
 } t_buffer;
 
-typedef struct
-{
-	op_code codigo_operacion;
+typedef struct {
+	op_code op_code;
 	t_buffer* buffer;
-} t_paquete;
+} t_package;
 
-char* obtener_cfg_type(char* process_name,char* file_type);
-t_config* iniciar_config(char* process_name);
-t_log* iniciar_logger(char* process_name);
+char* get_config_type(char* process_name, char* file_type);
+t_config* start_config(char* process_name);
+t_log* start_logger(char* process_name);
 
-//TODO IMPLEMTENAR PARA DESERIALIZAR EL PAYLOAD, CAPAZ ESTO DEPENDA DEL TIPO QUE NECESITEMOS ESTILO INT O CHAR*
+// TODO IMPLEMENTAR PARA DESERIALIZAR EL PAYLOAD, CAPAZ ESTO DEPENDA DEL TIPO QUE NECESITEMOS ESTILO INT O CHAR*
 char* deserialize_payload(t_list* payload);
 
-/* Inicializa un socket servidor y lo vincula a un puerto específico. Retorna el descriptor del socket creado. */
-int socket_initialize(char* puerto);
+/* Inicializa y establece la conexión con un servidor en una dirección IP y puerto específicos. Retorna el descriptor del socket creado. */
+int socket_initialize(char* ip, char* port);
 
 /* Espera y acepta la conexión entrante de un cliente. Retorna el descriptor del socket del cliente conectado. */
-int socket_accept(int socket_servidor); 
+int socket_accept(int server_socket);
 
-/* Inicializa y establece la conexión con un servidor en una dirección IP y puerto específicos. Retorna el descriptor del socket creado. */
-int socket_initialize_connect(char *ip, char *puerto); 
+/* Inicializa un socket servidor y lo vincula a un puerto específico. Retorna el descriptor del socket creado. */
+int socket_initialize_server(char* port);
 
 /* Recibe y retorna el código de operación enviado por un cliente a través del socket especificado. */
-int socket_recv_operation(int socket_cliente); 
+int socket_receive_operation(int target_socket);
 
-/* Recibe un buffer de datos enviado por un cliente a través del socket especificado y retorna un puntero al buffer recibido. También actualiza la variable size con el tamaño del buffer recibido. */
-void* socket_recv_buffer(int* size, int socket_cliente); 
-
-/* Envia un mensaje a un cliente a través del socket especificado. */
-void socket_send_message(char* mensaje, int socket_cliente); 
+/* Envía un mensaje a un cliente a través del socket especificado. */
+int socket_send_message(char* message, int target_socket);
 
 /* Recibe y muestra un mensaje enviado por un cliente a través del socket especificado. */
-int socket_recv_message(int socket_cliente); 
+int socket_receive_message(int target_socket);
 
 /* Envía un paquete a un cliente a través del socket especificado. */
-void socket_send_package(t_paquete* paquete, int socket_cliente); 
+int socket_send_package(t_package* package, int target_socket);
 
 /* Cierra la conexión del socket especificado. */
-void socket_end(int socket_cliente); 
+void socket_end(int target_socket);
 
 /* Crea y retorna un paquete con el código de operación especificado. */
-t_paquete* create_package(int cod_op); 
+t_package* package_create(int cod_op);
 
 /* Agrega un valor con un tamaño específico al paquete especificado. */
-void add_to_package(t_paquete* paquete, void* valor, int tamanio); 
+void package_add(t_package* package, void* value, int size);
 
 /* Serializa el paquete especificado en un buffer de bytes de tamaño específico y retorna un puntero al buffer. */
-void* serialize_package(t_paquete* paquete, int bytes); 
+void* package_serialize(t_package* package, int bytes);
 
 /* Libera la memoria asignada a un paquete especificado. */
-void delete_package(t_paquete* paquete); 
+void package_delete(t_package* package);
 
-/* Crea un buffer para el paquete especificado. */
-void create_buffer(t_paquete* paquete); 
+t_list* socket_receive_package(int target_socket);
 
-t_list* socket_recv_package(int socket_cliente);
+int connect_module(t_config* config, t_log* logger, char* modulo);
 
-int conect_modules(t_config* config,t_log* logger,char* modulo);
-
-int receive_modules(t_log* logger,t_config* config);
+int receive_modules(t_log* logger, t_config* config);
 
 op_code return_opcode(char* code);
 

@@ -6,19 +6,19 @@ int main(int argc, char ** argv){
 
     printf("Iniciando la CPU\n");
 
-    t_log* logger = iniciar_logger("cpu");
-    t_config* config = iniciar_config("cpu");
+    t_log* logger = start_logger("cpu");
+    t_config* config = start_config("cpu");
 
     //int kernel_fd = receive_modules(logger,config);
-    //int conexion_memoria = conect_modules(config,logger,"MEMORIA");
+    //int conexion_memoria = connect_module(config,logger,"MEMORIA");
 
     //TODO: En el primer recv llega basura no se porque
-    //socket_recv_message(kernel_fd);
-    //socket_recv_message(kernel_fd);
+    //socket_receive_message(kernel_fd);
+    //socket_receive_message(kernel_fd);
     
-    //Creo el pcb para las instrucciones
+    //Creo el t_pcb para las instrucciones
     t_list* instructions;
-    pcb* pcb_test = malloc(sizeof(pcb));
+    t_pcb* pcb_test = malloc(sizeof(t_pcb));
     
 
                 t_list* sublist1 = list_create();
@@ -46,7 +46,7 @@ int main(int argc, char ** argv){
     pcb_test->execution_context = context; 
 
 
-    // TODO: sigo completando el pcb de este proceso
+    // TODO: sigo completando el t_pcb de este proceso
     log_info(logger,"Se crea el proceso %d en NEW \n",pcb_test -> pid);
 
     //Recibe los pcbs que aca estan harcodeados y los opera

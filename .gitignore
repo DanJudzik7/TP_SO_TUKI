@@ -1,3 +1,11 @@
+# TP Executables and Logs
+kernel/kernel
+consola/consola
+cpu/cpu
+memoria/memoria
+filesystem/filesystem
+*.log
+
 # Prerequisites
 *.d
 

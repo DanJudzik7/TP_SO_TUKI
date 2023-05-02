@@ -1,26 +1,25 @@
 #include "handler_pcb_cpu.h"
 
-void instruction_cycle(pcb* pcb){
+void instruction_cycle(t_pcb* t_pcb){
 
         // devuelve el puntero de la lista a ejecutar dentro de la lista de instrucciones
-        t_list* next_instruction = fetch(pcb); 
+        t_list* next_instruction = fetch(t_pcb); 
 
         if (next_instruction != NULL) {
             op_code COD_OP = decode(next_instruction);
-            execute(COD_OP, next_instruction, pcb);
-            pcb->execution_context->program_counter++;
+            execute(COD_OP, next_instruction, t_pcb);
+            t_pcb->execution_context->program_counter++;
         } else {
         // No hay más instrucciones, manejar errores
         }
-           
            //En cuyo caso que tengamos que hacer while hasta el manejo de una excepcion meter dentro del while
-    /*while (pcb-> execution_context-> program_counter < list_size (pcb->execution_context -> instructions))*/
+    /*while (t_pcb-> execution_context-> program_counter < list_size (t_pcb->execution_context -> instructions))*/
 
     
 }
 // obtiene la instruccion(lista) actual a ejecutar
-t_list* fetch(pcb* pcb){
-    return list_get( *(pcb->execution_context -> instructions) , pcb->execution_context->program_counter );
+t_list* fetch(t_pcb* t_pcb){
+    return list_get( *(t_pcb->execution_context -> instructions) , t_pcb->execution_context->program_counter );
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar 
@@ -29,11 +28,10 @@ op_code decode(t_list* next_instruction){
     return (op_code) list_get(next_instruction , 0);                                           
 }
 
-void execute(op_code COD_OP,t_list* instruction,pcb* pcb){  
-
+void execute(op_code COD_OP,t_list* instruction,t_pcb* t_pcb){  
     switch (COD_OP){
         case SET:
-            set(pcb->execution_context, instruction);
+            set(t_pcb->execution_context, instruction);
             break;
         case MOV_IN:
         case MOV_OUT:
@@ -48,13 +46,13 @@ void execute(op_code COD_OP,t_list* instruction,pcb* pcb){
         case SIGNAL:
         case CREATE_SEGMENT:
         case DELETE_SEGMENT:
-            printf("Implementar funcion");
+            printf("Implementar función");
             break;
         case YIELD:
-            yield(pcb);
+            yield(t_pcb);
             break;
         case EXIT:
-            exit(pcb);
+            exitIns(t_pcb);
             break;
         default:
             // INSERTAR ERROR

@@ -2,12 +2,12 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Debug",
+			"name": "Console",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/${input:program}/${input:program}",
-			"preLaunchTask": "Make",
-			"cwd": "${workspaceFolder}/${input:program}",
+			"program": "${workspaceFolder}/consola/consola",
+			"preLaunchTask": "Make Console",
+			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"setupCommands": [
@@ -22,21 +22,94 @@
 					"ignoreFailures": true
 				}
 			]
-		}
-	],
-    "inputs": [
-        {
-            "id": "program",
-            "description": "Nombre del módulo",
-            "default": "consola",
-            "type": "pickString",
-            "options": [
-                "consola",
-                "kernel",
-                "cpu",
-                "filesystem",
-                "memoria"
-            ]
-        },
-    ]
+		},
+		{
+			"name": "Kernel",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/kernel/kernel",
+			"preLaunchTask": "Make Kernel",
+			"cwd": "${workspaceFolder}/kernel",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "CPU",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/cpu/cpu",
+			"preLaunchTask": "Make CPU",
+			"cwd": "${workspaceFolder}/cpu",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Filesystem",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/filesystem/filesystem",
+			"preLaunchTask": "Make Filesystem",
+			"cwd": "${workspaceFolder}/filesystem",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Memory",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/memoria/memoria",
+			"preLaunchTask": "Make Memory",
+			"cwd": "${workspaceFolder}/memoria",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+	]
 }
