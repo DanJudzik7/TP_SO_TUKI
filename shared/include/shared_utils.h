@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <time.h>
+#include <semaphore.h>
 #include <unistd.h>
 
 typedef enum {
@@ -43,24 +44,24 @@ typedef struct {
 } segment_table;
 // TODO
 typedef struct {
-	unsigned char AX[4];
-	unsigned char BX[4];
-	unsigned char CX[4];
-	unsigned char DX[4];
+	char AX[4];
+	char BX[4];
+	char CX[4];
+	char DX[4];
 } cpu_register_4;
 
 typedef struct {
-	unsigned char EAX[8];
-	unsigned char EBX[8];
-	unsigned char ECX[8];
-	unsigned char EDX[8];
+	char EAX[8];
+	char EBX[8];
+	char ECX[8];
+	char EDX[8];
 } cpu_register_8;
 
 typedef struct {
-	unsigned char RAX[16];
-	unsigned char RBX[16];
-	unsigned char RCX[16];
-	unsigned char RDX[16];
+	char RAX[16];
+	char RBX[16];
+	char RCX[16];
+	char RDX[16];
 } cpu_register_16;
 typedef struct {
 	cpu_register_4 register_4;
@@ -108,13 +109,24 @@ typedef struct {
 	int console;
 	t_queue* global_pcb;
 	char* algorithm;
+	int max_multiprogramming;
 	int default_burst_time;
-	int server_fd;
-	int conection_module;
+	int conection_kernel;
+	int conection_module_cpu;
+	int conection_module_memory;
+	int conection_module_filesystem;
+} global_config_kernel;
+
+typedef struct{
+	int conection_module_console;
 	t_pcb* pcb;
-} t_console_init;  // Debemos tener un struct igual pero para los planificadores,
+} process;
 
-
+typedef struct 
+{	
+	global_config_kernel* global_config_kernel;
+	process* current_process;
+} config_current_process ;
 
 
 typedef struct {

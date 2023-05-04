@@ -19,29 +19,30 @@ int main(int argc, char** argv) {
 	int burst_time = *config_get_string_value(config, "ESTIMACION_INICIAL") - '0';
 	log_warning(logger, "El algoritmo de planificación es: %s", algorithm);
 
-
+	// cola global de pcb en |READY|
 	t_queue* queue_global_pcb = queue_create();
 
-
-	t_console_init* ci = malloc(sizeof(t_console_init));
-
-	pthread_t thread_consola;
-	ci->logger = logger;
-	ci->server_fd = server_fd;
-	ci->global_pcb = queue_global_pcb;
-	ci->default_burst_time = burst_time;
-	ci->algorithm = algorithm;
-	pthread_create(&thread_consola, NULL, (void*) listen_console, ci);
-
-
-	
+	global_config_kernel* gck = malloc(sizeof(global_config_kernel));
+	gck->logger = logger;
+	gck->global_pcb = queue_global_pcb;
+	gck ->conection_kernel = server_fd;
+	gck->max_multiprogramming = 1; //ESTO CAMBIARLO Y CARGARLO POR CONFIG
+	gck->default_burst_time = burst_time;
+	gck->algorithm = algorithm;
+	gck->conection_module_cpu = conn_cpu;
+	//gck->conection_module_memory = conn_memoria;
+	//gck->conection_module_filesystem = conn_filesystem;
 
 	pthread_t thread_cpu;
-	ci->conection_module = conn_cpu;
-	pthread_create(&thread_cpu, NULL, (void*) listen_cpu, ci);
-		
 	
 
+	pthread_create(&thread_cpu, NULL, (void*) listen_cpu, gck);
+
+	//cada vez que me llega un nuevo proceso deberia abrir una config unica para ese proces
+	config_current_process* config_current_procces = malloc(sizeof(config_current_process)); 
+	pthread_t thread_consola;
+	pthread_create(&thread_consola, NULL, (void*) listen_console, config_current_procces);
+		
 
 
 	// Lo comento porque manejo el error y el ok en la función

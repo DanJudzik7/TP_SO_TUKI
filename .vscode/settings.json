@@ -28,7 +28,12 @@
         "queue.h": "c",
         "handler_execute_instructions.h": "c",
         "pthread.h": "c",
-        "handler_pcb.h": "c"
+        "handler_pcb.h": "c",
+        "semaphore.h": "c",
+        "algorithm": "c",
+        "*.tcc": "c",
+        "functional": "c",
+        "numeric": "c"
     },
     "cmake.configureOnOpen": false
 }

@@ -6,8 +6,9 @@
 #include "algorithms.h"
 #include "shared_utils.h"
 
-
-void planificador_kernel(t_console_init* ci);
-op_code_reception* long_term_scheduler(t_console_init* ci);
+void planificador_kernel(process* process);
+void reciver_new_pcb(config_current_process* current_config_process);
+op_code_reception* long_term_scheduler(global_config_kernel* gck, process* process);
+void short_term_scheduler(global_config_kernel* gck, process* process);
 
 #endif
