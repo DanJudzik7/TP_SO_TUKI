@@ -4,22 +4,21 @@ void instruction_cycle(t_pcb* t_pcb){
 
         // devuelve el puntero de la lista a ejecutar dentro de la lista de instrucciones
         t_list* next_instruction = fetch(t_pcb); 
-
         if (next_instruction != NULL) {
             op_code COD_OP = decode(next_instruction);
             execute(COD_OP, next_instruction, t_pcb);
+            printf("hola1");
             t_pcb->execution_context->program_counter++;
         } else {
+        printf("hola2");
         // No hay más instrucciones, manejar errores
         }
            //En cuyo caso que tengamos que hacer while hasta el manejo de una excepcion meter dentro del while
     /*while (t_pcb-> execution_context-> program_counter < list_size (t_pcb->execution_context -> instructions))*/
-
-    
 }
 // obtiene la instruccion(lista) actual a ejecutar
 t_list* fetch(t_pcb* t_pcb){
-    return list_get( *(t_pcb->execution_context -> instructions) , t_pcb->execution_context->program_counter );
+    return list_get( (t_pcb->execution_context -> instructions) , t_pcb->execution_context->program_counter );
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar 
@@ -29,9 +28,11 @@ op_code decode(t_list* next_instruction){
 }
 
 void execute(op_code COD_OP,t_list* instruction,t_pcb* t_pcb){  
+    
     switch (COD_OP){
         case SET:
             set(t_pcb->execution_context, instruction);
+            printf("hola3");
             break;
         case MOV_IN:
         case MOV_OUT:
@@ -55,7 +56,7 @@ void execute(op_code COD_OP,t_list* instruction,t_pcb* t_pcb){
             exitIns(t_pcb);
             break;
         default:
-            // INSERTAR ERROR
+            
             break;
         }
 }

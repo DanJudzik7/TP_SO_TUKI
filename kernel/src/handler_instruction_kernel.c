@@ -53,6 +53,7 @@ void handle_incoming_instructions(t_queue* queue, int socket_console, t_log* log
 			}
 		} else {
 			queue_push(queue, socket_receive_package(socket_console));
+			break;
 		}
 	}
 }

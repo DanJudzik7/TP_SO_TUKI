@@ -6,7 +6,6 @@ void planificador_kernel(process* process) {
 }
 
 void reciver_new_pcb(config_current_process* current_config_process) {
-	
 	//Creo el PCB con los datos que me llegan de la consola
 	t_pcb* new_pcb = malloc(sizeof(t_pcb));
 	new_pcb = create_pcb(current_config_process -> current_process , current_config_process -> global_config_kernel -> logger, current_config_process -> global_config_kernel -> default_burst_time);
@@ -14,21 +13,25 @@ void reciver_new_pcb(config_current_process* current_config_process) {
 	// Inserto el nuevo pcb creado en el current_process
 	current_config_process -> current_process -> pcb = new_pcb;
 	//Le envio al planificador de largo plazo, la configuracion local y el nuevo proceso que se va a ejecutar cuando pueda
-	long_term_scheduler(current_config_process -> global_config_kernel, current_config_process -> current_process);	  
+	long_term_scheduler(current_config_process -> global_config_kernel, current_config_process -> current_process);
+	log_info(current_config_process -> global_config_kernel -> logger, "SeDANl proceso %d en NEW", new_pcb -> pid);
+
 	free(new_pcb);
 }
 
 op_code_reception* long_term_scheduler(global_config_kernel* gck, process* process) {
-
+	log_info(gck->logger,"Iniciando planificador...");
 	int FLAG_MULTIPROGRAMACION = gck -> max_multiprogramming;
 	sem_init(&FLAG_MULTIPROGRAMACION,1 ,FLAG_MULTIPROGRAMACION); //Debe cargarse desde config
 	t_log* logger = gck -> logger;
 	t_queue* global_ready_pcb = gck -> global_pcb;
 	
+	log_error(gck->logger,"Proceso en estado: %i",process -> pcb -> state_pcb);
+
 	//Creo la cola local de PCB en estado |NEW|
 	//seguramente debe enviarse al planificador como algo global, pero solo la usa este
 	t_queue* queue_local_pcb_new = queue_create(); // TODO: LA COLA YA DEBERIA EXISTIR, NO CREARSE ACA
-	if(process -> pcb -> state_pcb == NEW ){
+	if( process -> pcb -> state_pcb== NEW ){
 		queue_push(queue_local_pcb_new, process);
 		log_info(logger, "El proceso %d se agrego a la cola de espera de NEW", process -> pcb -> pid);
 	}

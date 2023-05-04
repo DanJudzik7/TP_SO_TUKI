@@ -9,12 +9,12 @@ int main(int argc, char ** argv){
     t_log* logger = start_logger("cpu");
     t_config* config = start_config("cpu");
 
-    //int kernel_fd = receive_modules(logger,config);
+    int kernel_fd = receive_modules(logger,config);
     //int conexion_memoria = connect_module(config,logger,"MEMORIA");
 
     //TODO: En el primer recv llega basura no se porque
-    //socket_receive_message(kernel_fd);
-    //socket_receive_message(kernel_fd);
+    socket_receive_message(kernel_fd);
+    socket_receive_message(kernel_fd);
     
     //Creo el t_pcb para las instrucciones
     t_list* instructions;
@@ -48,7 +48,7 @@ int main(int argc, char ** argv){
 
     // TODO: sigo completando el t_pcb de este proceso
     log_info(logger,"Se crea el proceso %d en NEW \n",pcb_test -> pid);
-
+    
     //Recibe los pcbs que aca estan harcodeados y los opera
     instruction_cycle(pcb_test);
     free(context);

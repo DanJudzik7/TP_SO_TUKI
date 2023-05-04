@@ -2,7 +2,7 @@
 
 //TODO MEJORAR CODIGO CON LOS LOGGER
 void listen_console(config_current_process* config_current_process) {
-
+    log_info(config_current_process->global_config_kernel->logger,"Escuchando consolas");
     while (1) {
         pthread_t thread;
         int* console_socket = malloc(sizeof(int));
@@ -11,14 +11,16 @@ void listen_console(config_current_process* config_current_process) {
             log_warning(config_current_process -> global_config_kernel -> logger, "Hubo un error aceptando la conexión");
             continue;
         }
+        config_current_process -> current_process = malloc(sizeof(config_current_process -> current_process));
         config_current_process -> current_process -> conection_module_console = *console_socket;
-        log_debug(config_current_process -> global_config_kernel -> logger, "Se aceptó una conexión en el socket %d", *console_socket);
+        log_info(config_current_process -> global_config_kernel -> logger, "Se aceptó una conexión en el socket %d", *console_socket);
         op_code_reception result;
         //Cuando me llega una nueva consola lo mando a un recividor de nuevo pcb;
         pthread_create(&thread, NULL,  (void*) reciver_new_pcb, config_current_process);
         pthread_join(thread, (void**) &result);
 		//socket_send_message(result, console_socket);
         free(console_socket);
+
          // hacer algo con el valor devuelto por long_term_scheduler
     }
 }
@@ -41,7 +43,7 @@ t_pcb* create_pcb(process* process,t_log* logger, int default_burst_time) {
 	pcb->execution_context = malloc(sizeof(execution_context));
 	pcb->execution_context->instructions = queue_create();
 	pcb->execution_context->program_counter = 0;
-	log_info(log, "Proceso %d creado en NEW", pcb->pid);
+	log_warning(log, "Proceso %d creado en NEW", pcb->pid);
 	handle_incoming_instructions(pcb->execution_context->instructions, process->conection_module_console, logger);
 	free(process);
 	return pcb;

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "algorithms.h"
 #include "shared_utils.h"
+#include "handler_pcb.h"
 
 void planificador_kernel(process* process);
 void reciver_new_pcb(config_current_process* current_config_process);

@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
 	// Connect_module conecta al modulo que le pasa como tercer parámetros
-	int conn_cpu =  connect_module(config, logger, "CPU");//ME CONECTO CON CPU Y CREO LA CONEXION
+	//int conn_cpu =  connect_module(config, logger, "CPU");//ME CONECTO CON CPU Y CREO LA CONEXION
 	// int conn_memoria = connect_module(config, logger, "MEMORIA");
 	// int conn_filesystem = connect_module(config, logger, "FILESYSTEM");
 
@@ -29,19 +29,22 @@ int main(int argc, char** argv) {
 	gck->max_multiprogramming = 1; //ESTO CAMBIARLO Y CARGARLO POR CONFIG
 	gck->default_burst_time = burst_time;
 	gck->algorithm = algorithm;
-	gck->conection_module_cpu = conn_cpu;
+	//gck->conection_module_cpu = conn_cpu;
 	//gck->conection_module_memory = conn_memoria;
 	//gck->conection_module_filesystem = conn_filesystem;
 
-	pthread_t thread_cpu;
+	//pthread_t thread_cpu;
 	
 
-	pthread_create(&thread_cpu, NULL, (void*) listen_cpu, gck);
+	//pthread_create(&thread_cpu, NULL, (void*) listen_cpu, gck);
 
 	//cada vez que me llega un nuevo proceso deberia abrir una config unica para ese proces
 	config_current_process* config_current_procces = malloc(sizeof(config_current_process)); 
+	config_current_procces->global_config_kernel = gck;
 	pthread_t thread_consola;
 	pthread_create(&thread_consola, NULL, (void*) listen_console, config_current_procces);
+	pthread_join(thread_consola, NULL);
+	
 		
 
 
