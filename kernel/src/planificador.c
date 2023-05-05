@@ -16,15 +16,14 @@ op_code_reception* long_term_scheduler(config_current_process* current_config_pr
 	log_info(current_config_process->global_config_kernel->logger,"LLego long_term_scheduler...");
 
 	log_info(current_config_process->global_config_kernel->logger,"Paso process");
-	global_config_kernel* gck = malloc(sizeof(global_config_kernel));
 
-	log_info(gck->logger,"Paso pck");
+	log_info(current_config_process->global_config_kernel->logger,"Paso pck");
 
-	log_info(gck->logger,"Iniciando planificador...");
-	log_error(gck ->logger,"Proceso en estado: %d",current_config_process->current_process->pcb->state_pcb);
+	log_info(current_config_process->global_config_kernel->logger,"Iniciando planificador...");
+	log_error(current_config_process->global_config_kernel ->logger,"Proceso en estado: %d",current_config_process->current_process->pcb->state_pcb);
 	
 	sem_t* FLAG_MULTIPROGRAMACION = malloc(sizeof(sem_t));
-	sem_init(&FLAG_MULTIPROGRAMACION,1 ,gck -> max_multiprogramming); //Debe cargarse desde config
+	sem_init(&FLAG_MULTIPROGRAMACION,1 ,current_config_process->global_config_kernel -> max_multiprogramming); //Debe cargarse desde config
 	t_log* logger = current_config_process->global_config_kernel -> logger;
 	t_queue* global_ready_pcb = current_config_process->global_config_kernel -> global_pcb;
 	
@@ -38,12 +37,12 @@ op_code_reception* long_term_scheduler(config_current_process* current_config_pr
 	
 	log_info(current_config_process->global_config_kernel ->logger,"Proceso en estado: %d",current_config_process->current_process->pcb->state_pcb);
 	if( current_config_process->current_process->pcb->state_pcb == NEW_PROCESS ){
-		log_info(gck->logger,"entra al if");
+		log_info(current_config_process->global_config_kernel->logger,"entra al if");
 
 		queue_push(queue_local_pcb_new, current_config_process->current_process);
 		log_info(logger, "El proceso %d se agrego a la cola de espera de NEW", current_config_process->current_process -> pcb -> pid);
 	}
-	log_info(gck->logger,"pasa el if");
+	log_info(current_config_process->global_config_kernel->logger,"pasa el if");
 	
 	//TODO: Deberia ser un while que verifique todo el tiempo si puede ejecutar un nuevo pcb
 	//Reviso si la multiprogramacion permite planificar mas de uno
