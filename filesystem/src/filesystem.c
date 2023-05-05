@@ -1,14 +1,15 @@
 #include "filesystem.h"
-int main(int argc, char ** argv){
-    t_log* logger = start_logger("filesystem");
-    t_config* config = start_config("filesystem");
-    log_warning(logger, "Iniciando el filesystem");
 
-    int cliente_fd = receive_modules(logger,config);
+int main(int argc, char** argv) {
+	t_log* logger = start_logger("filesystem");
+	t_config* config = start_config("filesystem");
+	log_warning(logger, "Iniciando el filesystem");
 
-    //TODO: En el primer recv llega basura no se porque
-    socket_receive_message(cliente_fd);
-    socket_receive_message(cliente_fd); 
+	int cliente_fd = receive_modules(logger, config);
 
-    int socket_memory = connect_module(config,logger,"MEMORIA"); 
+	// TODO: En el primer recv llega basura no se porque
+	socket_receive_message(cliente_fd);
+	socket_receive_message(cliente_fd);
+
+	int socket_memory = connect_module(config, logger, "MEMORIA");
 }

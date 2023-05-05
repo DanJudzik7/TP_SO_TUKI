@@ -1,4 +1,5 @@
 #include "memoria.h"
+
 int main(int argc, char ** argv){    
     t_log* logger = start_logger("memoria");
     t_config* config = start_config("memoria");

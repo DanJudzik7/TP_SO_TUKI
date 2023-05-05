@@ -33,23 +33,21 @@ int instruction_handler_kernel() {
 
 void handle_incoming_instructions(t_queue* queue, int socket_console, t_log* logger) {
 	int cod_op = 0;
-	char* msg_invalid = "Instrucciones inválidas recibidas";
-	char* msg_valid = "Instrucciones recibidas por el kernel";
 	while (1) {
 		// Seguir mejorando esto
 		cod_op = socket_receive_operation(socket_console);
 		if (cod_op == (-1)) {
 			// La siguiente línea se va a optimizar al mejorar paquetes con mensajes
 			socket_receive_message(socket_console);
-			if (socket_send_message(msg_invalid, socket_console) == -1) break;
-			log_debug(logger, msg_invalid);
+			if (socket_send_message("Instrucciones inválidas recibidas", socket_console) == -1) break;
+			log_debug(logger, "Instrucciones inválidas recibidas");
 			continue;
 		}
 		log_debug(logger, "Código de operación recibido: %i", cod_op);
 		if (cod_op == MENSAJE) {
 			if (socket_receive_message(socket_console) == 1) {
 				// Si recibe el mensaje de finalización de instrucciones, avisa que las recibió y las devuelve en forma de lista
-				socket_send_message(msg_valid, socket_console);
+				socket_send_message("Instrucciones recibidas por el kernel", socket_console);
 			}
 		} else {
 			queue_push(queue, socket_receive_package(socket_console));

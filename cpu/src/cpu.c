@@ -1,58 +1,49 @@
 #include "cpu.h"
 
+int main(int argc, char** argv) {
+	printf("Iniciando la CPU\n");
 
+	t_log* logger = start_logger("cpu");
+	t_config* config = start_config("cpu");
 
-int main(int argc, char ** argv){
+	int kernel_fd = receive_modules(logger, config);
+	// int conn_memoria = connect_module(config,logger,"MEMORIA");
 
-    printf("Iniciando la CPU\n");
+	// TODO: En el primer recv llega basura no se porque
+	socket_receive_message(kernel_fd);
+	socket_receive_message(kernel_fd);
 
-    t_log* logger = start_logger("cpu");
-    t_config* config = start_config("cpu");
+	// Creo el t_pcb para las instrucciones
+	t_list* instructions;
+	t_pcb* pcb_test = malloc(sizeof(t_pcb));
 
-    int kernel_fd = receive_modules(logger,config);
-    //int conexion_memoria = connect_module(config,logger,"MEMORIA");
+	t_list* sublist1 = list_create();
+	list_add(sublist1, (void*)SET);	 // Debo hacer el casting a void siempre, dado que son enums
+	list_add(sublist1, "AX");
+	list_add(sublist1, "HOLA");
 
-    //TODO: En el primer recv llega basura no se porque
-    socket_receive_message(kernel_fd);
-    socket_receive_message(kernel_fd);
-    
-    //Creo el t_pcb para las instrucciones
-    t_list* instructions;
-    t_pcb* pcb_test = malloc(sizeof(t_pcb));
-    
+	t_list* sublist2 = list_create();
+	list_add(sublist2, (void*)WAIT);
+	list_add(sublist2, "DISCO");
 
-                t_list* sublist1 = list_create();
-                list_add(sublist1,(void *) SET);  // Debo hacer el casteo a void siempre, dado que son enums
-                list_add(sublist1, "AX");
-                list_add(sublist1, "HOLA");
+	instructions = list_create();
+	list_add(instructions, sublist1);
+	list_add(instructions, sublist2);
 
-                t_list* sublist2 = list_create();
-                list_add(sublist2,(void *) WAIT);
-                list_add(sublist2, "DISCO");
+	pcb_test->state_pcb = NEW_PROCESS;
+	pcb_test->pid = 2001;
 
-                instructions = list_create();
-                list_add(instructions, sublist1);
-                list_add(instructions, sublist2);
+	execution_context* context = malloc(sizeof(execution_context));
+	context->instructions = &instructions;
+	context->program_counter = 0;
 
+	pcb_test->execution_context = context;
 
-    pcb_test -> state_pcb = NEW;
-    pcb_test -> pid = 2001;
+	// TODO: sigo completando el t_pcb de este proceso
+	log_info(logger, "Se crea el proceso %d en NEW \n", pcb_test->pid);
 
-
-    execution_context* context = malloc(sizeof(execution_context));
-    context -> instructions = &instructions;
-    context -> program_counter = 0;  
-
-    pcb_test->execution_context = context; 
-
-
-    // TODO: sigo completando el t_pcb de este proceso
-    log_info(logger,"Se crea el proceso %d en NEW \n",pcb_test -> pid);
-    
-    //Recibe los pcbs que aca estan harcodeados y los opera
-    instruction_cycle(pcb_test);
-    free(context);
-    free(pcb_test);
-
+	// Recibe los pcbs que aca están harcodeados y los opera
+	instruction_cycle(pcb_test);
+	free(context);
+	free(pcb_test);
 }
-

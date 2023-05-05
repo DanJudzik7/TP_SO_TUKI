@@ -8,13 +8,13 @@
 #include <commons/string.h>
 #include <netdb.h>
 #include <readline/readline.h>
+#include <semaphore.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <time.h>
-#include <semaphore.h>
 #include <unistd.h>
 
 typedef enum {
@@ -111,23 +111,21 @@ typedef struct {
 	char* algorithm;
 	int max_multiprogramming;
 	int default_burst_time;
-	int conection_kernel;
-	int conection_module_cpu;
-	int conection_module_memory;
-	int conection_module_filesystem;
+	int connection_kernel;
+	int connection_module_cpu;
+	int connection_module_memory;
+	int connection_module_filesystem;
 } global_config_kernel;
 
-typedef struct{
-	int conection_module_console;
+typedef struct {
+	int connection_module_console;
 	t_pcb* pcb;
 } process;
 
-typedef struct 
-{	
+typedef struct {
 	global_config_kernel* global_config_kernel;
 	process* current_process;
-} config_current_process ;
-
+} config_current_process;
 
 typedef struct {
 	uint32_t size;
