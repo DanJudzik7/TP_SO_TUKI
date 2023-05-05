@@ -75,7 +75,7 @@ typedef struct {
 } file;
 
 typedef enum {
-	NEW,
+	NEW_PROCESS,
 	READY,
 	EXEC,
 	BLOCK,

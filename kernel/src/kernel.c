@@ -39,13 +39,13 @@ int main(int argc, char** argv) {
 	//pthread_create(&thread_cpu, NULL, (void*) listen_cpu, gck);
 
 	//cada vez que me llega un nuevo proceso deberia abrir una config unica para ese proces
-	config_current_process* config_current_procces = malloc(sizeof(config_current_process)); 
-	config_current_procces->global_config_kernel = gck;
+	//config_current_process* config_current_procces = malloc(sizeof(config_current_process)); 
+	//config_current_procces->global_config_kernel = gck;
 	pthread_t thread_consola;
-	pthread_create(&thread_consola, NULL, (void*) listen_console, config_current_procces);
+	pthread_create(&thread_consola, NULL, (void*) listen_console, gck);
 	pthread_join(thread_consola, NULL);
+
 	
-		
 
 
 	// Lo comento porque manejo el error y el ok en la función

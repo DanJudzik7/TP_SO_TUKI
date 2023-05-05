@@ -9,7 +9,7 @@
 #include "planificador.h"
 
 // Genera un nuevo PCB desde una nueva consola
-void listen_console(config_current_process* config_procces);
+void listen_console(global_config_kernel* gck);
 void listen_cpu(config_current_process* config_current_process);
 t_pcb* create_pcb(process* process, t_log* logger,int default_burst_time);
 
