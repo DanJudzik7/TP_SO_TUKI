@@ -13,6 +13,8 @@ int main(int argc, char** argv) {
 	socket_receive_message(kernel_fd);
 	socket_receive_message(kernel_fd);
 
+	// To do: CPU debe recibir solo execution context, no todo este PCB
+
 	// Creo el t_pcb para las instrucciones
 	t_list* instructions;
 	t_pcb* pcb_test = malloc(sizeof(t_pcb));
@@ -30,8 +32,8 @@ int main(int argc, char** argv) {
 	list_add(instructions, sublist1);
 	list_add(instructions, sublist2);
 
-	pcb_test->state_pcb = NEW_PROCESS;
-	pcb_test->pid = 2001;
+	pcb_test->state = NEW;
+	pcb_test->pid = 6;
 
 	execution_context* context = malloc(sizeof(execution_context));
 	context->instructions = &instructions;
@@ -40,7 +42,7 @@ int main(int argc, char** argv) {
 	pcb_test->execution_context = context;
 
 	// TODO: sigo completando el t_pcb de este proceso
-	log_info(logger, "Se crea el proceso %d en NEW \n", pcb_test->pid);
+	log_info(logger, "El proceso %d se creó en NEW\n", pcb_test->pid);
 
 	// Recibe los pcbs que aca están harcodeados y los opera
 	instruction_cycle(pcb_test);

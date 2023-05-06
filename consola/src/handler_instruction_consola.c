@@ -42,9 +42,10 @@ t_package* package_instruction_build(char* line) {
 	}
 	return package;
 }
+
 // TODO ESTA OPERACIÓN TENDRÍA QUE IR AL SHARED
 op_code_reception opcode_receive(char* code) {
 	if (strcmp(code, "RECEIVE_OK") == 0) return OK;
 	else if (strcmp(code, "ERROR") == 0) return ERROR;
-	else return (-1);  // Error handling
+	else return -1;  // Error handling
 }

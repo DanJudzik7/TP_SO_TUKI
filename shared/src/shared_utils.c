@@ -101,15 +101,14 @@ int socket_initialize(char* ip, char* port) {
 	// Creamos el socket de escucha del servidor
 	int server_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
 
-	if (ip == NULL) {  // Para servidor
+	if (ip == NULL) { // Para servidor
 		// Asociamos el socket a un port
 		bind(server_socket, server_info->ai_addr, server_info->ai_addrlen);
 		// Escuchamos las conexiones entrantes
-		listen(server_socket, SOMAXCONN);
-	} else {  // Para cliente
+		if(listen(server_socket, SOMAXCONN) == -1) return -1;
+	} else { // Para cliente
 		// Ahora que tenemos el socket, vamos a conectarlo
-		int connection = connect(server_socket, server_info->ai_addr, server_info->ai_addrlen);
-		if (connection == (-1)) return -1;
+		if (connect(server_socket, server_info->ai_addr, server_info->ai_addrlen) == -1) return -1;
 	}
 
 	freeaddrinfo(server_info);
@@ -137,7 +136,7 @@ int socket_send_package(t_package* package, int target_socket) {
 	void* package_serialized = package_serialize(package, bytes);
 	int send_ret = send(target_socket, package_serialized, bytes, MSG_NOSIGNAL);
 	if (send_ret == -1) {
-		socket_end(target_socket);
+		socket_close(target_socket);
 		printf("Cliente desconectado\n");
 		// Migrar este mensaje a la función que lo llame, para que pueda salir por logger
 	}
@@ -146,7 +145,7 @@ int socket_send_package(t_package* package, int target_socket) {
 	return send_ret;
 }
 
-void socket_end(int target_socket) {
+void socket_close(int target_socket) {
 	close(target_socket);
 }
 
@@ -179,7 +178,7 @@ t_list* socket_receive_package(int target_socket) {
 
 int socket_accept(int server_socket) {
 	int target_socket = accept(server_socket, NULL, NULL);
-	if (target_socket == (-1)) printf("Error de conexión al servidor!\n");
+	if (target_socket == -1) printf("Error de conexión al servidor\n");
 	return target_socket;
 }
 
@@ -234,12 +233,12 @@ int receive_modules(t_log* logger, t_config* config) {
 	log_info(logger, "El value del port es %s \n", port);
 
 	// Inicializo el socket en el port cargado por la config
-	int server_fd = socket_initialize_server(port);
+	int server_socket = socket_initialize_server(port);
 	log_info(logger, "SOCKET INICIALIZADO");
 	// Pongo el socket en modo de aceptar las escuchas
-	// int cliente_fd = socket_accept(server_fd);
+	// int cliente_fd = socket_accept(server_socket);
 
-	return socket_accept(server_fd);
+	return socket_accept(server_socket);
 }
 
 op_code return_opcode(char* code) {

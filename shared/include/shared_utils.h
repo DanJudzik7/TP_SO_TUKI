@@ -17,7 +17,7 @@
 #include <time.h>
 #include <unistd.h>
 
-typedef enum {
+typedef enum op_code {
 	MENSAJE,		 // 0     //Este existe de mas
 	F_READ,			 // 1
 	F_WRITE,		 // 2
@@ -37,102 +37,90 @@ typedef enum {
 	YIELD			 // 16
 } op_code;
 
-typedef struct {
+typedef struct segment_table {
 	int id;
 	void* segment_table_direction;
 	uint8_t size_data_segment;
 } segment_table;
 // TODO
-typedef struct {
+typedef struct cpu_register_4 {
 	char AX[4];
 	char BX[4];
 	char CX[4];
 	char DX[4];
 } cpu_register_4;
 
-typedef struct {
+typedef struct cpu_register_8 {
 	char EAX[8];
 	char EBX[8];
 	char ECX[8];
 	char EDX[8];
 } cpu_register_8;
 
-typedef struct {
+typedef struct cpu_register_16 {
 	char RAX[16];
 	char RBX[16];
 	char RCX[16];
 	char RDX[16];
 } cpu_register_16;
-typedef struct {
+typedef struct cpu_register {
 	cpu_register_4 register_4;
 	cpu_register_8 register_8;
 	cpu_register_16 register_16;
 } cpu_register;
 
-typedef struct {
+typedef struct file {
 	uint32_t size_file;
 	void* file_direction;
 } file;
 
-typedef enum {
-	NEW_PROCESS,
+typedef enum process_state {
+	NEW,
 	READY,
 	EXEC,
 	BLOCK,
 	EXIT_PROCESS
-} state_pcb;
+} process_state;
 
-typedef struct {
+typedef struct execution_context {
 	t_queue* instructions;
 	int program_counter;
-	cpu_register cpu_register;
-	segment_table segment_table;
-	state_pcb state_pcb;
+	process_state updated_state;
+	cpu_register* cpu_register;
+	segment_table* segment_table;
 } execution_context;
 
-typedef struct {
-	int pid;
-	execution_context* execution_context;
+typedef struct t_pcb {
+	int pid; // También funciona como ID del socket
+	process_state state;
 	int aprox_burst_time;
 	time_t last_ready_time;
-	file* table_open_files;
-	state_pcb state_pcb;
+	t_list* files;
+	execution_context* execution_context;
 } t_pcb;
 
-typedef enum {
+typedef enum op_code_reception {
 	ERROR,
 	OK
 } op_code_reception;
 
+// To do: Mover esto a un archivo específico de Kernel
 typedef struct {
 	t_log* logger;
-	int console;
-	t_queue* global_pcb;
-	char* algorithm;
+	t_queue* new_pcbs;
+	t_queue* active_pcbs;
+	bool algorithm_is_hrrn;
 	int max_multiprogramming;
 	int default_burst_time;
 	int connection_kernel;
-	int connection_module_cpu;
-	int connection_module_memory;
-	int connection_module_filesystem;
-} global_config_kernel;
+} t_global_config_kernel;
 
-typedef struct {
-	int connection_module_console;
-	t_pcb* pcb;
-} process;
-
-typedef struct {
-	global_config_kernel* global_config_kernel;
-	process* current_process;
-} config_current_process;
-
-typedef struct {
+typedef struct t_buffer {
 	uint32_t size;
 	void* stream;
 } t_buffer;
 
-typedef struct {
+typedef struct t_package {
 	op_code op_code;
 	t_buffer* buffer;
 } t_package;
@@ -166,7 +154,7 @@ int socket_receive_message(int target_socket);
 int socket_send_package(t_package* package, int target_socket);
 
 /* Cierra la conexión del socket especificado. */
-void socket_end(int target_socket);
+void socket_close(int target_socket);
 
 /* Crea y retorna un paquete con el código de operación especificado. */
 t_package* package_create(int cod_op);

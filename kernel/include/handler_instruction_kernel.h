@@ -9,8 +9,6 @@
 int instruction_handler_kernel();
 
 // Administrador de instrucciones recibidas por consola
-void handle_incoming_instructions(t_queue* queue, int cliente_fd, t_log* logger);
-
-void list_instructions(char* instructions);
+void handle_incoming_instructions(t_pcb* pcb);
 
 #endif

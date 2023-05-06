@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 			log_info(logger, "Recibimos un ERROR por parte del kernel \n");
 		} */
 	}
-	socket_end(socket_kernel);
+	socket_close(socket_kernel);
 	log_warning(logger, "Consola desconectada de kernel");
 	free(line);
 	return 0;

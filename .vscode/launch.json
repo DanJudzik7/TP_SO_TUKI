@@ -10,6 +10,7 @@
 			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"suppressMultipleSessionWarning": true,
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",

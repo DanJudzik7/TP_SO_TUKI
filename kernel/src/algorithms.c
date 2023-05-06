@@ -1,18 +1,19 @@
 #include "algorithms.h"
 
-t_pcb* fifo(t_queue* queue_global_pcb, t_pcb* new_pcb) {
-	t_pcb* next_pcb = malloc(sizeof(t_pcb));
-	queue_push(queue_global_pcb, new_pcb);	  // Agrego el nuevo t_pcb al final de la cola
-	next_pcb = queue_peek(queue_global_pcb);  // Devuelve el primer elemento de la cola sin extraerlo
-	queue_pop(queue_global_pcb);			  // quita el primer elemento de la cola
-
-	return next_pcb;
+t_pcb* pick_with_fifo(t_queue* active_pcbs) {
+	// Siempre devuelve NULL si está vacía
+	if (queue_is_empty(active_pcbs)) return NULL;
+	// Obtiene el primer elemento READY, lo borra de la queue y lo devuelve
+	// Trabaja a la queue como una list para esto
+	return list_remove_by_condition(active_pcbs->elements, (void*)pcb_is_ready);
 }
 
-t_pcb* hrrn(t_log* logger, t_queue* queue_global_pcb, t_pcb* new_pcb) {
-	// Se agrega el nuevo PCB a la cola global
-	queue_push(queue_global_pcb, new_pcb);
+bool pcb_is_ready(t_pcb* pcb) {
+	return pcb->state == READY;
+}
 
+// Esto se tiene que adaptar para no devolver nada con BLOCK
+t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 	// Se obtiene la hora actual del sistema
 	time_t current_time = time(NULL);
 
@@ -29,9 +30,9 @@ t_pcb* hrrn(t_log* logger, t_queue* queue_global_pcb, t_pcb* new_pcb) {
 	t_pcb* p = malloc(sizeof(t_pcb));
 
 	// Se itera sobre la cola global de PCBs
-	while (!queue_is_empty(queue_global_pcb)) {
+	while (!queue_is_empty(active_pcbs)) {
 		// Se obtiene el primer PCB de la cola
-		p = queue_peek(queue_global_pcb);
+		p = queue_peek(active_pcbs);
 
 		// Se calcula el response ratio del proceso actual
 		float response_ratio = (float)(current_time - p->last_ready_time + p->aprox_burst_time) / (float)p->aprox_burst_time;
@@ -54,15 +55,15 @@ t_pcb* hrrn(t_log* logger, t_queue* queue_global_pcb, t_pcb* new_pcb) {
 		}
 
 		// Se elimina el proceso actual de la cola global
-		queue_pop(queue_global_pcb);
+		queue_pop(active_pcbs);
 	}
 	// Se libera la memoria del proceso actual
 	free(p);
 	// Se limpia la cola global de PCBs
-	queue_clean(queue_global_pcb);
+	queue_clean(active_pcbs);
 
 	// La cola global de PCBs ahora es la cola temporal
-	queue_global_pcb = queue_temporal;
+	active_pcbs = queue_temporal;
 
 	// Se libera la memoria de la cola temporal
 	free(queue_temporal);

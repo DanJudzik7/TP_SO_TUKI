@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include "shared_utils.h"
 
-t_pcb* fifo(t_queue* queue_global_pcb, t_pcb* t_pcb);
-t_pcb* hrrn(t_log* logger,t_queue* queue_global_pcb, t_pcb *t_pcb);
+t_pcb* pick_with_fifo(t_queue* queue_global_pcb);
+bool pcb_is_ready(t_pcb* pcb);
+t_pcb* pick_with_hrrn(t_queue* queue_global_pcb);
 
 #endif

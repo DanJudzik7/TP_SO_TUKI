@@ -4,61 +4,57 @@ int main(int argc, char** argv) {
 	t_log* logger = start_logger("kernel");
 	t_config* config = start_config("kernel");
 	log_warning(logger, "Iniciando el kernel");
-	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");	 // Obtenemos el port con el que escucharemos conexiones
-	int server_fd = socket_initialize_server(port);					 // Inicializo el socket en el port cargado por la config
+	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");	 // Obtenemos el puerto con el que escucharemos conexiones
+	int socket_kernel = socket_initialize_server(port);	// Inicializo el socket en el puerto cargado por la config
+	if (socket_kernel == -1) {
+		log_error(logger, "No se pudo inicializar el socket de servidor");
+		exit(EXIT_FAILURE);
+	}
 	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
 	// Connect_module conecta al modulo que le pasa como tercer parámetros
-	// int conn_cpu =  connect_module(config, logger, "CPU");//ME CONECTO CON CPU Y CREO LA CONEXIÓN
+	// int socket_cpu =  connect_module(config, logger, "CPU");
 	// int conn_memoria = connect_module(config, logger, "MEMORIA");
 	// int conn_filesystem = connect_module(config, logger, "FILESYSTEM");
 
 	// Obtengo del config el algoritmo a usar
 	char* algorithm = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
-	int burst_time = *config_get_string_value(config, "ESTIMACION_INICIAL") - '0';
+	bool algorithm_is_hrrn = strcmp(algorithm, "HRRN") == 0;
+	if (!algorithm_is_hrrn && strcmp(algorithm, "FIFO") != 0) {
+		log_error(logger, "El algoritmo de planificación no es válido");
+		exit(EXIT_FAILURE);
+	}
 	log_warning(logger, "El algoritmo de planificación es: %s", algorithm);
 
-	// cola global de pcb en |READY|
-	t_queue* queue_global_pcb = queue_create();
-
-	global_config_kernel* gck = malloc(sizeof(global_config_kernel));
+	t_global_config_kernel* gck = malloc(sizeof(t_global_config_kernel));
 	gck->logger = logger;
-	gck->global_pcb = queue_global_pcb;
-	gck->connection_kernel = server_fd;
-	gck->max_multiprogramming = 1;	// ESTO CAMBIARLO Y CARGARLO POR CONFIG
-	gck->default_burst_time = burst_time;
-	gck->algorithm = algorithm;
-	// gck->connection_module_cpu = conn_cpu;
-	// gck->connection_module_memory = conn_memoria;
-	// gck->connection_module_filesystem = conn_filesystem;
+	gck->new_pcbs = queue_create(); // Cola local de PCBs en NEW
+	gck->active_pcbs = queue_create(); // Cola global de PCBs en READY, EXEC y BLOCK
+	gck->connection_kernel = socket_kernel;
+	gck->max_multiprogramming = *config_get_string_value(config, "GRADO_MAX_MULTIPROGRAMACION") - '0';
+	gck->default_burst_time = *config_get_string_value(config, "ESTIMACION_INICIAL") - '0';
+	gck->algorithm_is_hrrn = algorithm_is_hrrn;
 
-	// pthread_t thread_cpu;
-
-	// pthread_create(&thread_cpu, NULL, (void*) listen_cpu, gck);
-
-	// cada vez que me llega un nuevo proceso debería abrir una config única para ese process
-	// config_current_process* config_current_proccess = malloc(sizeof(config_current_process));
-	// config_current_proccess->global_config_kernel = gck;
+	// Manejo de consolas
 	pthread_t thread_consola;
-	pthread_create(&thread_consola, NULL, (void*)listen_console, gck);
-	pthread_join(thread_consola, NULL);
+	pthread_create(&thread_consola, NULL, (void*) listen_consoles, gck);
 
-	// Lo comento porque manejo el error y el ok en la función
-	/*printf(receive_instruction);
-	if( receive_instruction == (-1) ) {
-		log_error(logger,"Hubo un error recibiendo las instrucciones");
-		exit(EXIT_FAILURE);
-	}else if(strcmp(receive_instruction,"OK_SEND_INSTRUCTIONS")==0){// EN ESTE IF CREAR Y DEFINIR EL PCB PARA ENVIARLO A CPU,
-		t_package* paquete = package_create(OK);
-		socket_send_package(paquete, consola_fd);
-
-	}*/
-
-	// Si el proceso o los procesos terminan de ejecutarse envió un mensaje de ok,
-	// if() {
-
-	/*}else{
-		t_package* paquete = package_create("ERROR_RI");
-		socket_send_package(paquete, consola_fd);
-	}*/
+	// Manejo de CPU y Short Term Scheduler. Antes era listener_cpu.
+	while (1) {
+		// Organizo según el tipo de planificador
+		t_pcb* pcb = short_term_scheduler(gck);
+		if (pcb == NULL || pcb == 0) continue;
+		pcb->state = EXEC;
+		log_info(logger, "Enviando a CPU el Execution Context del proceso %d", pcb->pid);
+		// TO DO: Mandar a CPU y esperar
+		// Recibe el nuevo execution context
+		// pcb->execution_context = socket_receive_package(socket_cpu);
+		queue_clean(pcb->execution_context->instructions); // WORKAROUND TEMPORAL. Ya que todavía la conexión a CPU no está, borro todas las instrucciones para simular su ejecución.
+		// Revisa si está bloqueado
+		pcb->state = pcb->execution_context->updated_state;
+		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
+		if (queue_is_empty(pcb->execution_context->instructions)) pcb->state = BLOCK;
+		if (pcb->state == EXIT_PROCESS) long_term_schedule(gck);
+		else queue_push(gck->active_pcbs, pcb);
+	}
 }
