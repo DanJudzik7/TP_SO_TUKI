@@ -22,19 +22,19 @@ void listen_consoles(t_global_config_kernel* gck) {
 
 t_pcb* create_pcb(int pid, int burst_time) {
 	// La inicialización se hace de forma segura en memoria (con memset)
-	t_pcb* pcb = malloc(sizeof(t_pcb));
+	t_pcb* pcb = s_malloc(sizeof(t_pcb));
 	pcb->state = NEW;
 	pcb->pid = pid;
 	pcb->aprox_burst_time = burst_time;
 	pcb->last_ready_time = time(NULL);
 	pcb->files = list_create();
-	pcb->execution_context = malloc(sizeof(execution_context));
+	pcb->execution_context = s_malloc(sizeof(execution_context));
 	pcb->execution_context->instructions = queue_create();
 	pcb->execution_context->program_counter = 0;
 	pcb->execution_context->updated_state = NEW;
-	pcb->execution_context->cpu_register = malloc(sizeof(cpu_register));
+	pcb->execution_context->cpu_register = s_malloc(sizeof(cpu_register));
 	memset(pcb->execution_context->cpu_register, 0, sizeof(cpu_register));
-	pcb->execution_context->segment_table = malloc(sizeof(segment_table));
+	pcb->execution_context->segment_table = s_malloc(sizeof(segment_table));
 	memset(pcb->execution_context->segment_table, 0, sizeof(segment_table));
 	return pcb;
 }

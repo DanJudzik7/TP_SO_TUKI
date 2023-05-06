@@ -150,6 +150,9 @@ int socket_send_message(char* message, int target_socket);
 /* Recibe y muestra un mensaje enviado por un cliente a través del socket especificado. */
 int socket_receive_message(int target_socket);
 
+// Safe Memory Allocation. Crashea si no hay más memoria.
+void* s_malloc(size_t size);
+
 /* Envía un paquete a un cliente a través del socket especificado. */
 int socket_send_package(t_package* package, int target_socket);
 

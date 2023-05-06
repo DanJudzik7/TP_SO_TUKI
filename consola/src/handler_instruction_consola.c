@@ -2,7 +2,7 @@
 
 void process_instructions_from_file(int socket_kernel) {
 	char* directorio = getcwd(NULL, 0);
-	char* file_directory = malloc(strlen(directorio) + strlen("/cfg/instrucciones") + 1);
+	char* file_directory = s_malloc(strlen(directorio) + strlen("/cfg/instrucciones") + 1);
 	sprintf(file_directory, "%s/cfg/instrucciones", directorio);
 
 	FILE* instructions;

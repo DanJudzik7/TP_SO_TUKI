@@ -40,7 +40,7 @@ char* get_config_type(char* process_name, char* file_type) {
 		exit(EXIT_FAILURE);
 	}
 
-	char* ruta_config = malloc(strlen(directorio) + strlen("/cfg/.") + strlen(process_name) + strlen(".") + strlen(file_type) + 1);
+	char* ruta_config = s_malloc(strlen(directorio) + strlen("/cfg/.") + strlen(process_name) + strlen(".") + strlen(file_type) + 1);
 	sprintf(ruta_config, "%s/cfg/%s.%s", directorio, process_name, file_type);
 
 	if (ruta_config == NULL) {
@@ -53,7 +53,7 @@ char* get_config_type(char* process_name, char* file_type) {
 }
 
 void* package_serialize(t_package* package, int bytes) {
-	void* magic = malloc(bytes);
+	void* magic = s_malloc(bytes);
 	int offset = 0;
 
 	memcpy(magic + offset, &(package->op_code), sizeof(int));
@@ -76,9 +76,9 @@ void package_add(t_package* package, void* value, int size) {
 }
 
 t_package* package_create(int cod_op) {
-	t_package* package = malloc(sizeof(t_package));
+	t_package* package = s_malloc(sizeof(t_package));
 	package->op_code = cod_op;
-	package->buffer = malloc(sizeof(t_buffer));
+	package->buffer = s_malloc(sizeof(t_buffer));
 	package->buffer->size = 0;
 	package->buffer->stream = NULL;
 	return package;
@@ -120,12 +120,12 @@ int socket_initialize_server(char* port) {
 }
 
 int socket_send_message(char* message, int target_socket) {
-	t_package* package = malloc(sizeof(t_package));
+	t_package* package = s_malloc(sizeof(t_package));
 
 	package->op_code = MENSAJE;
-	package->buffer = malloc(sizeof(t_buffer));
+	package->buffer = s_malloc(sizeof(t_buffer));
 	package->buffer->size = strlen(message) + 1;
-	package->buffer->stream = malloc(package->buffer->size);
+	package->buffer->stream = s_malloc(package->buffer->size);
 	memcpy(package->buffer->stream, message, package->buffer->size);
 
 	return socket_send_package(package, target_socket);
@@ -152,7 +152,7 @@ void socket_close(int target_socket) {
 void* socket_receive_buffer(int* size, int target_socket) {
 	void* buffer;
 	recv(target_socket, size, sizeof(int), MSG_WAITALL);
-	buffer = malloc(*size);
+	buffer = s_malloc(*size);
 	recv(target_socket, buffer, *size, MSG_WAITALL);
 	return buffer;
 }
@@ -166,7 +166,7 @@ t_list* socket_receive_package(int target_socket) {
 	while (offset < buffer_size) {
 		memcpy(&size, buffer + offset, sizeof(int));
 		offset += sizeof(int);
-		char* value = malloc(size + 1);	 // Add one byte for null terminator
+		char* value = s_malloc(size + 1);	 // Add one byte for null terminator
 		memcpy(value, buffer + offset, size);
 		value[size] = '\0';	 // Add null terminator
 		offset += size;
@@ -204,14 +204,19 @@ int socket_receive_message(int target_socket) {
 	return 0;
 }
 
-/*t_pcb* socket_receive_pcb(int target_socket){
-	return serialize_receive_pcb(target_socket);
-}*/
+void* s_malloc(size_t size) {
+	void* ptr = malloc(size);
+	if (ptr == NULL) {
+		printf("Error: No hay más memoria disponible.\n");
+		abort();
+	}
+	return ptr;
+}
 
 int connect_module(t_config* config, t_log* logger, char* module) {
-	char* port = malloc(strlen("PUERTO_") + strlen(module) + 1);
+	char* port = s_malloc(strlen("PUERTO_") + strlen(module) + 1);
 	sprintf(port, "PUERTO_%s", module);
-	char* ip = malloc(strlen("IP_") + strlen(module) + 1);
+	char* ip = s_malloc(strlen("IP_") + strlen(module) + 1);
 	sprintf(ip, "IP_%s", module);
 
 	char* puerto_modulo = config_get_string_value(config, port);

@@ -24,10 +24,10 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 	float highest_response_ratio = 0;
 
 	// Se inicializa el PCB siguiente como nulo
-	t_pcb* next_pcb = malloc(sizeof(t_pcb));
+	t_pcb* next_pcb = s_malloc(sizeof(t_pcb));
 
 	// Se inicializa el PCB actual como nulo
-	t_pcb* p = malloc(sizeof(t_pcb));
+	t_pcb* p = s_malloc(sizeof(t_pcb));
 
 	// Se itera sobre la cola global de PCBs
 	while (!queue_is_empty(active_pcbs)) {

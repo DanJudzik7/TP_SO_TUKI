@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 	}
 	log_warning(logger, "El algoritmo de planificación es: %s", algorithm);
 
-	t_global_config_kernel* gck = malloc(sizeof(t_global_config_kernel));
+	t_global_config_kernel* gck = s_malloc(sizeof(t_global_config_kernel));
 	gck->logger = logger;
 	gck->new_pcbs = queue_create(); // Cola local de PCBs en NEW
 	gck->active_pcbs = queue_create(); // Cola global de PCBs en READY, EXEC y BLOCK

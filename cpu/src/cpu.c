@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 
 	// Creo el t_pcb para las instrucciones
 	t_list* instructions;
-	t_pcb* pcb_test = malloc(sizeof(t_pcb));
+	t_pcb* pcb_test = s_malloc(sizeof(t_pcb));
 
 	t_list* sublist1 = list_create();
 	list_add(sublist1, (void*)SET);	 // Debo hacer el casting a void siempre, dado que son enums
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 	pcb_test->state = NEW;
 	pcb_test->pid = 6;
 
-	execution_context* context = malloc(sizeof(execution_context));
+	execution_context* context = s_malloc(sizeof(execution_context));
 	context->instructions = &instructions;
 	context->program_counter = 0;
 
