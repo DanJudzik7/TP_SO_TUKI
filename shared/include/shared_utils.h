@@ -42,7 +42,7 @@ typedef struct segment_table {
 	void* segment_table_direction;
 	uint8_t size_data_segment;
 } segment_table;
-// TODO
+
 typedef struct cpu_register_4 {
 	char AX[4];
 	char BX[4];
@@ -105,7 +105,7 @@ typedef enum op_code_reception {
 } op_code_reception;
 
 // To do: Mover esto a un archivo específico de Kernel
-typedef struct {
+typedef struct t_global_config_kernel {
 	t_log* logger;
 	t_queue* new_pcbs;
 	t_queue* active_pcbs;
@@ -114,6 +114,12 @@ typedef struct {
 	int default_burst_time;
 	int connection_kernel;
 } t_global_config_kernel;
+
+typedef struct config_cpu{
+    t_log* logger;
+    sem_t flag_dislodge;
+	sem_t flag_running;
+} configuration_cpu;
 
 typedef struct t_buffer {
 	uint32_t size;

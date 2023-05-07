@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 	log_warning(logger, "El algoritmo de planificación es: %s", algorithm);
-
+	//To do: flags mutex para manejo de estos listas
 	t_global_config_kernel* gck = s_malloc(sizeof(t_global_config_kernel));
 	gck->logger = logger;
 	gck->new_pcbs = queue_create(); // Cola local de PCBs en NEW
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 		pcb->state = EXEC;
 		log_info(logger, "Enviando a CPU el Execution Context del proceso %d", pcb->pid);
 		// TO DO: Mandar a CPU y esperar
-		// Recibe el nuevo execution context
+		// Recibe el nuevo execution context que puede estar en EXIT o BLOCK
 		// pcb->execution_context = socket_receive_package(socket_cpu);
 		queue_clean(pcb->execution_context->instructions); // WORKAROUND TEMPORAL. Ya que todavía la conexión a CPU no está, borro todas las instrucciones para simular su ejecución.
 		// Revisa si está bloqueado

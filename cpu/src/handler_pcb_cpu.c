@@ -1,36 +1,47 @@
 #include "handler_pcb_cpu.h"
 
-void instruction_cycle(t_pcb* t_pcb) {
-	// Devuelve el puntero de la lista a ejecutar dentro de la lista de instrucciones
-	t_list* next_instruction = fetch(t_pcb);
-	if (next_instruction != NULL) {
-		op_code COD_OP = decode(next_instruction);
-		execute(COD_OP, next_instruction, t_pcb);
-		printf("hola1");
-		t_pcb->execution_context->program_counter++;
-	} else {
-		printf("hola2");
-		// No hay más instrucciones, manejar errores
-	}
-	// En cuyo caso que tengamos que hacer while hasta el manejo de una excepción meter dentro del while
-	/*while (t_pcb-> execution_context-> program_counter < list_size (t_pcb->execution_context -> instructions))*/
-}
 // obtiene la instrucción (lista) actual a ejecutar
-t_list* fetch(t_pcb* t_pcb) {
-	return list_get((t_pcb->execution_context->instructions), t_pcb->execution_context->program_counter);
+t_pcb* fetch(t_pcb* t_pcb) {
+
+	int sem_value;
+	t_list* instruction = NULL;
+	// ejecuto mientras el flag de desalojo este libre
+	do{
+		printf("Procedemos a ejecutar Instrucciones\n");
+		//Esto no consume el semaforo, solo lo consulta
+		sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
+		printf("\nEl valor obtenido de mi semaforo es: %d ",sem_value);
+		instruction = get_instrucction(t_pcb->execution_context);
+		if (sem_value > 0) {
+            if (instruction != NULL) {
+                decode(t_pcb, instruction);
+                t_pcb->execution_context->program_counter++;
+            } else {
+                // No hay más instrucciones
+                printf("Error: no existen más instrucciones a ejecutar");
+            }
+        }
+		printf("\nProcediendo a la siguiente ejecucion\n");
+	}
+	while(sem_value > 0);
+
+	// Desbloquea el semáforo
+    	sem_post(&config_cpu.flag_dislodge);
+
+	return t_pcb;
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
-// TODO:: y si la misma requiere de una traducción de dirección lógica a dirección física.    <-------- hacer la traducción de direcciones en decode.
-op_code decode(t_list* next_instruction) {
-	return (op_code)list_get(next_instruction, 0);
-}
-
-void execute(op_code COD_OP, t_list* instruction, t_pcb* t_pcb) {
+// TODO:: y si la misma requiere de una traducción de dirección lógica a dirección física. 
+t_pcb* decode(t_pcb* t_pcb, t_list* instruction) {
+	log_info(config_cpu.logger, "LLego al decode un PCB con instrucciones a ejecutar\n");
+	//To do: esto tiene que eliminarse ya que solamente quiero recibir una lista de instrucciones yo.
+	op_code COD_OP = (op_code) list_get(instruction, 0);
+	printf("El valor de op_code es: %d\n", (int) COD_OP);
 	switch (COD_OP) {
 		case SET:
-			set(t_pcb->execution_context, instruction);
-			printf("hola3");
+			log_info(config_cpu.logger, "EJECUTANDO UN SET\n");
+			execute_set(t_pcb->execution_context, instruction);
 			break;
 		case MOV_IN:
 		case MOV_OUT:
@@ -45,15 +56,28 @@ void execute(op_code COD_OP, t_list* instruction, t_pcb* t_pcb) {
 		case SIGNAL:
 		case CREATE_SEGMENT:
 		case DELETE_SEGMENT:
-			printf("Implementar función");
+			log_warning(config_cpu.logger, "Implementar función\n");
 			break;
 		case YIELD:
-			yield(t_pcb);
+			dislodge();
 			break;
 		case EXIT:
-			exitIns(t_pcb);
+			execute_exit(t_pcb->execution_context);
+			dislodge();
 			break;
 		default:
 			break;
-	}
+	}	
+	log_info(config_cpu.logger, "LLego al decode un PCB con instrucciones a ejecutar\n");
+	return t_pcb;
 }
+
+t_list* get_instrucction(execution_context* execution_context){
+	return list_get((execution_context->instructions),execution_context->program_counter);
+}
+
+void dislodge(){
+	log_warning(config_cpu.logger, "Desalojando el pcb\n");
+	// Bloquear el semáforo
+    sem_wait(&config_cpu.flag_dislodge);
+};

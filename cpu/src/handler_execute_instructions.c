@@ -1,6 +1,7 @@
 #include "handler_execute_instructions.h"
 
-void set(execution_context* execution_context, t_list* instruction) {
+void execute_set(execution_context* execution_context, t_list* instruction) {
+
 	// almaceno el nombre del registro y el valor
 	char* register_name = list_get(instruction, 1);
 	// lo paso a un int con atoi el valor proporcionado en la lista
@@ -8,7 +9,7 @@ void set(execution_context* execution_context, t_list* instruction) {
 
 	printf("El valor es %s\n", value);
 	// comparo el registro y asigno el valor correspondiente
-	cpu_register* registers = &execution_context->cpu_register;
+	cpu_register* registers = execution_context->cpu_register;
 
 	if (strcmp(register_name, "AX") == 0) {
 		strcpy(registers->register_4.AX, value);
@@ -38,13 +39,10 @@ void set(execution_context* execution_context, t_list* instruction) {
 		printf("Registro no válido\n");
 	}
 	printf("El valor del registro %s es %s\n", register_name, registers->register_4.AX);
+	
+	execution_context->cpu_register = registers;
 }
 
-void yield(t_pcb* t_pcb) {
-}
-
-void exitIns(t_pcb* t_pcb) {
-}
-
-void dislodge(t_pcb* t_pcb) {
+void  execute_exit(execution_context* execution_context) {
+	execution_context -> updated_state = EXIT;
 }
