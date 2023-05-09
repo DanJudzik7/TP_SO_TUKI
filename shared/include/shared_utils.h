@@ -100,6 +100,7 @@ typedef struct t_pcb {
 } t_pcb;
 
 typedef enum op_code_reception {
+	BUSY,
 	ERROR,
 	OK
 } op_code_reception;

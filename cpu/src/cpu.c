@@ -12,6 +12,14 @@ int main(int argc, char** argv) {
 	t_config* config = start_config("cpu");
 
 	config_cpu.logger = logger;
+	
+	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");	
+	int socket_cpu = socket_initialize_server(port);	// Inicializo el socket en el puerto cargado por la config
+	if (socket_cpu == -1) {
+		log_error(logger, "No se pudo inicializar el socket de servidor");
+		exit(EXIT_FAILURE);
+	}
+	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
 	//int kernel_fd = receive_modules(logger, config);
 	// int conn_memoria = connect_module(config,logger,"MEMORIA");
@@ -54,12 +62,43 @@ int main(int argc, char** argv) {
 	
 	pcb_test->execution_context = context;
 
+	//pthread_t thread_consola;
+	//pthread_create(&thread_consola, NULL, (void*) listen_kernel, socket_cpu);
+
 	// TODO: sigo completando el t_pcb de este proceso
 	log_info(logger, "El proceso %d se creó en NEW\n", pcb_test->pid);
 
 	// Recibe los pcbs que aca están harcodeados y los opera
-	fetch(pcb_test);
+	fetch(context);
 
 	free(context);
 	free(pcb_test);
+}
+
+void listen_kernel(int socket_cpu) {
+
+	int sem_value;
+
+	while (1) {
+		
+		int kernel_socket = socket_accept(socket_cpu);
+
+		if(sem_getvalue(&config_cpu.flag_running, &sem_value)){
+			
+			t_list* paquete = socket_receive_package(kernel_socket);
+			execution_context* context = deserialize_context(paquete); // Implementar
+			
+			sem_wait(&config_cpu.flag_running);
+			pthread_t thread;
+			// Se crea un thread para ejecutar el contexto y sus instrucciones
+			pthread_create(&thread, NULL, fetch(context),NULL);
+			pthread_join(thread, NULL);
+
+		}
+		else{
+			//En caso contrario envio un mensaje al kernel de que estoy ocupado
+			t_package* package = package_create(BUSY); 
+        	socket_send_package(package, kernel_socket);
+		}
+	}
 }

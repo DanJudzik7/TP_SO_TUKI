@@ -1,7 +1,7 @@
 #include "handler_pcb_cpu.h"
 
 // obtiene la instrucción (lista) actual a ejecutar
-t_pcb* fetch(t_pcb* t_pcb) {
+t_pcb* fetch(execution_context* execution_context) {
 
 	int sem_value;
 	t_list* instruction = NULL;
@@ -11,11 +11,11 @@ t_pcb* fetch(t_pcb* t_pcb) {
 		//Esto no consume el semaforo, solo lo consulta
 		sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
 		printf("\nEl valor obtenido de mi semaforo es: %d ",sem_value);
-		instruction = get_instrucction(t_pcb->execution_context);
+		instruction = get_instrucction(execution_context);
 		if (sem_value > 0) {
             if (instruction != NULL) {
-                decode(t_pcb, instruction);
-                t_pcb->execution_context->program_counter++;
+                decode(execution_context, instruction);
+                execution_context->program_counter++;
             } else {
                 // No hay más instrucciones
                 printf("Error: no existen más instrucciones a ejecutar");
@@ -26,14 +26,15 @@ t_pcb* fetch(t_pcb* t_pcb) {
 	while(sem_value > 0);
 
 	// Desbloquea el semáforo
-    	sem_post(&config_cpu.flag_dislodge);
+    sem_post(&config_cpu.flag_dislodge);
 
-	return t_pcb;
+	//sem_post(&config_cpu.flag_dislodge);   Desbloquear el estado running una vez implementado el hilo
+	return execution_context;
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
 // TODO:: y si la misma requiere de una traducción de dirección lógica a dirección física. 
-t_pcb* decode(t_pcb* t_pcb, t_list* instruction) {
+t_pcb* decode(execution_context* execution_context, t_list* instruction) {
 	log_info(config_cpu.logger, "LLego al decode un PCB con instrucciones a ejecutar\n");
 	//To do: esto tiene que eliminarse ya que solamente quiero recibir una lista de instrucciones yo.
 	op_code COD_OP = (op_code) list_get(instruction, 0);
@@ -41,7 +42,7 @@ t_pcb* decode(t_pcb* t_pcb, t_list* instruction) {
 	switch (COD_OP) {
 		case SET:
 			log_info(config_cpu.logger, "EJECUTANDO UN SET\n");
-			execute_set(t_pcb->execution_context, instruction);
+			execute_set(execution_context, instruction);
 			break;
 		case MOV_IN:
 		case MOV_OUT:
@@ -62,14 +63,14 @@ t_pcb* decode(t_pcb* t_pcb, t_list* instruction) {
 			dislodge();
 			break;
 		case EXIT:
-			execute_exit(t_pcb->execution_context);
+			execute_exit(execution_context);
 			dislodge();
 			break;
 		default:
 			break;
 	}	
 	log_info(config_cpu.logger, "LLego al decode un PCB con instrucciones a ejecutar\n");
-	return t_pcb;
+	return execution_context;
 }
 
 t_list* get_instrucction(execution_context* execution_context){

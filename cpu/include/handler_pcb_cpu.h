@@ -9,8 +9,8 @@
 
 extern configuration_cpu config_cpu;
 
-t_pcb* fetch(t_pcb* t_pcb);
-t_pcb* decode(t_pcb* t_pcb, t_list* instruction);
+t_pcb* fetch(execution_context* execution_context);
+t_pcb* decode(execution_context* execution_context, t_list* instruction);
 t_list* get_instrucction(execution_context* execution_context);
 void dislodge();
 
