@@ -25,6 +25,9 @@ int instruction_handler_memoria(int cliente_fd) {
 				socket_send_package(package, cliente_fd);
 
 				break;
+			case MENSAJE:
+				printf("RECIBIMOS UN HANDSAKE\n");
+				break;
 			default:
 				printf("Error al recibir código de operación\n");
 				return -1;

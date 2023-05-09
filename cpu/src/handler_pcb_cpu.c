@@ -1,7 +1,7 @@
 #include "handler_pcb_cpu.h"
 
 // obtiene la instrucción (lista) actual a ejecutar
-t_pcb* fetch(execution_context* execution_context) {
+void fetch(execution_context* execution_context, int kernel_socket) {
 
 	int sem_value;
 	t_list* instruction = NULL;
@@ -29,12 +29,14 @@ t_pcb* fetch(execution_context* execution_context) {
     sem_post(&config_cpu.flag_dislodge);
 
 	//sem_post(&config_cpu.flag_dislodge);   Desbloquear el estado running una vez implementado el hilo
-	return execution_context;
+	//t_package* package = package_create(OK);
+	//package_add(package, execution_context , sizeof(*execution_context));
+	//socket_send_package(package,kernel_socket);
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
 // TODO:: y si la misma requiere de una traducción de dirección lógica a dirección física. 
-t_pcb* decode(execution_context* execution_context, t_list* instruction) {
+execution_context* decode(execution_context* execution_context, t_list* instruction) {
 	log_info(config_cpu.logger, "LLego al decode un PCB con instrucciones a ejecutar\n");
 	//To do: esto tiene que eliminarse ya que solamente quiero recibir una lista de instrucciones yo.
 	op_code COD_OP = (op_code) list_get(instruction, 0);

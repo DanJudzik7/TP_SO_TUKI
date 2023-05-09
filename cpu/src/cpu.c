@@ -69,7 +69,8 @@ int main(int argc, char** argv) {
 	log_info(logger, "El proceso %d se creó en NEW\n", pcb_test->pid);
 
 	// Recibe los pcbs que aca están harcodeados y los opera
-	fetch(context);
+	int kernel_socket = socket_accept(socket_cpu);
+	fetch(context,kernel_socket);
 
 	free(context);
 	free(pcb_test);
@@ -87,13 +88,15 @@ void listen_kernel(int socket_cpu) {
 			
 			t_list* paquete = socket_receive_package(kernel_socket);
 			execution_context* context = deserialize_context(paquete); // Implementar
-			
+			fetch_args* args = malloc(sizeof(fetch_args));
+			args->context = context;
+			args->kernel_socket = kernel_socket;
 			sem_wait(&config_cpu.flag_running);
 			pthread_t thread;
 			// Se crea un thread para ejecutar el contexto y sus instrucciones
-			pthread_create(&thread, NULL, fetch(context),NULL);
+			pthread_create(&thread, NULL, (void*) fetch , args);
 			pthread_join(thread, NULL);
-
+			free(args);
 		}
 		else{
 			//En caso contrario envio un mensaje al kernel de que estoy ocupado

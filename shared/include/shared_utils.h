@@ -122,6 +122,11 @@ typedef struct config_cpu{
 	sem_t flag_running;
 } configuration_cpu;
 
+typedef struct config_cpu{
+    t_log* logger;
+	char* algorithm;
+} configuration_memory;
+
 typedef struct t_buffer {
 	uint32_t size;
 	void* stream;
