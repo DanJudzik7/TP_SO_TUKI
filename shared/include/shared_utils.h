@@ -34,8 +34,10 @@ typedef enum op_code {
 	F_CLOSE,		 // 13
 	DELETE_SEGMENT,	 // 14
 	EXIT,			 // 15
-	YIELD			 // 16
+	YIELD,			 // 16	 
 } op_code;
+
+
 
 typedef struct segment_table {
 	int id;
@@ -102,7 +104,8 @@ typedef struct t_pcb {
 typedef enum op_code_reception {
 	BUSY,
 	ERROR,
-	OK
+	OK,
+	EXECUTION_CONTEXT,
 } op_code_reception;
 
 // To do: Mover esto a un archivo específico de Kernel
@@ -117,13 +120,15 @@ typedef struct t_global_config_kernel {
 } t_global_config_kernel;
 
 typedef struct config_cpu{
-    t_log* logger;
-    sem_t flag_dislodge;
+	t_log* logger;
+	sem_t flag_dislodge;
 	sem_t flag_running;
+	int connection_kernel;
 } configuration_cpu;
 
-typedef struct config_cpu{
+typedef struct config_memory{
     t_log* logger;
+    t_config* config;
 	char* algorithm;
 } configuration_memory;
 
@@ -136,6 +141,12 @@ typedef struct t_package {
 	op_code op_code;
 	t_buffer* buffer;
 } t_package;
+
+typedef struct t_package_reception {
+	op_code_reception op_code_reception;
+	t_buffer* buffer;
+} t_package_reception;
+
 
 char* get_config_type(char* process_name, char* file_type);
 t_config* start_config(char* process_name);
@@ -190,5 +201,15 @@ int connect_module(t_config* config, t_log* logger, char* modulo);
 int receive_modules(t_log* logger, t_config* config);
 
 op_code return_opcode(char* code);
+
+//crea un execution context
+t_package_reception* package_create_execution_context();
+
+//Recibe un execution context
+execution_context* socket_recive_execution_context(int target_socket);
+
+//Envia un execution context
+void socket_send_execution_context(execution_context* context, int target_socket);
+
 
 #endif

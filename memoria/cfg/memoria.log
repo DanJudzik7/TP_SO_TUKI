@@ -3,3 +3,39 @@
 [INFO] 22:10:34:086 memoria/(16782:16782): El valor del puerto asignado es: 8052 
 
 [INFO] 22:10:34:086 memoria/(16782:16782): SOCKET INICIALIZADO
+[WARNING] 20:47:02:097 memoria/(9659:9659): Iniciando la memoria
+[WARNING] 20:47:02:111 memoria/(9659:9659): Socket de servidor inicializado en puerto 8052
+[WARNING] 20:49:13:698 memoria/(9976:9976): Iniciando la memoria
+[WARNING] 20:49:13:698 memoria/(9976:9976): Socket de servidor inicializado en puerto 8052
+[WARNING] 20:49:23:883 memoria/(10060:10060): Iniciando la memoria
+[WARNING] 20:49:23:888 memoria/(10060:10060): Socket de servidor inicializado en puerto 8052
+[WARNING] 20:50:00:567 memoria/(10270:10270): Iniciando la memoria
+[WARNING] 20:50:00:607 memoria/(10270:10270): Socket de servidor inicializado en puerto 8052
+[WARNING] 20:53:24:292 memoria/(10559:10559): Iniciando la memoria
+[WARNING] 20:53:24:295 memoria/(10559:10559): Socket de servidor inicializado en puerto 8052
+[WARNING] 20:54:02:345 memoria/(10719:10719): Iniciando la memoria
+[WARNING] 20:54:02:386 memoria/(10719:10719): Socket de servidor inicializado en puerto 8052
+[WARNING] 20:55:45:368 memoria/(10971:10971): Iniciando la memoria
+[WARNING] 20:55:45:408 memoria/(10971:10971): Socket de servidor inicializado en puerto 8052
+[WARNING] 20:56:58:406 memoria/(11149:11149): Iniciando la memoria
+[WARNING] 20:56:58:448 memoria/(11149:11149): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:07:42:997 memoria/(11418:11418): Iniciando la memoria
+[WARNING] 21:07:43:037 memoria/(11418:11418): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:13:27:007 memoria/(11718:11718): Iniciando la memoria
+[WARNING] 21:13:27:053 memoria/(11718:11718): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:13:29:234 memoria/(11718:11718): Context enviado a CPU
+[WARNING] 21:18:45:723 memoria/(12457:12457): Iniciando la memoria
+[WARNING] 21:18:45:724 memoria/(12457:12457): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:21:13:073 memoria/(12911:12911): Iniciando la memoria
+[WARNING] 21:21:13:073 memoria/(12911:12911): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:22:08:791 memoria/(12911:12911): Context enviado a CPU
+[WARNING] 21:25:00:800 memoria/(13193:13193): Iniciando la memoria
+[WARNING] 21:25:00:800 memoria/(13193:13193): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:31:25:365 memoria/(13494:13494): Iniciando la memoria
+[WARNING] 21:31:25:366 memoria/(13494:13494): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:32:23:700 memoria/(13665:13665): Iniciando la memoria
+[WARNING] 21:32:23:700 memoria/(13665:13665): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:32:32:740 memoria/(13665:13665): Context enviado a CPU
+[WARNING] 21:35:40:234 memoria/(14013:14013): Iniciando la memoria
+[WARNING] 21:35:40:234 memoria/(14013:14013): Socket de servidor inicializado en puerto 8052
+[WARNING] 21:35:44:074 memoria/(14013:14013): Context enviado a CPU

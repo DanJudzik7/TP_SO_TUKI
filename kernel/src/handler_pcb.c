@@ -14,7 +14,7 @@ void listen_consoles(t_global_config_kernel* gck) {
 		queue_push(gck->new_pcbs, pcb);
 		// Se crea un thread para escuchar las instrucciones
 		pthread_create(&thread, NULL, (void*)handle_incoming_instructions, pcb);
-		pthread_join(thread, NULL);
+		pthread_detach(thread);
 		// Se planifica el proceso
 		long_term_schedule(gck);
 	}

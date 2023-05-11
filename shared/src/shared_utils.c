@@ -75,6 +75,15 @@ void package_add(t_package* package, void* value, int size) {
 	package->buffer->size += size + sizeof(int);
 }
 
+void package_add_context(t_package_reception* package, void* value, int size) {
+	package->buffer->stream = realloc(package->buffer->stream, package->buffer->size + size + sizeof(int));
+
+	memcpy(package->buffer->stream + package->buffer->size, &size, sizeof(int));
+	memcpy(package->buffer->stream + package->buffer->size + sizeof(int), value, size);
+
+	package->buffer->size += size + sizeof(int);
+}
+
 t_package* package_create(int cod_op) {
 	t_package* package = s_malloc(sizeof(t_package));
 	package->op_code = cod_op;
@@ -176,6 +185,50 @@ t_list* socket_receive_package(int target_socket) {
 	return params;
 }
 
+t_package_reception* package_create_execution_context() {
+	t_package_reception* package = s_malloc(sizeof(t_package_reception));
+	package->op_code_reception = EXECUTION_CONTEXT;
+	package->buffer = s_malloc(sizeof(t_buffer));
+	package->buffer->size = 0;
+	package->buffer->stream = NULL;
+	return package;
+};
+
+
+void socket_send_execution_context(execution_context* context, int target_socket) {
+	
+	t_package_reception* package = malloc(sizeof(t_package_reception));
+	package = package_create_execution_context(EXECUTION_CONTEXT);
+
+	// Serializar los campos individuales del execution_context y agregarlos al paquete
+	package_add_context(package, &(context->program_counter), sizeof(int));
+	package_add_context(package, &(context->updated_state), sizeof(process_state));
+	package_add_context(package, context->cpu_register, sizeof(cpu_register));
+	package_add_context(package, context->segment_table, sizeof(segment_table));
+
+	// Enviar el paquete a través del socket
+	socket_send_package(package, target_socket);
+}
+
+execution_context* socket_recive_execution_context(int target_socket) {
+	execution_context* context = malloc(sizeof(execution_context));
+	t_list* params = socket_receive_package(target_socket);
+	int offset = 0;
+
+	// Deserializar los campos individuales del paquete y asignarlos al execution_context
+	memcpy(&(context->program_counter), list_get(params, offset), sizeof(int));
+	offset++;
+	memcpy(&(context->updated_state), list_get(params, offset), sizeof(process_state));
+	offset++;
+	context->cpu_register = list_get(params, offset);
+	offset++;
+	context->segment_table = list_get(params, offset);
+
+	// Liberar la memoria utilizada por la lista y el paquete recibido
+	list_destroy_and_destroy_elements(params, free);
+	return context;
+}
+
 int socket_accept(int server_socket) {
 	int target_socket = accept(server_socket, NULL, NULL);
 	if (target_socket == -1) printf("Error de conexión al servidor\n");
@@ -224,7 +277,7 @@ int connect_module(t_config* config, t_log* logger, char* module) {
 
 	int module_socket = socket_initialize(ip_modulo, puerto_modulo);
 
-	printf("Conectado a módulo %s\n", module);
+	
 	char* message = "prueba";
 	socket_send_message(message, module_socket);
 

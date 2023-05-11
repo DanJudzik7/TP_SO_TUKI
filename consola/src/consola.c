@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 
 	log_info(logger, "Ahora pasando a consola interactiva...");
     char* line;
-	while (1) { // Cambiar esto a 0 para desactivar la consola interactiva
+	while (0) { // Cambiar esto a 0 para desactivar la consola interactiva
         line = readline("> ");
         if (!line) continue;
         if (line) add_history(line);                        

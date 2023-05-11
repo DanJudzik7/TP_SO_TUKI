@@ -1,8 +1,7 @@
 #include "handler_pcb_cpu.h"
 
 // obtiene la instrucción (lista) actual a ejecutar
-void fetch(execution_context* execution_context, int kernel_socket) {
-
+void fetch(execution_context* execution_context) {
 	int sem_value;
 	t_list* instruction = NULL;
 	// ejecuto mientras el flag de desalojo este libre
@@ -31,7 +30,7 @@ void fetch(execution_context* execution_context, int kernel_socket) {
 	//sem_post(&config_cpu.flag_dislodge);   Desbloquear el estado running una vez implementado el hilo
 	//t_package* package = package_create(OK);
 	//package_add(package, execution_context , sizeof(*execution_context));
-	//socket_send_package(package,kernel_socket);
+	//socket_send_package(package,args->kernel_socket);
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
@@ -84,3 +83,4 @@ void dislodge(){
 	// Bloquear el semáforo
     sem_wait(&config_cpu.flag_dislodge);
 };
+

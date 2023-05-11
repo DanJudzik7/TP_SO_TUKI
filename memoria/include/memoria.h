@@ -33,4 +33,6 @@ typedef struct memory{
 extern configuration_memory config_memory;
 extern memory memory_shared;
 
+execution_context* create_context_test(); //LUEGO BORRAR, TEST QUE NO VA ACA
+
 #endif
