@@ -14,8 +14,10 @@ void long_term_schedule(t_global_config_kernel* gck) {
 
 t_pcb* short_term_scheduler(t_global_config_kernel* gck) {
 	// Remover PCBs terminados por handle_incoming_instructions (o sea, usuario, desconexión, etc)
-	if (list_remove_by_condition(gck->active_pcbs->elements, (void*)pcb_did_exit)) {
+	t_pcb* pcb_removed = list_remove_by_condition(gck->active_pcbs->elements, (void*)pcb_did_exit);
+	if (pcb_removed) {
 		log_info(gck->logger, "Se removió un proceso terminado");
+		pcb_destroy(pcb_removed);
 		long_term_schedule(gck);
 	}
 	// Devuelve el próximo PCB a ejecutar en base al algoritmo y los PCBs activos.

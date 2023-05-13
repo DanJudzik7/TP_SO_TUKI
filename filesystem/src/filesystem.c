@@ -8,8 +8,7 @@ int main(int argc, char** argv) {
 	int cliente_fd = receive_modules(logger, config);
 
 	// TODO: En el primer recv llega basura no se porque
-	socket_receive_message(cliente_fd);
-	socket_receive_message(cliente_fd);
+	socket_receive_buffer(cliente_fd, 17);
 
 	int socket_memory = connect_module(config, logger, "MEMORIA");
 }

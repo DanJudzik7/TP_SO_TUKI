@@ -1,29 +1,39 @@
 #include "handler_instruction_memoria.h"
 
-int instruction_handler_memoria(int cliente_fd) {
+int instruction_handler_memoria(int socket_client) {
+	// Todo esto no está adaptado al nuevo packaging
 	t_list* payload;
 	t_package* package;
 
 	while (1) {
-		int cod_op = socket_receive_operation(cliente_fd);
-		printf("El código de op es: %i\n", cod_op);
+		uint32_t* cod_op = socket_receive_int(socket_client);
+		if (cod_op == NULL) {
+			printf("Error al recibir código de operación\n");
+			return -1;
+		}
+		printf("El código de operación es: %i\n", *cod_op);
 
-		switch (cod_op) {
+		switch (*cod_op) {
 			case CREATE_SEGMENT:
 				printf("RECIBIMOS UNA INSTRUCCIÓN DE CREAR SEGMENTO DE MEMORIA\n");
-				op_code_reception result_creation_segment = create_memory_segment();
-				package = package_create(result_creation_segment);
-				socket_send_package(package, cliente_fd);
+				int result_creation_segment = create_memory_segment();
+				package = package_new(result_creation_segment);
+				if (!socket_send(socket_client, package)) {
+					printf("Error al enviar el paquete\n");
+					return -1;
+				}
 
 				break;
 			case DELETE_SEGMENT:
 				printf("RECIBIMOS UNA INSTRUCCIÓN DE ELIMINAR UN SEGMENTO DE MEMORIA\n");
-				payload = socket_receive_package(cliente_fd);
+				//payload = socket_receive(socket_client);
 				// deserialize_payload(payload);
-				op_code_reception result_delete_segment = delete_memory_segment(0);	 // ACTUALMENTE PASO UN ID = 0, PERO LUEGO NECESITO SABERLO DADO EL
-				package = package_create(result_delete_segment);
-				socket_send_package(package, cliente_fd);
-
+				int result_delete_segment = delete_memory_segment(0);	 // ACTUALMENTE PASO UN ID = 0, PERO LUEGO NECESITO SABERLO DADO EL
+				package = package_new(result_delete_segment);
+				if (!socket_send(socket_client, package)) {
+					printf("Error al enviar el paquete\n");
+					return -1;
+				}
 				break;
 			case MENSAJE:
 				printf("RECIBIMOS UN HANDSAKE\n");

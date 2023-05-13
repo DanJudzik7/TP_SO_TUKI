@@ -32,8 +32,8 @@ int main(int argc, char** argv) {
 	// To do: CPU debe recibir solo execution context, no todo este PCB
 
 	
-	log_info(logger, "El proceso %d se creó en NEW\n", pcb_test->pid);
-	pcb_test->execution_context = context;
+	// log_info(logger, "El proceso %d se creó en NEW\n", pcb_test->pid);
+	// pcb_test->execution_context = context;
 
 	pthread_t thread_consola;
 	pthread_create(&thread_consola, NULL, (void*) listen_kernel, socket_cpu);
@@ -50,18 +50,30 @@ int main(int argc, char** argv) {
 }
 
 void listen_kernel(int socket_cpu) {
-
 	int sem_value;
 
 	while (1) {
-		
 		int kernel_socket = socket_accept(socket_cpu);
 		config_cpu.connection_kernel = kernel_socket;
 		if(sem_getvalue(&config_cpu.flag_running, &sem_value)){
 			log_info(config_cpu.logger, "Mi flag de running es -> %i",sem_value);
-			execution_context* context = socket_recive_execution_context(kernel_socket); // Implementar
+
+			t_package* package = socket_receive(kernel_socket);
+			if (package == NULL) {
+				// Definir si acá se tiene que hacer algo más
+				log_warning(config_cpu.logger, "El kernel se desconectó");
+				break;
+			}
+			if (package->field != EXECUTION_CONTEXT) {
+				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->field);
+				socket_send_message(config_cpu.logger, invalid_package, true);
+				free(invalid_package);
+				package_destroy(package);
+				break;
+			}
+			execution_context* context = deserialize_execution_context(package); // No está terminado
 			sem_wait(&config_cpu.flag_running);
-			log_info(config_cpu.logger, "Llego un nuevo Contexto de Ejecucion");
+			log_info(config_cpu.logger, "Llego un nuevo Execution Context");
 			pthread_t thread;
 			// Se crea un thread para ejecutar el contexto y sus instrucciones
 			pthread_create(&thread, NULL, (void*) fetch , context);
@@ -69,8 +81,8 @@ void listen_kernel(int socket_cpu) {
 		}else{
 			//En caso contrario envio un mensaje al kernel de que estoy ocupado
 			log_info(config_cpu.logger, "ESTOY OCUPADO");
-			t_package* package = package_create(BUSY); 
-        		socket_send_package(package, kernel_socket);
+			t_package* package = package_create(MESSAGE_BUSY); 
+			socket_send_package(package, kernel_socket);
 		}
 	}
 }
@@ -99,9 +111,9 @@ execution_context* create_context_test(){
     execution_context* context = malloc(sizeof(execution_context));
 	context->instructions = instructions;
 	context->program_counter = 0;
-   	context->updated_state = NEW;
+	context->updated_state = NEW;
    	context->cpu_register = malloc(sizeof(cpu_register)); // inicializa el puntero
-   	context->segment_table = malloc(sizeof(segment_table));
+	context->segment_table = malloc(sizeof(segment_table));
 
     return context;
 }

@@ -32,42 +32,34 @@ int instruction_handler_kernel() {
 }
 
 void handle_incoming_instructions(t_pcb* pcb) {
-	int op_code = 0;
-	char* welcome_message = "Instrucciones recibidas por el kernel. Tu PID es: %i";
-	char generated_message[65];
+	printf("Nueva consola conectada. PID: %i\n", pcb->pid);
+	char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
+	if (!socket_send_message(pcb->pid, welcome_message, true)) pcb->state = EXIT_PROCESS;
+	free(welcome_message);
 	while (1) {
 		if (pcb->state == EXIT_PROCESS) break;
-		// Seguir mejorando esto
-		op_code = socket_receive_operation(pcb->pid);
-		if (op_code == -1) {
-			// La siguiente línea se va a optimizar al mejorar paquetes con mensajes
-			socket_receive_message(pcb->pid);
-			if (socket_send_message("Instrucciones inválidas recibidas", pcb->pid) == -1) {
-				pcb->state = EXIT_PROCESS;
-				break;
-			}
-			printf("Instrucciones inválidas recibidas\n");
-			continue;
-		} else if (op_code == 32767) { // Cliente desconectado
+		t_package* package = socket_receive(pcb->pid);
+		if (package == NULL) {
 			pcb->state = EXIT_PROCESS;
 			printf("El cliente se desconectó\n");
 			break;
 		}
-		printf("Código de operación recibido: %i\n", op_code);
-		if (op_code == MENSAJE) {
-			if (socket_receive_message(pcb->pid) == 1) {
-				// Si recibe el mensaje de finalización de instrucciones, avisa que las recibió y le devuelve el PID 
-				sprintf(generated_message, welcome_message, pcb->pid);
-				socket_send_message(generated_message, pcb->pid);
-			}
-		} else {
-			queue_push(pcb->execution_context->instructions, socket_receive_package(pcb->pid));
+		if (package->field == MESSAGE_OK || package->field == MESSAGE_FLAW) {
+			socket_send_message(pcb->pid, "Mensaje recibido", false);
+			char* message = deserialize_message(package);
+			printf("< %s\n", message);
+			free(message);
+		} else if (package->field == INSTRUCTIONS) {
+			socket_send_message(pcb->pid, "Instrucciones recibidas", false);
+			deserialize_instructions(package, pcb->execution_context->instructions);
 			pcb->state = READY;
+		} else {
+			char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->field);
+			socket_send_message(pcb->pid, invalid_package, true);
+			free(invalid_package);
+			package_destroy(package);
+			continue;
 		}
 	}
 	socket_close(pcb->pid);
 }
-
-// To do: Migrar a que las instrucciones se manden en un solo paquete
-// esto se encarga de crear una cola, y va cargando una lista de instrucciones [ ["AUX", Arg1, Arg2] , [] ]
-// Para dps si lo enviamos a la cpu podemos saber el tamaño de cada arg de la lista :D

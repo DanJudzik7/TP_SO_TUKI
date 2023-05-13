@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 		log_info(logger, "Enviando a CPU el Execution Context del proceso %d", pcb->pid);
 		// TO DO: Mandar a CPU y esperar
 		// Recibe el nuevo execution context que puede estar en EXIT o BLOCK
-		// pcb->execution_context = socket_receive_package(socket_cpu);
+		// pcb->execution_context = socket_receive(socket_cpu);
 		queue_clean(pcb->execution_context->instructions); // WORKAROUND TEMPORAL. Ya que todavía la conexión a CPU no está, borro todas las instrucciones para simular su ejecución.
 		// Revisa si está bloqueado
 		pcb->state = pcb->execution_context->updated_state;

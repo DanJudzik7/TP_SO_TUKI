@@ -28,7 +28,7 @@ void fetch(execution_context* execution_context) {
     sem_post(&config_cpu.flag_dislodge);
 
 	//sem_post(&config_cpu.flag_dislodge);   Desbloquear el estado running una vez implementado el hilo
-	//t_package* package = package_create(OK);
+	//t_package* package = package_create(MESSAGE_OK);
 	//package_add(package, execution_context , sizeof(*execution_context));
 	//socket_send_package(package,args->kernel_socket);
 }

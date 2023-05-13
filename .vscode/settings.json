@@ -33,7 +33,9 @@
         "algorithm": "c",
         "*.tcc": "c",
         "functional": "c",
-        "numeric": "c"
+        "numeric": "c",
+        "cstdint": "c"
     },
+    "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false
 }

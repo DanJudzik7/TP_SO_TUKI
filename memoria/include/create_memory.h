@@ -3,6 +3,6 @@
 
 #include "shared_utils.h"
 
-op_code_reception create_memory_segment();  //Actualmente necesita ser implementado, por ahora regresa un ok unicamente
+int create_memory_segment();  //Actualmente necesita ser implementado, por ahora regresa un 0 únicamente
 
 #endif

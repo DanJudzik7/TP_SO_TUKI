@@ -26,7 +26,7 @@ int main(int argc, char ** argv){
     int cpu_socket = socket_accept(socket_memory);
     execution_context* context =  create_context_test();
 
-    socket_send_execution_context( context, cpu_socket);
+	socket_send(cpu_socket, serialize_execution_context(context));
     log_warning(config_memory.logger, "Context enviado a CPU");
     //instruction_handler_memoria(cliente_fd);
     
@@ -55,9 +55,9 @@ execution_context* create_context_test(){
     execution_context* context = malloc(sizeof(execution_context));
 	context->instructions = instructions;
 	context->program_counter = 0;
-   	context->updated_state = NEW;
+	context->updated_state = NEW;
    	context->cpu_register = malloc(sizeof(cpu_register)); // inicializa el puntero
-   	context->segment_table = malloc(sizeof(segment_table));
+	context->segment_table = malloc(sizeof(segment_table));
 
     return context;
 }
