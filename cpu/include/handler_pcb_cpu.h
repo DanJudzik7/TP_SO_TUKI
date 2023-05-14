@@ -1,11 +1,11 @@
 #ifndef HANDLER_PCB_CPU_H
 #define HANDLER_PCB_CPU_H
 
+#include <stdio.h>
 
 #include "cpu.h"
-#include <stdio.h>
-#include "shared_utils.h"
 #include "handler_execute_instructions.h"
+#include "shared_utils.h"
 
 extern configuration_cpu config_cpu;
 

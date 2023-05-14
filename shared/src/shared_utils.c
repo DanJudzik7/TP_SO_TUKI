@@ -180,17 +180,17 @@ void* socket_receive_buffer(int target_socket, uint64_t size) {
 }
 
 uint64_t* socket_receive_long(int target_socket) {
-	uint64_t* value = malloc(sizeof(uint64_t));
+	uint64_t* value = s_malloc(sizeof(uint64_t));
 	return recv(target_socket, value, sizeof(uint64_t), MSG_WAITALL) > 0 ? value : NULL;
 }
 
 int32_t* socket_receive_int(int target_socket) {
-	int32_t* value = malloc(sizeof(int32_t));
+	int32_t* value = s_malloc(sizeof(int32_t));
 	return recv(target_socket, value, sizeof(int32_t), MSG_WAITALL) > 0 ? value : NULL;
 }
 
 t_package* socket_receive(int target_socket) {
-	t_package* package = malloc(sizeof(t_package));
+	t_package* package = s_malloc(sizeof(t_package));
 	uint64_t* size = socket_receive_long(target_socket);
 	if (size == NULL) return NULL;
 	package->size = *size;
