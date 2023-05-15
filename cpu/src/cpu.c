@@ -3,7 +3,6 @@
 configuration_cpu config_cpu;
 
 int main(int argc, char** argv) {
-	printf("Iniciando la CPU\n");
 
 	sem_init(&(config_cpu.flag_running), 0, 1);
 	sem_init(&(config_cpu.flag_dislodge), 0, 1);
@@ -11,6 +10,7 @@ int main(int argc, char** argv) {
 	t_log* logger = start_logger("cpu");
 	t_config* config = start_config("cpu");
 
+	log_warning(logger, "Iniciando la CPU");
 	config_cpu.logger = logger;
 
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 	}
 	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
-	int conn_memoria = connect_module(config, logger, "MEMORIA");
+	// int conn_memoria = connect_module(config, logger, "MEMORIA");
 
 	// int kernel_fd = receive_modules(logger, config);
 	execution_context* context = create_context_test();
@@ -63,16 +63,16 @@ void listen_kernel(int socket_cpu) {
 				log_warning(config_cpu.logger, "El kernel se desconectó");
 				break;
 			}
-			if (package->field != EXECUTION_CONTEXT) {
-				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->field);
-				socket_send_message(config_cpu.logger, invalid_package, true);
+			if (package->type != EXECUTION_CONTEXT) {
+				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
+				socket_send_message(kernel_socket, invalid_package, true);
 				free(invalid_package);
 				package_destroy(package);
 				break;
 			}
 			execution_context* context = deserialize_execution_context(package);  // No está terminado
 			sem_wait(&config_cpu.flag_running);
-			log_info(config_cpu.logger, "Llego un nuevo Execution Context");
+			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
 			pthread_t thread;
 			// Se crea un thread para ejecutar el contexto y sus instrucciones
 			pthread_create(&thread, NULL, (void*)fetch, context);
@@ -81,7 +81,7 @@ void listen_kernel(int socket_cpu) {
 			// En caso contrario envio un mensaje al kernel de que estoy ocupado
 			log_info(config_cpu.logger, "ESTOY OCUPADO");
 			t_package* package = package_new(MESSAGE_BUSY);
-			socket_send(package, kernel_socket);
+			socket_send(kernel_socket, package);
 		}
 	}
 }

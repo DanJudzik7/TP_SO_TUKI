@@ -19,13 +19,10 @@ int main(int argc, char** argv) {
     char* line;
 	while (1) {
 		t_package* package = socket_receive(socket_kernel);
-		if (package == NULL) {
-			log_warning(logger, "Error al recibir respuesta");
-			break;
-		}
-		if (package->field == MESSAGE_OK) log_info(logger, "< %s", deserialize_message(package));
-		else if (package->field == MESSAGE_FLAW) log_warning(logger, "< %s", deserialize_message(package));
-		else log_warning(logger, "Paquete inválido recibido\n");
+		if (package == NULL) break;
+		if (package->type == MESSAGE_OK) log_info(logger, "< %s", deserialize_message(package));
+		else if (package->type == MESSAGE_FLAW) log_warning(logger, "< %s", deserialize_message(package));
+		else log_warning(logger, "Paquete inválido recibido");
 		if (interactive) {
 			//break; // Activar esta línea para desactivar la consola interactiva
 			line = readline("> ");
@@ -36,7 +33,7 @@ int main(int argc, char** argv) {
 				break;
 			}
 			package = package_new(INSTRUCTIONS);
-			package_nest(package, serialize_instruction(line));
+			package_nest(package, parse_instruction(line));
 			if (!socket_send(socket_kernel, package)) break;
 		} else {
 			if (!socket_send(socket_kernel, process_instructions(socket_kernel))) break;
@@ -45,7 +42,6 @@ int main(int argc, char** argv) {
 		}
 	}
 	socket_close(socket_kernel);
-	log_warning(logger, "Consola desconectada de kernel");
-	free(line);
+	log_warning(logger, "El kernel se ha desconectado de esta consola");
 	return 0;
 }

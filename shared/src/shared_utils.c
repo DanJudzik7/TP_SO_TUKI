@@ -33,14 +33,14 @@ char* get_config_type(char* module, char* file_type) {
 	return ruta_config;
 }
 
-t_package* package_new_dict(int32_t key, void* value, uint64_t value_size) {
+t_package* package_new_dict(int32_t key, void* value, uint64_t* value_size) {
 	t_package* package = package_new(key);
-	package_add(package, value, &value_size);
+	package_add(package, value, value_size);
 	return package;
 }
 
 void package_nest(t_package* package, t_package* nested) {
-	package_close(nested);
+	package_close(nested); // Convierte el package al tipo Serialized
 	uint64_t offset = package->size;
 	package->size += nested->size;
 	package->buffer = realloc(package->buffer, package->size);
@@ -59,12 +59,11 @@ void package_add(t_package* package, void* value, uint64_t* value_size) {
 	package->buffer = realloc(package->buffer, package->size);
 	memcpy(package->buffer + offset, value_size, sizeof(uint64_t));
 	memcpy(package->buffer + offset + sizeof(uint64_t), value, *value_size);
-    if (*value_size == strlen((char*)value)) memcpy(package->buffer + offset + sizeof(uint64_t) + *value_size, "\0", 1);
 }
 
-t_package* package_new(int32_t field) {
+t_package* package_new(int32_t type) {
 	t_package* package = s_malloc(sizeof(t_package));
-	package->field = field;
+	package->type = type;
 	package->size = 0;
 	package->buffer = NULL;
 	return package;
@@ -76,10 +75,10 @@ void package_close(t_package* package) {
     uint64_t offset = 0;
     memcpy(stream + offset, &(package->size), sizeof(uint64_t));
     offset += sizeof(uint64_t);
-    memcpy(stream + offset, &(package->field), sizeof(int32_t));
+    memcpy(stream + offset, &(package->type), sizeof(int32_t));
     offset += sizeof(int32_t);
     memcpy(stream + offset, package->buffer, package->size);
-    package->field = SERIALIZED;
+    package->type = SERIALIZED;
     package->size = package_size;
     free(package->buffer);
     package->buffer = stream;
@@ -138,69 +137,134 @@ void socket_close(int target_socket) {
 	close(target_socket);
 }
 
-t_package* serialize_execution_context(execution_context* ec) { // En progreso
-	// No llegué a mergear bien ni completar todo esto, así que hay un poco de todo. Si pueden déjenmelo para seguir a mí.
-	// Serializar los campos individuales del execution_context y agregarlos al paquete
-	t_package* package = package_new(EXECUTION_CONTEXT);
-	// To do: Instructions
-	/*package_nest(package, package_new_dict(PROGRAM_COUNTER, &(ec->program_counter), sizeof(uint32_t)));
-	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), sizeof(int32_t)));*/
-	// To do: CPU Registers, Segment Table
-	// Esto reemplaza package_add_context por package_nest y package_new_dict, que permiten representar tipos mucho más amplios
+t_package* serialize_cpu_registers(cpu_register* registers) {
+	t_package* package = package_new(CPU_REGISTERS);
+	uint64_t size4 = 4, size8 = 8, size16 = 16;
+	// Registros de 4 bytes
+	package_add(package, &(registers->register_4.AX), &size4);
+	package_add(package, &(registers->register_4.BX), &size4);
+	package_add(package, &(registers->register_4.CX), &size4);
+	package_add(package, &(registers->register_4.DX), &size4);
+	// Registros de 8 bytes
+	package_add(package, &(registers->register_8.EAX), &size8);
+	package_add(package, &(registers->register_8.EBX), &size8);
+	package_add(package, &(registers->register_8.ECX), &size8);
+	package_add(package, &(registers->register_8.EDX), &size8);
+	// Registros de 16 bytes
+	package_add(package, &(registers->register_16.RAX), &size16);
+	package_add(package, &(registers->register_16.RBX), &size16);
+	package_add(package, &(registers->register_16.RCX), &size16);
+	package_add(package, &(registers->register_16.RDX), &size16);
 	return package;
 }
 
-execution_context* deserialize_execution_context(t_package* package) { // En progreso
-	// No llegué a mergear bien ni completar todo esto, así que hay un poco de todo. Si pueden déjenmelo para seguir a mí.
+cpu_register* deserialize_cpu_registers(void* source) {
+	uint64_t offset = 0;
+	cpu_register* registers = s_malloc(sizeof(cpu_register));
+	// Registros de 4 bytes
+	package_decode_buffer(source, registers->register_4.AX, &offset);
+	package_decode_buffer(source, registers->register_4.BX, &offset);
+	package_decode_buffer(source, registers->register_4.CX, &offset);
+	package_decode_buffer(source, registers->register_4.DX, &offset);
+	// Registros de 8 bytes
+	package_decode_buffer(source, registers->register_8.EAX, &offset);
+	package_decode_buffer(source, registers->register_8.EBX, &offset);
+	package_decode_buffer(source, registers->register_8.ECX, &offset);
+	package_decode_buffer(source, registers->register_8.EDX, &offset);
+	// Registros de 16 bytes
+	package_decode_buffer(source, registers->register_16.RAX, &offset);
+	package_decode_buffer(source, registers->register_16.RBX, &offset);
+	package_decode_buffer(source, registers->register_16.RCX, &offset);
+	package_decode_buffer(source, registers->register_16.RDX, &offset);
+	return registers;
+}
+
+t_package* serialize_segment_table(segment_table* st) {
+	t_package* package = package_new(SEGMENT_TABLE);
+	// Implementar segment tables acá. Por ahora, manda solo un dato de ejemplo.
+	uint64_t size = sizeof(uint32_t);
+	package_add(package, &(st->id), &size);
+	return package;
+}
+
+segment_table* deserialize_segment_table(void* source) {
+	uint64_t offset = 0;
+	segment_table* st = s_malloc(sizeof(segment_table));
+	// Implementar segment tables acá. Por ahora, manda solo un dato de ejemplo.
+	package_decode_buffer(source, &(st->id), &offset);
+	return st;
+}
+
+t_package* serialize_execution_context(execution_context* ec) {
+	t_package* package = package_new(EXECUTION_CONTEXT);
+	uint64_t size4 = 4;
+	package_nest(package, serialize_instructions(ec->instructions, true));
+	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(ec->program_counter), &size4));
+	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), &size4));
+	package_nest(package, serialize_cpu_registers(ec->cpu_register));
+	package_nest(package, serialize_segment_table(ec->segment_table));
+	return package;
+}
+
+execution_context* deserialize_execution_context(t_package* package) {
 	execution_context* ec = s_malloc(sizeof(execution_context));
-	//int offset = 0;
-
-	/* memcpy(&ec->program_counter, package->buffer + offset, sizeof(uint32_t));
-	offset += sizeof(uint32_t);
-	memcpy(&ec->updated_state, package->buffer + offset, sizeof(process_state));
-	offset += sizeof(process_state); */
-
-	// Deserializar los campos individuales del paquete y asignarlos al execution_context
-	/* t_list* params = list_create();
-	memcpy(&(ec->program_counter), list_get(params, offset), sizeof(int));
-	offset++;
-	memcpy(&(ec->updated_state), list_get(params, offset), sizeof(process_state));
-	offset++;
-	ec->cpu_register = list_get(params, offset);
-	offset++;
-	ec->segment_table = list_get(params, offset);
-	list_destroy_and_destroy_elements(params, free); */
-	// Liberar la memoria utilizada por la lista y el paquete recibido
+	uint64_t offset = 0;
+	uint64_t offset_start = 0;
+	while (package_decode_isset(package, offset)) {
+		t_package* nested_package = package_decode(package->buffer, &offset);
+		switch (nested_package->type) {
+			case EC_INSTRUCTIONS:
+				ec->instructions = queue_create();
+				deserialize_instructions(nested_package, ec->instructions);
+				break;
+			case PROGRAM_COUNTER:
+				package_decode_buffer(nested_package->buffer, &(ec->program_counter), &offset_start);
+				break;
+			case UPDATED_STATE:
+				package_decode_buffer(nested_package->buffer, &(ec->updated_state), &offset_start);
+				break;
+			case CPU_REGISTERS:
+				ec->cpu_register = deserialize_cpu_registers(nested_package->buffer);
+				break;
+			case SEGMENT_TABLE:
+				ec->segment_table = deserialize_segment_table(nested_package->buffer);
+				break;
+			default:
+				printf("Error: Tipo de paquete desconocido.\n");
+				return NULL;
+		}
+		package_destroy(nested_package);
+	}
 	return ec;
-}
-
-void* socket_receive_buffer(int target_socket, uint64_t size) {
-	void* buffer = s_malloc(size);
-	return recv(target_socket, buffer, (size_t)size, MSG_WAITALL) > 0 ? buffer : NULL;
-}
-
-uint64_t* socket_receive_long(int target_socket) {
-	uint64_t* value = s_malloc(sizeof(uint64_t));
-	return recv(target_socket, value, sizeof(uint64_t), MSG_WAITALL) > 0 ? value : NULL;
-}
-
-int32_t* socket_receive_int(int target_socket) {
-	int32_t* value = s_malloc(sizeof(int32_t));
-	return recv(target_socket, value, sizeof(int32_t), MSG_WAITALL) > 0 ? value : NULL;
 }
 
 t_package* socket_receive(int target_socket) {
 	t_package* package = s_malloc(sizeof(t_package));
-	uint64_t* size = socket_receive_long(target_socket);
-	if (size == NULL) return NULL;
+	// Recibe un número unsigned long del cliente
+	uint64_t* size = s_malloc(sizeof(uint64_t));
+	if (recv(target_socket, size, sizeof(uint64_t), MSG_WAITALL) < 1) {
+		free(size);
+		free(package);
+		return NULL;
+	}
 	package->size = *size;
 	free(size);
-	int32_t* field = socket_receive_int(target_socket);
-	if (field == NULL) return NULL;
-	package->field = *field;
-	free(field);
-	package->buffer = socket_receive_buffer(target_socket, package->size);
-	if (package->buffer == NULL) return NULL;
+	// Recibe un número int del cliente
+	int32_t* type = s_malloc(sizeof(int32_t));
+	if (recv(target_socket, type, sizeof(int32_t), MSG_WAITALL) < 1) {
+		free(type);
+		free(package);
+		return NULL;
+	}
+	package->type = *type;
+	free(type);
+	// Recibe el buffer del cliente
+	package->buffer = s_malloc(package->size);
+	if (recv(target_socket, package->buffer, package->size, MSG_WAITALL) < 1) {
+		free(package->buffer);
+		free(package);
+		return NULL;
+	}
 	return package;
 }
 
@@ -215,38 +279,77 @@ char* deserialize_message(t_package* package) {
 	return message;
 }
 
-void deserialize_instructions(t_package* package, t_queue* instructions) {
-	uint64_t offset = 0, item_offset = 0;
-	uint64_t *size = s_malloc(sizeof(uint64_t));
-	*size = 0;
-	uint64_t *item_size = s_malloc(sizeof(uint64_t));
-	*item_size = 0;
-	// Va buscando todas las instrucciones
-	while (offset < package->size) {
-		t_instruction* instruction = s_malloc(sizeof(t_instruction));
-		instruction->args = list_create();
-		memcpy(size, package->buffer + offset, sizeof(uint64_t));
-		offset += sizeof(uint64_t);
-		memcpy(&instruction->op_code, package->buffer + offset, sizeof(int32_t));
-		offset += sizeof(int32_t);
-		char *args = s_malloc(*size + 1);
-		memcpy(args, package->buffer + offset, *size);
-		item_offset = offset;
-		// Carga los args de package_add
-		while ((offset - item_offset) < *size) {
-			memcpy(item_size, package->buffer + offset, sizeof(uint64_t));
-			offset += sizeof(uint64_t);
-			char *item = s_malloc(*item_size + 1);
-			memcpy(item, package->buffer + offset, *item_size);
-			offset += *item_size;
-			list_add(instruction->args, item);
-		}
-		queue_push(instructions, instruction);
-		free(args);
+t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
+	t_package* package = package_new(is_ec ? EC_INSTRUCTIONS : INSTRUCTIONS);
+	// Recorre la cola de instrucciones y las serializa
+	for (int i = 0; i < queue_size(instructions); i++) {
+		t_instruction* instruction = list_get(instructions->elements, i);
+		t_package* nested = package_new(instruction->op_code);
+		// Serializa los args de la instrucción
+		for (int j = 0; j < list_size(instruction->args); j++) package_write(nested, list_get(instruction->args, j));
+		package_nest(package, nested);
 	}
-	free(item_size);
+	return package;
+}
+
+t_package* parse_instruction(char* instruction) {
+	char** parts = string_split(instruction, " ");
+	// Creamos el package con el operation code correspondiente
+	t_package* package = package_new(parse_op_code(parts[0]));
+	for (int i = 1; parts[i] != NULL; i++) package_write(package, parts[i]);
+	return package;
+}
+
+void deserialize_instructions(t_package* package, t_queue* instructions) {
+	uint64_t offset = 0;
+	// Va buscando todas las instrucciones
+	while (package_decode_isset(package, offset)) {
+		t_package* instruction_package = package_decode(package->buffer, &offset);
+		t_instruction* instruction = s_malloc(sizeof(t_instruction));
+		instruction->op_code = instruction_package->type;
+		instruction->args = list_create();
+		uint64_t offset_list = 0;
+		// Carga los args de package_add
+		while (package_decode_isset(instruction_package, offset_list)) list_add(instruction->args, package_decode_string(instruction_package->buffer, &offset_list));
+		queue_push(instructions, instruction);
+		package_destroy(instruction_package);
+	}
+}
+
+bool package_decode_isset(t_package* package, uint64_t offset) {
+	return offset < package->size;
+}
+
+char* package_decode_string(void* source, uint64_t* offset) {
+	uint64_t *size = s_malloc(sizeof(uint64_t));
+	memcpy(size, source + *offset, sizeof(uint64_t));
+	*offset += sizeof(uint64_t);
+	char *str = s_malloc(*size + 1);
+	memcpy(str, source + *offset, *size);
+	*offset += *size;
 	free(size);
-	package_destroy(package);
+	return str;
+}
+
+void package_decode_buffer(void* source, void* dest, uint64_t* offset) {
+	uint64_t *size = s_malloc(sizeof(uint64_t));
+	memcpy(size, source + *offset, sizeof(uint64_t));
+	*offset += sizeof(uint64_t);
+	memcpy(dest, source + *offset, *size);
+	*offset += *size;
+	free(size);
+}
+
+t_package* package_decode(void* source, uint64_t* offset) {
+	t_package* package = s_malloc(sizeof(t_package));
+	memcpy(&(package->size), source + *offset, sizeof(uint64_t));
+	*offset += sizeof(uint64_t);
+	memcpy(&(package->type), source + *offset, sizeof(int32_t));
+	*offset += sizeof(int32_t);
+	package->buffer = s_malloc(package->size);
+	memcpy(package->buffer, source + *offset, package->size);
+	*offset += package->size;
+	return package;
 }
 
 int socket_accept(int server_socket) {
@@ -274,30 +377,28 @@ int connect_module(t_config* config, t_log* logger, char* module) {
 	free(ip);
 	free(module_port);
 	free(module_ip);
-	if (!socket_send_message(module_socket, "Mensaje de prueba", false)) {
-		// Mejorar error handling acá
-		printf("Error al enviar mensaje de prueba\n");
+	/*if (!socket_send_message(module_socket, "Mensaje de prueba", false)) {
+		printf("Error al enviar mensaje de prueba en %s en %d\n", module, module_socket);
 		return -1;
-	}
-	printf("Conectado a módulo %s en %d\n", module, module_socket);
+	}*/
+	printf("Conectado a módulo %s en socket %d\n", module, module_socket);
 	return module_socket;
 }
 
-int receive_modules(t_log* logger, t_config* config) {
-	// Obtenemos el port con el que escucharemos conexiones
+int receive_module(t_log* logger, t_config* config) {
+	// Obtiene el puerto con el que escucharemos conexiones
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
 	log_info(logger, "El value del port es %s \n", port);
 
-	// Inicializo el socket en el port cargado por la config
+	// Inicializo el socket en el puerto cargado por la config
 	int server_socket = socket_initialize_server(port);
 	log_info(logger, "SOCKET INICIALIZADO");
-	// Pongo el socket en modo de aceptar las escuchas
-	// int cliente_fd = socket_accept(server_socket);
 
+	// Acepto la primera conexión entrante
 	return socket_accept(server_socket);
 }
 
-op_code get_opcode(char* code) {
+op_code parse_op_code(char* code) {
 	if (strcmp(code, "F_READ") == 0)
 		return F_READ;
 	else if (strcmp(code, "F_WRITE") == 0)

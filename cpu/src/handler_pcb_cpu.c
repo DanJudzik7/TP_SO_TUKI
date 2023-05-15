@@ -3,14 +3,14 @@
 // obtiene la instrucción (lista) actual a ejecutar
 void fetch(execution_context* execution_context) {
 	int sem_value;
-	t_list* instruction = NULL;
+	t_instruction* instruction = NULL;
 	// ejecuto mientras el flag de desalojo este libre
 	do {
 		printf("Procedemos a ejecutar Instrucciones\n");
-		// Esto no consume el semaforo, solo lo consulta
+		// Esto no consume el semáforo, solo lo consulta
 		sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
-		printf("\nEl valor obtenido de mi semaforo es: %d ", sem_value);
-		instruction = get_instrucction(execution_context);
+		printf("\nEl valor obtenido de mi semáforo es: %d ", sem_value);
+		instruction = get_instruction(execution_context);
 		if (sem_value > 0) {
 			if (instruction != NULL) {
 				decode(execution_context, instruction);
@@ -34,12 +34,11 @@ void fetch(execution_context* execution_context) {
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
 // TODO:: y si la misma requiere de una traducción de dirección lógica a dirección física.
-execution_context* decode(execution_context* execution_context, t_list* instruction) {
-	log_info(config_cpu.logger, "LLego al decode un PCB con instrucciones a ejecutar\n");
+execution_context* decode(execution_context* execution_context, t_instruction* instruction) {
+	log_info(config_cpu.logger, "LLegó al decode un PCB con instrucciones a ejecutar\n");
 	// To do: esto tiene que eliminarse ya que solamente quiero recibir una lista de instrucciones yo.
-	op_code COD_OP = (op_code)list_get(instruction, 0);
-	printf("El valor de op_code es: %d\n", (int)COD_OP);
-	switch (COD_OP) {
+	printf("El valor de op code es: %d\n", instruction->op_code);
+	switch (instruction->op_code) {
 		case SET:
 			log_info(config_cpu.logger, "EJECUTANDO UN SET\n");
 			execute_set(execution_context, instruction);
@@ -73,8 +72,8 @@ execution_context* decode(execution_context* execution_context, t_list* instruct
 	return execution_context;
 }
 
-t_list* get_instrucction(execution_context* execution_context) {
-	return list_get((execution_context->instructions), execution_context->program_counter);
+t_instruction* get_instruction(execution_context* ec) {
+	return list_get(ec->instructions->elements, ec->program_counter);
 }
 
 void dislodge() {

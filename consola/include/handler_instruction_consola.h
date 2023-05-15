@@ -8,6 +8,4 @@
 // Lee un archivo y manda sus instrucciones al kernel
 t_package* process_instructions(int socket_kernel);
 
-t_package* serialize_instruction(char* line);
-
 #endif

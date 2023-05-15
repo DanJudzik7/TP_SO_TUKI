@@ -11,7 +11,7 @@ extern configuration_cpu config_cpu;
 
 void fetch(execution_context* execution_context);
 execution_context* decode(execution_context* execution_context, t_list* instruction);
-t_list* get_instrucction(execution_context* execution_context);
+t_list* get_instruction(execution_context* execution_context);
 void dislodge();
 
 #endif

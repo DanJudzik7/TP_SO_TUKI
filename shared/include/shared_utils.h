@@ -36,8 +36,6 @@ typedef enum op_code {
 	YIELD			 // 15
 } op_code;
 
-
-
 typedef struct segment_table {
 	uint32_t id;
 	void* segment_table_direction;
@@ -92,24 +90,24 @@ typedef struct execution_context {
 } execution_context;
 
 typedef enum t_package_type {
-	SERIALIZED, // 0
-	MESSAGE_OK, // 1
-	MESSAGE_FLAW, // 2
-	MESSAGE_BUSY, // 3
-	INSTRUCTIONS, // 4
-	EXECUTION_CONTEXT, // 5
+	SERIALIZED,			// 0
+	MESSAGE_OK,			// 1
+	MESSAGE_FLAW,		// 2
+	MESSAGE_BUSY,		// 3
+	INSTRUCTIONS,		// 4
+	EXECUTION_CONTEXT,	// 5
 } t_package_type;
 
 typedef enum execution_context_index {
 	EC_INSTRUCTIONS,
 	PROGRAM_COUNTER,
 	UPDATED_STATE,
-	CPU_REGISTER,
+	CPU_REGISTERS,
 	SEGMENT_TABLE
 } execution_context_index;
 
 typedef struct t_pcb {
-	int pid; // También funciona como ID del socket
+	int pid;  // También funciona como ID del socket
 	process_state state;
 	int aprox_burst_time;
 	time_t last_ready_time;
@@ -128,23 +126,19 @@ typedef struct t_global_config_kernel {
 	int connection_kernel;
 } t_global_config_kernel;
 
-typedef struct config_cpu{
+typedef struct config_cpu {
 	t_log* logger;
 	sem_t flag_dislodge;
 	sem_t flag_running;
 	int connection_kernel;
 } configuration_cpu;
 
-typedef struct config_memory{
-    t_log* logger;
-    t_config* config;
+typedef struct config_memory {
+	t_log* logger;
+	t_config* config;
 	char* algorithm;
 } configuration_memory;
 
-typedef struct t_buffer { // Esto se va a ir
-	uint32_t size;
-	void* stream;
-} t_buffer;
 typedef struct t_instruction {
 	op_code op_code;
 	t_list* args;
@@ -152,14 +146,9 @@ typedef struct t_instruction {
 
 typedef struct t_package {
 	uint64_t size;
-	int32_t field;
+	int32_t type;
 	void* buffer;
 } t_package;
-
-typedef struct t_package_reception { // Esto se va a ir
-	t_package_type package_type;
-	t_buffer* buffer;
-} t_package_reception;
 
 // Carga la configuración de un módulo
 t_config* start_config(char* module);
@@ -179,12 +168,6 @@ int socket_accept(int server_socket);
 // Inicializa un socket servidor y lo vincula a un puerto específico. Retorna el descriptor del socket creado.
 int socket_initialize_server(char* port);
 
-// Recibe un número Unsigned Long de un cliente a través del socket especificado, o NULL si hubo error
-uint64_t* socket_receive_long(int target_socket);
-
-// Recibe un número Int de un cliente a través del socket especificado, o NULL si hubo error
-int32_t* socket_receive_int(int target_socket);
-
 // Recibe un paquete completo de un cliente a través del socket especificado.
 t_package* socket_receive(int target_socket);
 
@@ -200,14 +183,22 @@ bool socket_send(int target_socket, t_package* package);
 // Cierra la conexión del socket especificado.
 void socket_close(int target_socket);
 
-// Serializa el Execution Context
+t_package* serialize_cpu_registers(cpu_register* registers);
+
+cpu_register* deserialize_cpu_registers(void* source);
+
+t_package* serialize_segment_table(segment_table* st);
+
+segment_table* deserialize_segment_table(void* source);
+
+// Serializa el execution_context a un paquete
 t_package* serialize_execution_context(execution_context* ec);
 
-// Recibe un execution context
+// Deserializa un Execution Context desde un paquete
 execution_context* deserialize_execution_context(t_package* package);
 
 // Crea un paquete de modo key-value
-t_package* package_new_dict(int32_t key, void* value, uint64_t value_size);
+t_package* package_new_dict(int32_t key, void* value, uint64_t* value_size);
 
 // Inserta un paquete dentro de otro
 void package_nest(t_package* package, t_package* nested);
@@ -216,7 +207,7 @@ void package_nest(t_package* package, t_package* nested);
 void package_write(t_package* package, char* string);
 
 // Crea y retorna un paquete con el código de operación especificado.
-t_package* package_new(int32_t field);
+t_package* package_new(int32_t type);
 
 // Destruye el paquete especificado
 void package_destroy(t_package* package);
@@ -230,16 +221,34 @@ void package_close(t_package* package);
 // Devuelve el mensaje deserializado, y destruye el paquete
 char* deserialize_message(t_package* package);
 
-// Deserializa una instrucción y la agrega a la queue
+// Serializa una lista de instrucciones
+t_package* serialize_instructions(t_queue* instructions, bool is_ec);
+
+// Convierte una instrucción en texto a un package
+t_package* parse_instruction(char* instruction);
+
+// Deserializa las instrucciones y las agrega a una queue
 void deserialize_instructions(t_package* package, t_queue* instructions);
+
+// Comrpueba si en una lista de paquetes aún hay más paquetes a continuación
+bool package_decode_isset(t_package* package, uint64_t offset);
+
+// Deserializa un string
+char* package_decode_string(void* source, uint64_t* offset);
+
+// Deserializa un string a un espacio en memoria existente
+void package_decode_buffer(void* source, void* dest, uint64_t* offset);
+
+// Deserializa un paquete
+t_package* package_decode(void* source, uint64_t* offset);
 
 // En base a las configuraciones, se conecta a un módulo
 int connect_module(t_config* config, t_log* logger, char* modulo);
 
 // En desarrollo
-int receive_modules(t_log* logger, t_config* config);
+int receive_module(t_log* logger, t_config* config);
 
 // Convierte un código de operación a su representación numérica
-op_code get_opcode(char* code);
+op_code parse_op_code(char* code);
 
 #endif

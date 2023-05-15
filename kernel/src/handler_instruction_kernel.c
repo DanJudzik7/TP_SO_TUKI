@@ -44,22 +44,21 @@ void handle_incoming_instructions(t_pcb* pcb) {
 			printf("El cliente se desconectó\n");
 			break;
 		}
-		if (package->field == MESSAGE_OK || package->field == MESSAGE_FLAW) {
+		if (package->type == MESSAGE_OK || package->type == MESSAGE_FLAW) {
 			socket_send_message(pcb->pid, "Mensaje recibido", false);
 			char* message = deserialize_message(package);
 			printf("< %s\n", message);
 			free(message);
-		} else if (package->field == INSTRUCTIONS) {
+		} else if (package->type == INSTRUCTIONS) {
 			socket_send_message(pcb->pid, "Instrucciones recibidas", false);
 			deserialize_instructions(package, pcb->execution_context->instructions);
 			pcb->state = READY;
 		} else {
-			char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->field);
+			char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
 			socket_send_message(pcb->pid, invalid_package, true);
 			free(invalid_package);
-			package_destroy(package);
-			continue;
 		}
+		package_destroy(package);
 	}
 	socket_close(pcb->pid);
 }
