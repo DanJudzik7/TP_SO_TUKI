@@ -1,4 +1,4 @@
-#include "planificador.h"
+#include "scheduler.h"
 
 void long_term_schedule(t_global_config_kernel* gck) {
 	log_info(gck->logger, "Realizando Planificación a Largo Plazo");

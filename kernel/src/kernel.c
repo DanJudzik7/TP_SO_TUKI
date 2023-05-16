@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 			if (!socket_send(socket_cpu, ec_package)) break;
 			t_package* package = socket_receive(socket_cpu);
 			if (package != NULL && package->type == EXECUTION_CONTEXT) {
-				pcb->execution_context = deserialize_execution_context(package->buffer);
+				pcb->execution_context = deserialize_execution_context(package);
 				log_info(logger, "Recibido el Execution Context del proceso %d", pcb->pid);
 			} else
 				log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);

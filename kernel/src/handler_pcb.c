@@ -20,6 +20,38 @@ void listen_consoles(t_global_config_kernel* gck) {
 	}
 }
 
+void handle_incoming_instructions(t_pcb* pcb) {
+	printf("Nueva consola conectada. PID: %i\n", pcb->pid);
+	char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
+	if (!socket_send(pcb->pid, serialize_message(welcome_message, true))) pcb->state = EXIT_PROCESS;
+	free(welcome_message);
+	while (1) {
+		if (pcb->state == EXIT_PROCESS) break;
+		t_package* package = socket_receive(pcb->pid);
+		if (package == NULL) {
+			pcb->state = EXIT_PROCESS;
+			printf("El cliente se desconectó\n");
+			break;
+		}
+		if (package->type == MESSAGE_OK || package->type == MESSAGE_FLAW) {
+			if (!socket_send(pcb->pid, serialize_message("Mensaje recibido", false))) pcb->state = EXIT_PROCESS;
+			char* message = deserialize_message(package);
+			printf("< %s\n", message);
+			free(message);
+		} else if (package->type == INSTRUCTIONS) {
+			if (!socket_send(pcb->pid, serialize_message("Instrucciones recibidas", false))) pcb->state = EXIT_PROCESS;
+			deserialize_instructions(package, pcb->execution_context->instructions);
+			pcb->state = READY;
+		} else {
+			char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
+			if (!socket_send(pcb->pid, serialize_message(invalid_package, true))) pcb->state = EXIT_PROCESS;
+			free(invalid_package);
+		}
+		package_destroy(package);
+	}
+	socket_close(pcb->pid);
+}
+
 t_pcb* pcb_new(int pid, int burst_time) {
 	// La inicialización se hace de forma segura en memoria (con memset)
 	t_pcb* pcb = s_malloc(sizeof(t_pcb));
@@ -53,9 +85,11 @@ void pcb_destroy(t_pcb* pcb) {
 }
 
 void delete_file(t_file* file) {
-	// Implementar
+	free(file->file_direction);
+	free(file);
 }
 
 void delete_instruction(t_instruction* instruction) {
-	// Implementar
+	list_destroy_and_destroy_elements(instruction->args, free);
+	free(instruction);
 }

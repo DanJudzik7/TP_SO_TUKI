@@ -1,11 +1,9 @@
-#ifndef PLANIFICADOR_H
-#define PLANIFICADOR_H
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
 
-
-#include <stdio.h>
 #include "algorithms.h"
-#include "shared_utils.h"
 #include "handler_pcb.h"
+#include "shared_utils.h"
 
 // Se llama cuando: se crean procesos, o cuando uno existente llega a EXIT
 void long_term_schedule(t_global_config_kernel* gck);

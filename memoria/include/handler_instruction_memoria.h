@@ -3,8 +3,9 @@
 
 #include "create_memory.h"
 #include "delete_memory.h"
-#include "shared_utils.h"
+#include "shared_serializer.h"
+#include "shared_socket.h"
 
-int instruction_handler_memoria(int cliente_fd);
+int instruction_handler_memoria(int socket_client);
 
 #endif

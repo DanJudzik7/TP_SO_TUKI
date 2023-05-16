@@ -32,23 +32,24 @@ int main(int argc, char** argv) {
 }
 
 execution_context* create_context_test() {
-	t_queue* instructions;
+	t_instruction* instruction_set = s_malloc(sizeof(t_instruction));
+	instruction_set->op_code = SET;
+	instruction_set->args = list_create();
+	list_add(instruction_set->args, "AX");
+	list_add(instruction_set->args, "1");
 
-	t_list* sublist1 = list_create();
-	list_add(sublist1, SET);
-	list_add(sublist1, "AX");
-	list_add(sublist1, "HOLA");
+	t_instruction* instruction_yield = s_malloc(sizeof(t_instruction));
+	instruction_yield->op_code = YIELD;
+	instruction_yield->args = list_create();
 
-	t_list* sublist2 = list_create();
-	list_add(sublist2, YIELD);
+	t_instruction* instruction_exit = s_malloc(sizeof(t_instruction));
+	instruction_exit->op_code = EXIT;
+	instruction_exit->args = list_create();
 
-	t_list* sublist3 = list_create();
-	list_add(sublist3, EXIT);
-
-	instructions = list_create();
-	list_add(instructions, sublist1);
-	list_add(instructions, sublist2);
-	list_add(instructions, sublist3);
+	t_queue* instructions = queue_create();
+	queue_push(instructions, instruction_set);
+	queue_push(instructions, instruction_yield);
+	queue_push(instructions, instruction_exit);
 
 	execution_context* context = s_malloc(sizeof(execution_context));
 	context->instructions = instructions;

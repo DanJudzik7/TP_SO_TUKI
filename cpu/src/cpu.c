@@ -3,7 +3,6 @@
 configuration_cpu config_cpu;
 
 int main(int argc, char** argv) {
-
 	sem_init(&(config_cpu.flag_running), 0, 1);
 	sem_init(&(config_cpu.flag_dislodge), 0, 1);
 
@@ -24,7 +23,7 @@ int main(int argc, char** argv) {
 	// int conn_memoria = connect_module(config, logger, "MEMORIA");
 
 	// int kernel_fd = receive_modules(logger, config);
-	execution_context* context = create_context_test();
+	// execution_context* context = create_context_test();
 	// TODO: En el primer recv llega basura no se porque
 	// socket_receive_message(kernel_fd);
 	// socket_receive_message(kernel_fd);
@@ -37,7 +36,6 @@ int main(int argc, char** argv) {
 	pthread_t thread_consola;
 	pthread_create(&thread_consola, NULL, (void*)listen_kernel, socket_cpu);
 	pthread_join(&thread_consola, NULL);
-	// TODO: sigo completando el t_pcb de este proceso
 
 	// Recibe los pcbs que aca están harcodeados y los opera
 	// int kernel_socket = socket_accept(socket_cpu);
@@ -65,7 +63,7 @@ void listen_kernel(int socket_cpu) {
 			}
 			if (package->type != EXECUTION_CONTEXT) {
 				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
-				socket_send_message(kernel_socket, invalid_package, true);
+				socket_send(kernel_socket, serialize_message(invalid_package, true));
 				free(invalid_package);
 				package_destroy(package);
 				break;
@@ -87,29 +85,30 @@ void listen_kernel(int socket_cpu) {
 }
 
 execution_context* create_context_test() {
-	t_queue* instructions;
+	t_instruction* instruction_set = s_malloc(sizeof(t_instruction));
+	instruction_set->op_code = SET;
+	instruction_set->args = list_create();
+	list_add(instruction_set->args, "AX");
+	list_add(instruction_set->args, "1");
 
-	t_list* sublist1 = list_create();
-	list_add(sublist1, SET);
-	list_add(sublist1, "AX");
-	list_add(sublist1, "HOLA");
+	t_instruction* instruction_yield = s_malloc(sizeof(t_instruction));
+	instruction_yield->op_code = YIELD;
+	instruction_yield->args = list_create();
 
-	t_list* sublist2 = list_create();
-	list_add(sublist2, YIELD);
+	t_instruction* instruction_exit = s_malloc(sizeof(t_instruction));
+	instruction_exit->op_code = EXIT;
+	instruction_exit->args = list_create();
 
-	t_list* sublist3 = list_create();
-	list_add(sublist3, EXIT);
-
-	instructions = list_create();
-	list_add(instructions, sublist1);
-	list_add(instructions, sublist2);
-	list_add(instructions, sublist3);
+	t_queue* instructions = queue_create();
+	queue_push(instructions, instruction_set);
+	queue_push(instructions, instruction_yield);
+	queue_push(instructions, instruction_exit);
 
 	execution_context* context = s_malloc(sizeof(execution_context));
 	context->instructions = instructions;
 	context->program_counter = 0;
 	context->updated_state = NEW;
-	context->cpu_register = s_malloc(sizeof(cpu_register));  // inicializa el puntero
+	context->cpu_register = s_malloc(sizeof(cpu_register));	 // inicializa el puntero
 	context->segment_table = s_malloc(sizeof(segment_table));
 
 	return context;

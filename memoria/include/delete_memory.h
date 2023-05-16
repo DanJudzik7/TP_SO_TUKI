@@ -3,6 +3,6 @@
 
 #include "shared_utils.h"
 
-int delete_memory_segment(int id);  //Actualmente necesita ser implementado, por ahora regresa un ok unicamente
+bool delete_memory_segment(int id);	// Actualmente necesita ser implementado, por ahora regresa un ok unicamente
 
 #endif

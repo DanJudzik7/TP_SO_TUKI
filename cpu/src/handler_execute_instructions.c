@@ -1,10 +1,10 @@
 #include "handler_execute_instructions.h"
 
-void execute_set(execution_context* execution_context, t_list* instruction) {
+void execute_set(execution_context* execution_context, t_instruction* instruction) {
 	// almaceno el nombre del registro y el valor
-	char* register_name = list_get(instruction, 1);
+	char* register_name = list_get(instruction->args, 0);
 	// lo paso a un int con atoi el valor proporcionado en la lista
-	char* value = list_get(instruction, 2);
+	char* value = list_get(instruction->args, 1);
 
 	printf("El valor es %s\n", value);
 	// comparo el registro y asigno el valor correspondiente
@@ -43,5 +43,5 @@ void execute_set(execution_context* execution_context, t_list* instruction) {
 }
 
 void execute_exit(execution_context* execution_context) {
-	execution_context->updated_state = EXIT;
+	execution_context->updated_state = EXIT_PROCESS;
 }

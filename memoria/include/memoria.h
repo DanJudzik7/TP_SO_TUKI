@@ -1,13 +1,11 @@
 #ifndef MEMORIA_H
 #define MEMORIA_H
-#include <commons/log.h>
-#include <stdbool.h>
-#include <stdio.h>
 
 #include "create_memory.h"
 #include "delete_memory.h"
 #include "handler_instruction_memoria.h"
-#include "shared_utils.h"
+#include "shared_package.h"
+#include "shared_socket.h"
 #include "tests.h"
 
 typedef struct empty_space {
