@@ -52,9 +52,9 @@ void listen_kernel(int socket_cpu) {
 	while (1) {
 		int kernel_socket = socket_accept(socket_cpu);
 		config_cpu.connection_kernel = kernel_socket;
-		if (sem_getvalue(&config_cpu.flag_running, &sem_value)) {
-			log_info(config_cpu.logger, "Mi flag de running es -> %i", sem_value);
-
+		sem_getvalue(&config_cpu.flag_running, &sem_value);
+		log_info(config_cpu.logger, "Mi flag de running es -> %i", sem_value);
+		if (sem_value==1) {
 			t_package* package = socket_receive(kernel_socket);
 			if (package == NULL) {
 				// Definir si acá se tiene que hacer algo más
@@ -68,12 +68,14 @@ void listen_kernel(int socket_cpu) {
 				package_destroy(package);
 				break;
 			}
-			execution_context* context = deserialize_execution_context(package);  // No está terminado
+			execution_context* context = deserialize_execution_context(package);  //  quizas No está terminado
 			sem_wait(&config_cpu.flag_running);
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
+			
 			pthread_t thread;
 			// Se crea un thread para ejecutar el contexto y sus instrucciones
 			pthread_create(&thread, NULL, (void*)fetch, context);
+			log_warning(config_cpu.logger,"hilo de ejecucion creado");
 			pthread_join(&thread, NULL);
 		} else {
 			// En caso contrario envio un mensaje al kernel de que estoy ocupado

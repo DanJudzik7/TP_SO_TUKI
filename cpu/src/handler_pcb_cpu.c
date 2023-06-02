@@ -2,34 +2,35 @@
 
 // obtiene la instrucción (lista) actual a ejecutar
 void fetch(execution_context* execution_context) {
-	int sem_value;
-	t_instruction* instruction = NULL;
-	// ejecuto mientras el flag de desalojo este libre
-	do {
-		printf("Procedemos a ejecutar Instrucciones\n");
-		// Esto no consume el semáforo, solo lo consulta
-		sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
-		printf("\nEl valor obtenido de mi semáforo es: %d ", sem_value);
-		instruction = get_instruction(execution_context);
-		if (sem_value > 0) {
-			if (instruction != NULL) {
-				decode(execution_context, instruction);
-				execution_context->program_counter++;
-			} else {
-				// No hay más instrucciones
-				printf("Error: no existen más instrucciones a ejecutar");
+		printf("llego\n");
+		int sem_value;
+		t_instruction* instruction = NULL;
+		// ejecuto mientras el flag de desalojo este libre
+		do {
+			printf("Procedemos a ejecutar Instrucciones\n");
+			// Esto no consume el semáforo, solo lo consulta
+			sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
+			printf("\nEl valor obtenido de mi semáforo es: %d ", sem_value);
+			instruction = get_instruction(execution_context);
+			if (sem_value == 1) {
+				if (instruction != NULL) {
+					decode(execution_context, instruction);
+					execution_context->program_counter++;
+				} else {
+					// No hay más instrucciones
+					printf("Error: no existen más instrucciones a ejecutar");
+				}
 			}
-		}
-		printf("\nProcediendo a la siguiente ejecucion\n");
-	} while (sem_value > 0);
+			printf("\nProcediendo a la siguiente ejecucion\n");
+		} while (sem_value > 0);
 
-	// Desbloquea el semáforo
-	sem_post(&config_cpu.flag_dislodge);
+		// Desbloquea el semáforo
+		sem_post(&config_cpu.flag_dislodge);
 
-	// sem_post(&config_cpu.flag_dislodge);   Desbloquear el estado running una vez implementado el hilo
-	// t_package* package = package_create(MESSAGE_OK);
-	// package_add(package, execution_context , sizeof(*execution_context));
-	// socket_send_package(package,args->kernel_socket);
+		// sem_post(&config_cpu.flag_dislodge);   Desbloquear el estado running una vez implementado el hilo
+		// t_package* package = package_create(MESSAGE_OK);
+		// package_add(package, execution_context , sizeof(*execution_context));
+		// socket_send_package(package,args->kernel_socket);
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
