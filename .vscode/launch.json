@@ -1,5 +1,16 @@
 {
 	"version": "0.2.0",
+	"compounds": [
+		{
+			"name": "TUKI",
+			"configurations": ["CPU", "Kernel (delayed)", "Console (delayed)"],
+			"presentation": {
+				"group": "+",
+				"order": 1
+			},
+			"stopAll": true
+		}
+	],
 	"configurations": [
 		{
 			"name": "Console",
@@ -10,6 +21,37 @@
 			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"presentation": {
+				"hidden": false,
+				"group": "Módulos",
+				"order": 3
+			},
+			"suppressMultipleSessionWarning": true,
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Console (delayed)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/consola/consola",
+			"preLaunchTask": "Make Console (delayed)",
+			"cwd": "${workspaceFolder}/consola",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"presentation": {
+				"hidden": true
+			},
 			"suppressMultipleSessionWarning": true,
 			"setupCommands": [
 				{
@@ -33,6 +75,36 @@
 			"cwd": "${workspaceFolder}/kernel",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"presentation": {
+				"hidden": false,
+				"group": "Módulos",
+				"order": 2
+			},
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Kernel (delayed)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/kernel/kernel",
+			"preLaunchTask": "Make Kernel (delayed)",
+			"cwd": "${workspaceFolder}/kernel",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"presentation": {
+				"hidden": true
+			},
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -55,6 +127,11 @@
 			"cwd": "${workspaceFolder}/cpu",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"presentation": {
+				"hidden": false,
+				"group": "Módulos",
+				"order": 1
+			},
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",

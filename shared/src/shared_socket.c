@@ -10,6 +10,7 @@ int socket_initialize(char* ip, char* port) {
 
 	// Creamos el socket de escucha del servidor
 	int server_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
+	if (server_socket == -1) return -1;
 
 	if (ip == NULL) { // Para servidor
 		// Asociamos el socket a un port
@@ -90,7 +91,11 @@ int connect_module(t_config* config, t_log* logger, char* module) {
 		printf("Error al enviar mensaje de prueba en %s en %d\n", module, module_socket);
 		return -1;
 	}*/
-	printf("Conectado a módulo %s en socket %d\n", module, module_socket);
+	if (module_socket == -1) {
+		log_error(logger, "No se pudo conectar a módulo %s", module);
+		exit(EXIT_FAILURE);
+	}
+	log_info(logger, "Conectado a módulo %s en socket %d", module, module_socket);
 	return module_socket;
 }
 

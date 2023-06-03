@@ -45,21 +45,15 @@ int main(int argc, char** argv) {
 		t_pcb* pcb = short_term_scheduler(gck);
 		if (pcb == NULL || pcb == 0) continue;
 		pcb->state = EXEC;
-		// Cuando CPU ya funcione, sacar el if del siguiente código
-		if (socket_cpu != -1) {
-			// Mandar a CPU y esperar
-			t_package* ec_package = serialize_execution_context(pcb->execution_context);
-			// Recibe el nuevo execution context, que puede estar en EXIT o BLOCK
-			if (!socket_send(socket_cpu, ec_package)) break;
-			t_package* package = socket_receive(socket_cpu);
-			if (package != NULL && package->type == EXECUTION_CONTEXT) {
-				pcb->execution_context = deserialize_execution_context(package);
-				log_info(logger, "Recibido el Execution Context del proceso %d", pcb->pid);
-			} else
-				log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
-		} else
-			log_info(logger, "CPU no está disponible, por lo que el Execution Context del proceso %d no fue enviado", pcb->pid);
-		queue_clean(pcb->execution_context->instructions);	// WORKAROUND TEMPORAL. Ya que todavía la conexión a CPU no está, borro todas las instrucciones para simular su ejecución.
+		// Mandar a CPU y esperar
+		t_package* ec_package = serialize_execution_context(pcb->execution_context);
+		// Recibe el nuevo execution context, que puede estar en EXIT o BLOCK
+		if (!socket_send(socket_cpu, ec_package)) break;
+		t_package* package = socket_receive(socket_cpu);
+		if (package != NULL && package->type == EXECUTION_CONTEXT) {
+			pcb->execution_context = deserialize_execution_context(package);
+			log_info(logger, "Recibido el Execution Context del proceso %d", pcb->pid);
+		} else log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
 		// Revisa si está bloqueado
 		pcb->state = pcb->execution_context->updated_state;
 		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.

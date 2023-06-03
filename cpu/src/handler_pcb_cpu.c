@@ -10,7 +10,7 @@ void fetch(execution_context* execution_context) {
 			printf("Procedemos a ejecutar Instrucciones\n");
 			// Esto no consume el semáforo, solo lo consulta
 			sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
-			printf("\nEl valor obtenido de mi semáforo es: %d ", sem_value);
+			printf("El valor obtenido de mi semáforo es: %d\n", sem_value);
 			instruction = get_instruction(execution_context);
 			if (sem_value == 1) {
 				if (instruction != NULL) {
@@ -18,10 +18,10 @@ void fetch(execution_context* execution_context) {
 					execution_context->program_counter++;
 				} else {
 					// No hay más instrucciones
-					printf("Error: no existen más instrucciones a ejecutar");
+					printf("Error: no existen más instrucciones a ejecutar\n");
 				}
 			}
-			printf("\nProcediendo a la siguiente ejecucion\n");
+			printf("Procediendo a la siguiente ejecuci+on\n");
 		} while (sem_value > 0);
 
 		// Desbloquea el semáforo
@@ -74,11 +74,12 @@ execution_context* decode(execution_context* execution_context, t_instruction* i
 }
 
 t_instruction* get_instruction(execution_context* ec) {
+	if (ec->program_counter >= list_size(ec->instructions->elements)) return NULL;
 	return list_get(ec->instructions->elements, ec->program_counter);
 }
 
 void dislodge() {
-	log_warning(config_cpu.logger, "Desalojando el pcb\n");
+	log_warning(config_cpu.logger, "Desalojando el pcb");
 	// Bloquear el semáforo
 	sem_wait(&config_cpu.flag_dislodge);
 };

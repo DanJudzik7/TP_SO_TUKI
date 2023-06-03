@@ -5,11 +5,11 @@ t_pcb* pick_with_fifo(t_queue* active_pcbs) {
 	if (queue_is_empty(active_pcbs)) return NULL;
 	// Obtiene el primer elemento READY, lo borra de la queue y lo devuelve
 	// Trabaja a la queue como una list para esto
-	return list_remove_by_condition(active_pcbs->elements, (void*)pcb_is_ready);
+	return list_remove_by_condition(active_pcbs->elements, (void*)pcb_is_available);
 }
 
-bool pcb_is_ready(t_pcb* pcb) {
-	return pcb->state == READY;
+bool pcb_is_available(t_pcb* pcb) {
+	return pcb->state == READY && !queue_is_empty(pcb->execution_context->instructions);
 }
 
 // Esto se tiene que adaptar para no devolver nada con BLOCK
@@ -43,7 +43,7 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 			highest_response_ratio = response_ratio;
 
 			// Si el PCB siguiente no es nulo, se agrega a la cola temporal
-			if (next_pcb != NULL) {
+			if (next_pcb != NULL && pcb_is_available(next_pcb)) { // Esta línea la modifiqué para que se asegure de que el PCB esté listo
 				queue_push(queue_temporal, next_pcb);
 			}
 

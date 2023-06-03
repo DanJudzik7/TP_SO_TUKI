@@ -20,6 +20,11 @@
             }
         },
         {
+            "label": "Make Console (delayed)",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Delay", "Delay", "Make Console"],
+        },
+        {
             "label": "Make Console",
             "type": "shell",
             "command": "make",
@@ -33,6 +38,11 @@
             "presentation": {
                 "clear": true
             }
+        },
+        {
+            "label": "Make Kernel (delayed)",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Delay", "Make Kernel"],
         },
         {
             "label": "Make Kernel",
@@ -128,6 +138,21 @@
             ],
             "presentation": {
                 "clear": true
+            }
+        },
+        {
+            "label": "Delay",
+            "type": "shell",
+            "command": "sleep 3",
+            "windows": {
+                "command": "ping 127.0.0.1 -n 3 > nul"
+            },
+            "group": "none",
+            "presentation": {
+                "reveal": "never",
+                "echo": false,
+                "showReuseMessage": false,
+                "close": true
             }
         }
     ],

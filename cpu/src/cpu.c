@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
 	// pcb_test->execution_context = context;
 
 	pthread_t thread_consola;
-	pthread_create(&thread_consola, NULL, (void*)listen_kernel, socket_cpu);
-	pthread_join(&thread_consola, NULL);
+	pthread_create(&thread_consola, NULL, (void*)listen_kernel, &socket_cpu);
+	pthread_join(thread_consola, NULL);
 
 	// Recibe los pcbs que aca están harcodeados y los opera
 	// int kernel_socket = socket_accept(socket_cpu);
@@ -46,11 +46,11 @@ int main(int argc, char** argv) {
 	// free(pcb_test);
 }
 
-void listen_kernel(int socket_cpu) {
+void listen_kernel(int* socket_cpu) {
 	int sem_value;
 
 	while (1) {
-		int kernel_socket = socket_accept(socket_cpu);
+		int kernel_socket = socket_accept(*socket_cpu);
 		config_cpu.connection_kernel = kernel_socket;
 		sem_getvalue(&config_cpu.flag_running, &sem_value);
 		log_info(config_cpu.logger, "Mi flag de running es -> %i", sem_value);
@@ -58,32 +58,35 @@ void listen_kernel(int socket_cpu) {
 			t_package* package = socket_receive(kernel_socket);
 			if (package == NULL) {
 				// Definir si acá se tiene que hacer algo más
-				log_warning(config_cpu.logger, "El kernel se desconectó");
+				log_error(config_cpu.logger, "El kernel se desconectó");
 				break;
 			}
 			if (package->type != EXECUTION_CONTEXT) {
 				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
 				socket_send(kernel_socket, serialize_message(invalid_package, true));
+				log_warning(config_cpu.logger, "Se recibió un paquete inválido: %i", package->type);
 				free(invalid_package);
 				package_destroy(package);
-				break;
+				continue;
 			}
-			execution_context* context = deserialize_execution_context(package);  //  quizas No está terminado
+			execution_context* context = deserialize_execution_context(package);
 			sem_wait(&config_cpu.flag_running);
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
 			
 			pthread_t thread;
 			// Se crea un thread para ejecutar el contexto y sus instrucciones
 			pthread_create(&thread, NULL, (void*)fetch, context);
-			log_warning(config_cpu.logger,"hilo de ejecucion creado");
-			pthread_join(&thread, NULL);
+			log_warning(config_cpu.logger, "Hilo de ejecución creado");
+			pthread_join(thread, NULL);
 		} else {
-			// En caso contrario envio un mensaje al kernel de que estoy ocupado
-			log_info(config_cpu.logger, "ESTOY OCUPADO");
+			// En caso contrario se envía un mensaje al kernel de que estoy ocupado
+			log_info(config_cpu.logger, "La CPU está ocupada");
 			t_package* package = package_new(MESSAGE_BUSY);
 			socket_send(kernel_socket, package);
 		}
 	}
+	log_warning(config_cpu.logger, "Se cerró el socket de conexión con el kernel");
+	return 0;
 }
 
 execution_context* create_context_test() {
@@ -110,7 +113,7 @@ execution_context* create_context_test() {
 	context->instructions = instructions;
 	context->program_counter = 0;
 	context->updated_state = NEW;
-	context->cpu_register = s_malloc(sizeof(cpu_register));	 // inicializa el puntero
+	context->cpu_register = s_malloc(sizeof(cpu_register));
 	context->segment_table = s_malloc(sizeof(segment_table));
 
 	return context;
