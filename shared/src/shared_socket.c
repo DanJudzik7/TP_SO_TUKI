@@ -10,6 +10,8 @@ int socket_initialize(char* ip, char* port) {
 
 	// Creamos el socket de escucha del servidor
 	int server_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
+	int yes = 1;
+	setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 	if (server_socket == -1) return -1;
 
 	if (ip == NULL) { // Para servidor
