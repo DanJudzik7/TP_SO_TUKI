@@ -7,22 +7,21 @@ void fetch(execution_context* execution_context) {
 		t_instruction* instruction = NULL;
 		// ejecuto mientras el flag de desalojo este libre
 		do {
-			printf("Procedemos a ejecutar Instrucciones\n");
 			// Esto no consume el semáforo, solo lo consulta
 			sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
-			printf("El valor obtenido de mi semáforo es: %d\n", sem_value);
 			instruction = get_instruction(execution_context);
-			if (sem_value == 1) {
-				if (instruction != NULL) {
+			if (sem_value == 1 && instruction != NULL) {
 					decode(execution_context, instruction);
 					execution_context->program_counter++;
-				} else {
-					// No hay más instrucciones
-					printf("Error: no existen más instrucciones a ejecutar\n");
-				}
 			}
-			printf("Procediendo a la siguiente ejecuci+on\n");
+			printf("Procediendo a la siguiente instruccion\n");
 		} while (sem_value > 0);
+		/* TODO: Actualmente deshabilitado hasta encontrar el fix con el execution_context que da 8 bits de mas
+		t_package* package_context = serialize_execution_context(execution_context);
+		log_info(config_cpu.logger, "Context enviado al Kernel");
+		if (!socket_send(config_cpu.connection_kernel, package_context)) {
+			log_error(config_cpu.logger, "ERROR AL ENVIAR EL CONTEXT AL KERNEL");
+		}*/
 
 		// Desbloquea el semáforo
 		sem_post(&config_cpu.flag_dislodge);
@@ -36,8 +35,7 @@ void fetch(execution_context* execution_context) {
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
 // TODO:: y si la misma requiere de una traducción de dirección lógica a dirección física.
 execution_context* decode(execution_context* execution_context, t_instruction* instruction) {
-	log_info(config_cpu.logger, "LLegó al decode un PCB con instrucciones a ejecutar\n");
-	// To do: esto tiene que eliminarse ya que solamente quiero recibir una lista de instrucciones yo.
+	// TODO: esto tiene que eliminarse ya que solamente quiero recibir una lista de instrucciones yo.
 	printf("El valor de op code es: %d\n", instruction->op_code);
 	switch (instruction->op_code) {
 		case SET:
@@ -60,16 +58,17 @@ execution_context* decode(execution_context* execution_context, t_instruction* i
 			log_warning(config_cpu.logger, "Implementar función\n");
 			break;
 		case YIELD:
+			log_warning(config_cpu.logger, "Ejecutando un YIELD");
 			dislodge();
 			break;
 		case EXIT:
+			log_warning(config_cpu.logger, "Ejecutando un EXIT");
 			execute_exit(execution_context);
 			dislodge();
 			break;
 		default:
 			break;
 	}
-	log_info(config_cpu.logger, "LLego al decode un PCB con instrucciones a ejecutar\n");
 	return execution_context;
 }
 
@@ -79,7 +78,7 @@ t_instruction* get_instruction(execution_context* ec) {
 }
 
 void dislodge() {
-	log_warning(config_cpu.logger, "Desalojando el pcb");
+	log_warning(config_cpu.logger, "Desalojando el Context");
 	// Bloquear el semáforo
 	sem_wait(&config_cpu.flag_dislodge);
 };

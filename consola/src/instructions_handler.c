@@ -14,7 +14,7 @@ t_package* process_instructions(int socket_kernel) {
 	char* line = s_malloc(512 * sizeof(char));
 	while (fgets(line, 512, instructions)) {
 		line[strlen(line) - 1] = '\0';
-		package_nest(package, parse_instruction(line));
+		if(strlen(line)>0) package_nest(package, parse_instruction(line));
 	}
 	fclose(instructions);
 	return package;

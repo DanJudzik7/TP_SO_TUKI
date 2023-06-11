@@ -15,12 +15,29 @@ char* deserialize_message(t_package* package) {
 
 t_package* serialize_execution_context(execution_context* ec) {
 	t_package* package = package_new(EXECUTION_CONTEXT);
+	
 	uint64_t size4 = 4;
 	package_nest(package, serialize_instructions(ec->instructions, true));
-	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(ec->program_counter), &size4));
+	printf("Tamaño serializado del paquete luego de las instrucciones -> %lu bytes\n", package->size);
+	
+    uint64_t program_counter_64 = ec->program_counter;
+	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(program_counter_64), &size4));
+	printf("\nTamaño PROGRAM COUNTER -> %u bytes\n",  &(ec->program_counter));
+	printf("Tamaño serializado del paquete luego del PROGRAM COUNTER -> %lu bytes\n", package->size);
+
 	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), &size4));
+	printf("\nTamaño UPDATED STATE-> %lu bytes\n",   &(ec->updated_state));
+	printf("Tamaño serializado del paquete luego del UPDATED STATE -> %lu bytes\n", package->size);
+
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
+	printf("\nTamaño CPU REGISTERS -> %lu bytes\n",  sizeof(ec->cpu_register));
+	printf("Tamaño serializado del paquete luego del CPU REGISTERS-> %lu bytes\n", package->size);
+
 	package_nest(package, serialize_segment_table(ec->segment_table));
+	printf("\nTamaño CPU REGISTERS -> %lu bytes\n",  &(ec->program_counter));
+	printf("Tamaño serializado del paquete luego del SEGMENT TABLE-> %lu bytes\n", package->size);
+
+	printf("\n\n\nTamaño TOTAL serializado del paquete: %lu bytes\n", package->size);
 	return package;
 }
 
@@ -34,12 +51,15 @@ execution_context* deserialize_execution_context(t_package* package) {
 			case EC_INSTRUCTIONS:
 				ec->instructions = queue_create();
 				deserialize_instructions(nested_package, ec->instructions);
+				printf("Tamaño deserializado de INSTRUCTIONS: %lu bytes\n", offset - offset_start);
 				break;
 			case PROGRAM_COUNTER:
-				package_decode_buffer(nested_package->buffer, &(ec->program_counter), &offset_start);
+				ec->program_counter = deserialize_program_counter(nested_package->buffer);
+				printf("Tamaño deserializado de PROGRAM_COUNTER: %lu bytes\n", offset - offset_start);
 				break;
 			case UPDATED_STATE:
 				package_decode_buffer(nested_package->buffer, &(ec->updated_state), &offset_start);
+				printf("Tamaño deserializado de UPDATE_STATE: %lu bytes\n", offset - offset_start);
 				break;
 			case CPU_REGISTERS:
 				ec->cpu_register = deserialize_cpu_registers(nested_package->buffer);
@@ -56,6 +76,14 @@ execution_context* deserialize_execution_context(t_package* package) {
 	return ec;
 }
 
+uint32_t deserialize_program_counter(void* buffer){
+	 uint64_t* program_counter_64 = s_malloc(sizeof(uint64_t));
+	memcpy(program_counter_64, buffer, sizeof(uint64_t));
+    uint32_t program_counter_32 = (uint32_t)(*program_counter_64);
+    free(program_counter_64);
+    return program_counter_32;
+}
+
 t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
 	t_package* package = package_new(is_ec ? EC_INSTRUCTIONS : INSTRUCTIONS);
 	// Recorre la cola de instrucciones y las serializa
@@ -66,6 +94,7 @@ t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
 		for (int j = 0; j < list_size(instruction->args); j++) package_write(nested, list_get(instruction->args, j));
 		package_nest(package, nested);
 	}
+	printf("Tamaño serializado del paquete luego de las instrucciones SIN OP_CODE -> %lu bytes", package->size);
 	return package;
 }
 
@@ -82,6 +111,7 @@ void deserialize_instructions(t_package* package, t_queue* instructions) {
 		while (package_decode_isset(instruction_package, offset_list)) list_add(instruction->args, package_decode_string(instruction_package->buffer, &offset_list));
 		queue_push(instructions, instruction);
 		package_destroy(instruction_package);
+		printf("Tamaño deserializado de INSTRUCTIONS: %lu bytes\n",offset);
 	}
 }
 
@@ -124,6 +154,7 @@ cpu_register* deserialize_cpu_registers(void* source) {
 	package_decode_buffer(source, registers->register_16.RBX, &offset);
 	package_decode_buffer(source, registers->register_16.RCX, &offset);
 	package_decode_buffer(source, registers->register_16.RDX, &offset);
+	printf("Tamaño deserializado de CPU_REGISTERS: %lu bytes\n",offset);
 	return registers;
 }
 
@@ -141,5 +172,21 @@ segment_table* deserialize_segment_table(void* source) {
 	memset(st, 0, sizeof(segment_table));
 	// Implementar segment tables acá. Por ahora, manda solo un dato de ejemplo.
 	package_decode_buffer(source, &(st->id), &offset);
+	printf("Tamaño deserializado de SEGMENT_TABLE: %lu bytes\n",offset);
 	return st;
+}
+
+void serialize_package(t_package* package) {
+    uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;
+    void* stream = s_malloc(package_size);
+    uint64_t offset = 0;
+    memcpy(stream + offset, &(package->size), sizeof(uint64_t));
+    offset += sizeof(uint64_t);
+    memcpy(stream + offset, &(package->type), sizeof(int32_t));
+    offset += sizeof(int32_t);
+    memcpy(stream + offset, package->buffer, package->size);
+    package->type = SERIALIZED;
+    package->size = package_size;
+    free(package->buffer);
+    package->buffer = stream;
 }

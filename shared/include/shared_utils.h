@@ -16,6 +16,12 @@
 #include <time.h>
 #include <unistd.h>
 
+typedef struct t_package {
+	uint64_t size;
+	int32_t type;
+	void* buffer;
+} t_package;
+
 typedef struct cpu_register_4 {
 	char AX[4];
 	char BX[4];

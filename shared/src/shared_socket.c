@@ -39,7 +39,7 @@ int socket_accept(int server_socket) {
 }
 
 bool socket_send(int target_socket, t_package* package) {
-	package_close(package);
+	serialize_package(package);
 	bool send_ret = send(target_socket, package->buffer, package->size, MSG_NOSIGNAL) != -1;
 	package_destroy(package);
 	return send_ret;

@@ -2,16 +2,11 @@
 #define SHARED_PACKAGE_H
 
 #include "shared_utils.h"
+#include "shared_serializer.h"
 
 // Librería de paquetes
 // Se encarga del manejo de bajo nivel de paquetes de datos
 // Permite interpretar tipos recursivos con facilidad
-
-typedef struct t_package {
-	uint64_t size;
-	int32_t type;
-	void* buffer;
-} t_package;
 
 typedef enum t_package_type {
 	SERIALIZED,			// 0
@@ -61,9 +56,6 @@ void package_add(t_package* package, void* value, uint64_t* value_size);
 
 // Agrega texto plano a un paquete
 void package_write(t_package* package, char* string);
-
-// Serializa el paquete especificado reemplazando al original
-void package_close(t_package* package);
 
 // Deserializa un paquete
 t_package* package_decode(void* source, uint64_t* offset);

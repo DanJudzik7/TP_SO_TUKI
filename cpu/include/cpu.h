@@ -13,6 +13,4 @@ extern configuration_cpu config_cpu;
 
 void listen_kernel(int* socket_cpu);
 
-execution_context* create_context_test();
-
 #endif

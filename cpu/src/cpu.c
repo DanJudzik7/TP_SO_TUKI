@@ -55,6 +55,7 @@ void listen_kernel(int* socket_cpu) {
 		sem_getvalue(&config_cpu.flag_running, &sem_value);
 		log_info(config_cpu.logger, "Mi flag de running es -> %i", sem_value);
 		if (sem_value==1) {
+			sem_wait(&config_cpu.flag_running);
 			t_package* package = socket_receive(kernel_socket);
 			if (package == NULL) {
 				// Definir si acá se tiene que hacer algo más
@@ -69,15 +70,15 @@ void listen_kernel(int* socket_cpu) {
 				package_destroy(package);
 				continue;
 			}
-			execution_context* context = deserialize_execution_context(package);
-			sem_wait(&config_cpu.flag_running);
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
+			execution_context* context = deserialize_execution_context(package);
 			
 			pthread_t thread;
 			// Se crea un thread para ejecutar el contexto y sus instrucciones
 			pthread_create(&thread, NULL, (void*)fetch, context);
 			log_warning(config_cpu.logger, "Hilo de ejecución creado");
 			pthread_join(thread, NULL);
+			sem_post(&config_cpu.flag_running);
 		} else {
 			// En caso contrario se envía un mensaje al kernel de que estoy ocupado
 			log_info(config_cpu.logger, "La CPU está ocupada");
@@ -86,35 +87,4 @@ void listen_kernel(int* socket_cpu) {
 		}
 	}
 	log_warning(config_cpu.logger, "Se cerró el socket de conexión con el kernel");
-	return 0;
-}
-
-execution_context* create_context_test() {
-	t_instruction* instruction_set = s_malloc(sizeof(t_instruction));
-	instruction_set->op_code = SET;
-	instruction_set->args = list_create();
-	list_add(instruction_set->args, "AX");
-	list_add(instruction_set->args, "1");
-
-	t_instruction* instruction_yield = s_malloc(sizeof(t_instruction));
-	instruction_yield->op_code = YIELD;
-	instruction_yield->args = list_create();
-
-	t_instruction* instruction_exit = s_malloc(sizeof(t_instruction));
-	instruction_exit->op_code = EXIT;
-	instruction_exit->args = list_create();
-
-	t_queue* instructions = queue_create();
-	queue_push(instructions, instruction_set);
-	queue_push(instructions, instruction_yield);
-	queue_push(instructions, instruction_exit);
-
-	execution_context* context = s_malloc(sizeof(execution_context));
-	context->instructions = instructions;
-	context->program_counter = 0;
-	context->updated_state = NEW;
-	context->cpu_register = s_malloc(sizeof(cpu_register));
-	context->segment_table = s_malloc(sizeof(segment_table));
-
-	return context;
 }

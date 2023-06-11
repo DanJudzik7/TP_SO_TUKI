@@ -15,9 +15,11 @@ t_package* package_new_dict(int32_t key, void* value, uint64_t* value_size) {
 }
 
 void package_nest(t_package* package, t_package* nested) {
-	package_close(nested); // Convierte el package al tipo Serialized
+	serialize_package(nested); // Convierte el package al tipo Serialized
 	uint64_t offset = package->size;
+	printf("Serializamos un paquete n_tamaño -> %lu\n",package->size);
 	package->size += nested->size;
+	printf("El paquete quedo con un nuevo tamaño de -> %lu\n",package->size);
 	package->buffer = realloc(package->buffer, package->size);
 	memcpy(package->buffer + offset, nested->buffer, nested->size);
 	package_destroy(nested);
@@ -34,21 +36,6 @@ void package_add(t_package* package, void* value, uint64_t* value_size) {
 void package_write(t_package* package, char* value) {
 	uint64_t size = strlen(value) + 1;
 	package_add(package, value, &size);
-}
-
-void package_close(t_package* package) {
-    uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;
-    void* stream = s_malloc(package_size);
-    uint64_t offset = 0;
-    memcpy(stream + offset, &(package->size), sizeof(uint64_t));
-    offset += sizeof(uint64_t);
-    memcpy(stream + offset, &(package->type), sizeof(int32_t));
-    offset += sizeof(int32_t);
-    memcpy(stream + offset, package->buffer, package->size);
-    package->type = SERIALIZED;
-    package->size = package_size;
-    free(package->buffer);
-    package->buffer = stream;
 }
 
 t_package* package_decode(void* source, uint64_t* offset) {
