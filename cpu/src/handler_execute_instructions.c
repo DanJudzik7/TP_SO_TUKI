@@ -37,9 +37,6 @@ void execute_set(execution_context* execution_context, t_instruction* instructio
 	} else {
 		printf("Registro no válido\n");
 	}
-	printf("El valor del registro %s es %s\n", register_name, registers->register_4.AX);
-
-	execution_context->cpu_register = registers;
 }
 
 void execute_exit(execution_context* execution_context) {

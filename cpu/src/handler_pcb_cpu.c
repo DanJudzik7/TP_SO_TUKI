@@ -16,12 +16,12 @@ void fetch(execution_context* execution_context) {
 			}
 			printf("Procediendo a la siguiente instruccion\n");
 		} while (sem_value > 0);
-		/* TODO: Actualmente deshabilitado hasta encontrar el fix con el execution_context que da 8 bits de mas
+		
 		t_package* package_context = serialize_execution_context(execution_context);
 		log_info(config_cpu.logger, "Context enviado al Kernel");
 		if (!socket_send(config_cpu.connection_kernel, package_context)) {
 			log_error(config_cpu.logger, "ERROR AL ENVIAR EL CONTEXT AL KERNEL");
-		}*/
+		}
 
 		// Desbloquea el semáforo
 		sem_post(&config_cpu.flag_dislodge);

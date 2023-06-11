@@ -17,9 +17,7 @@ t_package* package_new_dict(int32_t key, void* value, uint64_t* value_size) {
 void package_nest(t_package* package, t_package* nested) {
 	serialize_package(nested); // Convierte el package al tipo Serialized
 	uint64_t offset = package->size;
-	printf("Serializamos un paquete n_tamaño -> %lu\n",package->size);
 	package->size += nested->size;
-	printf("El paquete quedo con un nuevo tamaño de -> %lu\n",package->size);
 	package->buffer = realloc(package->buffer, package->size);
 	memcpy(package->buffer + offset, nested->buffer, nested->size);
 	package_destroy(nested);
