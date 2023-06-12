@@ -47,8 +47,8 @@ void set_register_value(char* register_name, char* value, void* register_ptr, si
     }
 	size_t value_len = strlen(value);
     if (value_len > register_size) {
-		printf("Error: tamaño del registro -> %u\n",value_len);
-		printf("Error: tamaño del value_len -> %u\n",register_size);
+		printf("Error: tamaño del registro -> %lu\n",value_len);
+		printf("Error: tamaño del value_len -> %lu\n",register_size);
         printf("Error: El valor excede el tamaño del registro\n");
         return;
     }

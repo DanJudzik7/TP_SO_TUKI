@@ -93,6 +93,10 @@ void deserialize_instructions(t_package* package, t_queue* instructions) {
 		// Carga los args de package_add
 		while (package_decode_isset(instruction_package, offset_list)) list_add(instruction->args, package_decode_string(instruction_package->buffer, &offset_list));
 		queue_push(instructions, instruction);
+		//TODO: BORRAR
+		printf("\nINSTRUCCIONES CARGADAS-> ");
+		print_instruction(instruction);
+
 		package_destroy(instruction_package);
 	}
 }

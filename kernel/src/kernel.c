@@ -46,15 +46,18 @@ int main(int argc, char** argv) {
 		if (pcb == NULL || pcb == 0) continue;
 		pcb->state = EXEC;
 		// Mandar a CPU y esperar
+		log_warning(logger, "-----------------------Enviando context al CPU-----------------------");
+		print_execution_context(pcb->execution_context);
+		log_warning(logger, "---------------------------------------------------------------------");
 		t_package* ec_package = serialize_execution_context(pcb->execution_context);
 		// Recibe el nuevo execution context, que puede estar en EXIT o BLOCK
 		if (!socket_send(socket_cpu, ec_package)) break;
 		t_package* package = socket_receive(socket_cpu);
 		if (package != NULL && package->type == EXECUTION_CONTEXT) {
 			pcb->execution_context = deserialize_execution_context(package);
-			log_warning(logger, "-----------------------------------------------");
-			log_info(logger, "Recibido el Execution Context del proceso %d de la CPU", pcb->pid);
+			log_warning(logger, "--------------Recibiendo context %d al CPU-------------------",  pcb->pid);
 			print_execution_context(pcb->execution_context);
+			log_warning(logger, "---------------------------------------------------------------------");
 		} else log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
 		// Revisa si está bloqueado
 		pcb->state = pcb->execution_context->updated_state;

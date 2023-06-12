@@ -18,30 +18,6 @@ typedef enum t_package_type {
 	INSTRUCTION,		// 6
 } t_package_type;
 
-typedef enum op_code {
-	F_READ,			 // 0
-	F_WRITE,		 // 1
-	SET,			 // 2
-	MOV_IN,			 // 3
-	MOV_OUT,		 // 4
-	F_TRUNCATE,		 // 5
-	F_SEEK,			 // 6
-	CREATE_SEGMENT,	 // 7
-	I_O,			 // 8
-	WAIT,			 // 9
-	SIGNAL,			 // 10
-	F_OPEN,			 // 11
-	F_CLOSE,		 // 12
-	DELETE_SEGMENT,	 // 13
-	EXIT,			 // 14
-	YIELD			 // 15
-} op_code;
-
-typedef struct t_instruction {
-	op_code op_code;
-	t_list* args;
-} t_instruction;
-
 // Crea y retorna un paquete con el código de operación especificado.
 t_package* package_new(int32_t type);
 

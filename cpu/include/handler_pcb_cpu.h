@@ -16,4 +16,6 @@ t_instruction* get_instruction(execution_context* execution_context);
 
 void dislodge();
 
+void print_instruction(t_instruction* instruction);
+
 #endif

@@ -97,6 +97,30 @@ typedef struct config_memory {
 	char* algorithm;
 } configuration_memory;
 
+typedef enum op_code {
+	F_READ,			 // 0
+	F_WRITE,		 // 1
+	SET,			 // 2
+	MOV_IN,			 // 3
+	MOV_OUT,		 // 4
+	F_TRUNCATE,		 // 5
+	F_SEEK,			 // 6
+	CREATE_SEGMENT,	 // 7
+	I_O,			 // 8
+	WAIT,			 // 9
+	SIGNAL,			 // 10
+	F_OPEN,			 // 11
+	F_CLOSE,		 // 12
+	DELETE_SEGMENT,	 // 13
+	EXIT,			 // 14
+	YIELD			 // 15
+} op_code;
+
+typedef struct t_instruction {
+	op_code op_code;
+	t_list* args;
+} t_instruction;
+
 // Carga la configuración de un módulo
 t_config* start_config(char* module);
 
@@ -110,5 +134,7 @@ char* get_config_type(char* module, char* file_type);
 void* s_malloc(size_t size);
 
 void print_execution_context(execution_context* execution_context);
+
+void print_instruction(t_instruction* instruction);
 
 #endif

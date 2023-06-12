@@ -2,7 +2,7 @@
 
 // obtiene la instrucción (lista) actual a ejecutar
 void fetch(execution_context* execution_context) {
-		void print_execution_context(execution_context);
+		print_execution_context(execution_context);
 		int sem_value;
 		t_instruction* instruction = NULL;
 		// ejecuto mientras el flag de desalojo este libre
@@ -11,8 +11,10 @@ void fetch(execution_context* execution_context) {
 			sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
 			instruction = get_instruction(execution_context);
 			if (sem_value == 1 && instruction != NULL) {
+					print_instruction(instruction);
 					decode(execution_context, instruction);
 					execution_context->program_counter++;
+					printf("El program counter queda -> %u \n", execution_context->program_counter);
 			}
 		} while (sem_value > 0);
 

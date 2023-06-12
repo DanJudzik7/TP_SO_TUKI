@@ -51,6 +51,7 @@ void handle_incoming_instructions(t_pcb* pcb) {
 		//TODO: deberia destruirlo el long_sheduler
 		package_destroy(package);
 	}
+	//TODO: ESTO DEBE PASAR AL LONG_SCHEDULER
 	socket_close(pcb->pid);
 }
 

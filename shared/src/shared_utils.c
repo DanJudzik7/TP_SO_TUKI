@@ -68,3 +68,16 @@ void print_execution_context(execution_context* execution_context) {
     printf("    - Direction: %p\n", segment_table->segment_table_direction);
     printf("    - Size of Data Segment: %u\n", segment_table->size_data_segment);
 }
+
+void print_instruction(t_instruction* instruction) {
+    
+    if (instruction->args == NULL || list_is_empty(instruction->args)) {
+        printf("No arguments\n");
+        return;
+    }
+    
+    for (int i = 0; i < list_size(instruction->args); i++) {
+        printf(" -> Argument %d: %s ", i, list_get(instruction->args, i));
+    }
+	printf("\n");
+}
