@@ -53,7 +53,6 @@ void listen_kernel(int* socket_cpu) {
 		int kernel_socket = socket_accept(*socket_cpu);
 		config_cpu.connection_kernel = kernel_socket;
 		sem_getvalue(&config_cpu.flag_running, &sem_value);
-		log_info(config_cpu.logger, "Mi flag de running es -> %i", sem_value);
 		if (sem_value==1) {
 			sem_wait(&config_cpu.flag_running);
 			t_package* package = socket_receive(kernel_socket);
