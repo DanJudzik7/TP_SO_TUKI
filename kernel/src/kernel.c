@@ -52,7 +52,9 @@ int main(int argc, char** argv) {
 		t_package* package = socket_receive(socket_cpu);
 		if (package != NULL && package->type == EXECUTION_CONTEXT) {
 			pcb->execution_context = deserialize_execution_context(package);
-			log_info(logger, "Recibido el Execution Context del proceso %d", pcb->pid);
+			log_warning(logger, "-----------------------------------------------");
+			log_info(logger, "Recibido el Execution Context del proceso %d de la CPU", pcb->pid);
+			print_execution_context(pcb->execution_context);
 		} else log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
 		// Revisa si está bloqueado
 		pcb->state = pcb->execution_context->updated_state;

@@ -2,7 +2,7 @@
 
 // obtiene la instrucción (lista) actual a ejecutar
 void fetch(execution_context* execution_context) {
-		printf("llego\n");
+		void print_execution_context(execution_context);
 		int sem_value;
 		t_instruction* instruction = NULL;
 		// ejecuto mientras el flag de desalojo este libre
@@ -14,9 +14,10 @@ void fetch(execution_context* execution_context) {
 					decode(execution_context, instruction);
 					execution_context->program_counter++;
 			}
-			printf("Procediendo a la siguiente instruccion\n");
 		} while (sem_value > 0);
-		
+
+		log_warning(config_cpu.logger, "-----------------------------------------------");
+		print_execution_context(execution_context);
 		t_package* package_context = serialize_execution_context(execution_context);
 		log_info(config_cpu.logger, "Context enviado al Kernel");
 		if (!socket_send(config_cpu.connection_kernel, package_context)) {
@@ -35,11 +36,8 @@ void fetch(execution_context* execution_context) {
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar
 // TODO:: y si la misma requiere de una traducción de dirección lógica a dirección física.
 execution_context* decode(execution_context* execution_context, t_instruction* instruction) {
-	// TODO: esto tiene que eliminarse ya que solamente quiero recibir una lista de instrucciones yo.
-	printf("El valor de op code es: %d\n", instruction->op_code);
 	switch (instruction->op_code) {
 		case SET:
-			log_info(config_cpu.logger, "EJECUTANDO UN SET\n");
 			execute_set(execution_context, instruction);
 			break;
 		case MOV_IN:
@@ -55,7 +53,6 @@ execution_context* decode(execution_context* execution_context, t_instruction* i
 		case SIGNAL:
 		case CREATE_SEGMENT:
 		case DELETE_SEGMENT:
-			log_warning(config_cpu.logger, "Implementar función\n");
 			break;
 		case YIELD:
 			log_warning(config_cpu.logger, "Ejecutando un YIELD");

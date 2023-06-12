@@ -7,4 +7,6 @@ void execute_set(execution_context* execution_context, t_instruction* instructio
 
 void execute_exit(execution_context* execution_context);
 
+void set_register_value(char* register_name, char* value, void* register_ptr, size_t register_size);
+
 #endif

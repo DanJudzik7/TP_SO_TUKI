@@ -109,4 +109,6 @@ char* get_config_type(char* module, char* file_type);
 // Safe Memory Allocation. Crashea si no hay más memoria.
 void* s_malloc(size_t size);
 
+void print_execution_context(execution_context* execution_context);
+
 #endif

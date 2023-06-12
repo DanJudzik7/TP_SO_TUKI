@@ -41,3 +41,30 @@ void* s_malloc(size_t size) {
 	}
 	return ptr;
 }
+
+void print_execution_context(execution_context* execution_context) {
+    printf("Execution Context:\n");
+    printf(" - Program Counter: %u\n", execution_context->program_counter);
+    printf(" - Updated State: %d\n", execution_context->updated_state);
+    
+    cpu_register* registers = execution_context->cpu_register;
+    printf(" - CPU Registers:\n");
+    printf("    - AX: %.*s\n", 4, registers->register_4.AX);
+    printf("    - BX: %.*s\n", 4, registers->register_4.BX);
+    printf("    - CX: %.*s\n", 4, registers->register_4.CX);
+    printf("    - DX: %.*s\n", 4, registers->register_4.DX);
+    printf("    - EAX: %.*s\n", 8, registers->register_8.EAX);
+    printf("    - EBX: %.*s\n", 8, registers->register_8.EBX);
+    printf("    - ECX: %.*s\n", 8, registers->register_8.ECX);
+    printf("    - EDX: %.*s\n", 8, registers->register_8.EDX);
+    printf("    - RAX: %.*s\n", 16, registers->register_16.RAX);
+    printf("    - RBX: %.*s\n", 16, registers->register_16.RBX);
+    printf("    - RCX: %.*s\n", 16, registers->register_16.RCX);
+    printf("    - RDX: %.*s\n", 16, registers->register_16.RDX);
+    
+    segment_table* segment_table = execution_context->segment_table;
+    printf(" - Segment Table:\n");
+    printf("    - ID: %u\n", segment_table->id);
+    printf("    - Direction: %p\n", segment_table->segment_table_direction);
+    printf("    - Size of Data Segment: %u\n", segment_table->size_data_segment);
+}
