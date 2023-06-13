@@ -17,7 +17,7 @@ t_package* serialize_execution_context(execution_context* ec) {
 	t_package* package = package_new(EXECUTION_CONTEXT);
 	uint64_t size4 = 4;
 	package_nest(package, serialize_instructions(ec->instructions, true));
-    uint64_t program_counter_64 = ec->program_counter;
+    uint64_t* program_counter_64 = ec->program_counter;
 	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(program_counter_64), &size4));
 	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), &size4));
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
@@ -39,7 +39,7 @@ execution_context* deserialize_execution_context(t_package* package) {
 				deserialize_instructions(nested_package, ec->instructions);
 				break;
 			case PROGRAM_COUNTER:
-				ec->program_counter = deserialize_program_counter(nested_package->buffer);
+				deserialize_program_counter(nested_package->buffer, &(ec->updated_state), &offset_start);
 				break;
 			case UPDATED_STATE:
 				package_decode_buffer(nested_package->buffer, &(ec->updated_state), &offset_start);
@@ -60,12 +60,13 @@ execution_context* deserialize_execution_context(t_package* package) {
 	return ec;
 }
 
-uint32_t deserialize_program_counter(void* buffer){
-	 uint64_t* program_counter_64 = s_malloc(sizeof(uint64_t));
-	memcpy(program_counter_64, buffer, sizeof(uint64_t));
-    uint32_t program_counter_32 = (uint32_t)(*program_counter_64);
-    free(program_counter_64);
-    return program_counter_32;
+uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset) {
+    uint64_t* pc_value_64 = s_malloc(sizeof(uint64_t));
+    package_decode_buffer(buffer, pc_value_64, offset);
+    uint32_t pc_value_32 = (uint32_t)(*pc_value_64);
+    free(pc_value_64);
+    *(uint32_t*)dest = pc_value_32;
+    return pc_value_32;
 }
 
 t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
@@ -93,10 +94,6 @@ void deserialize_instructions(t_package* package, t_queue* instructions) {
 		// Carga los args de package_add
 		while (package_decode_isset(instruction_package, offset_list)) list_add(instruction->args, package_decode_string(instruction_package->buffer, &offset_list));
 		queue_push(instructions, instruction);
-		//TODO: BORRAR
-		printf("\nINSTRUCCIONES CARGADAS-> ");
-		print_instruction(instruction);
-
 		package_destroy(instruction_package);
 	}
 }

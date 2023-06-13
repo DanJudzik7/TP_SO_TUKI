@@ -11,10 +11,8 @@ void fetch(execution_context* execution_context) {
 			sem_getvalue(&config_cpu.flag_dislodge, &sem_value);
 			instruction = get_instruction(execution_context);
 			if (sem_value == 1 && instruction != NULL) {
-					print_instruction(instruction);
 					decode(execution_context, instruction);
 					execution_context->program_counter++;
-					printf("El program counter queda -> %u \n", execution_context->program_counter);
 			}
 		} while (sem_value > 0);
 

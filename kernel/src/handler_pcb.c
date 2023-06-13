@@ -58,7 +58,6 @@ void handle_incoming_instructions(t_pcb* pcb) {
 t_pcb* pcb_new(int pid, int burst_time) {
 	// La inicialización se hace de forma segura en memoria (con memset)
 	t_pcb* pcb = s_malloc(sizeof(t_pcb));
-	uint32_t initial_program_counter = 0;
 	pcb->state = NEW;
 	pcb->pid = pid;
 	pcb->aprox_burst_time = burst_time;
@@ -66,7 +65,7 @@ t_pcb* pcb_new(int pid, int burst_time) {
 	pcb->files = list_create();
 	pcb->execution_context = s_malloc(sizeof(execution_context));
 	pcb->execution_context->instructions = queue_create();
-	pcb->execution_context->program_counter = initial_program_counter;
+	pcb->execution_context->program_counter = 0;
 	pcb->execution_context->updated_state = NEW;
 	pcb->execution_context->cpu_register = s_malloc(sizeof(cpu_register));
 	memset(pcb->execution_context->cpu_register, 0, sizeof(cpu_register));

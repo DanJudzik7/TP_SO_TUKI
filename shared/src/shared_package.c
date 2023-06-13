@@ -24,11 +24,11 @@ void package_nest(t_package* package, t_package* nested) {
 }
 
 void package_add(t_package* package, void* value, uint64_t* value_size) {
-	uint64_t offset = package->size;
-	package->size += sizeof(uint64_t) + *value_size;
-	package->buffer = realloc(package->buffer, package->size);
-	memcpy(package->buffer + offset, value_size, sizeof(uint64_t));
-	memcpy(package->buffer + offset + sizeof(uint64_t), value, *value_size);
+    uint64_t offset = package->size;
+    package->size += sizeof(uint64_t) + *value_size;
+    package->buffer = realloc(package->buffer, package->size);
+    memcpy(package->buffer + offset, value_size, sizeof(uint64_t));
+    memcpy(package->buffer + offset + sizeof(uint64_t), value, *value_size);
 }
 
 void package_write(t_package* package, char* value) {
