@@ -47,3 +47,6 @@
 [WARNING] 23:33:55:400 memoria/(22766:22766): Socket de servidor inicializado en puerto 8052
 [WARNING] 23:34:30:753 memoria/(22879:22879): Iniciando la memoria
 [WARNING] 23:34:30:753 memoria/(22879:22879): Socket de servidor inicializado en puerto 8052
+[INFO] 00:42:15:698 memoria/(2987:2987): Iniciando Memoria...
+[INFO] 00:49:24:859 memoria/(3325:3325): Iniciando Memoria...
+[WARNING] 00:49:24:862 memoria/(3325:3325): Socket de servidor inicializado en puerto 8052

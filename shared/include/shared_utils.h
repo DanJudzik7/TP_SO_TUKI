@@ -94,7 +94,7 @@ typedef struct config_cpu {
 typedef struct config_memory {
 	t_log* logger;
 	t_config* config;
-	char* algorithm;
+	char* port;
 } configuration_memory;
 
 typedef enum op_code {

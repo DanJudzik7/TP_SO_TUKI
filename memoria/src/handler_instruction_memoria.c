@@ -1,5 +1,5 @@
 #include "handler_instruction_memoria.h"
-
+/*
 int instruction_handler_memoria(int socket_client) {
 	// Todo esto no está adaptado al nuevo packaging
 
@@ -38,4 +38,4 @@ int instruction_handler_memoria(int socket_client) {
 		}
 	}
 	return 0;
-}
+}*/
