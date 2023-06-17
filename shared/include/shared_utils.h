@@ -86,10 +86,19 @@ typedef enum execution_context_index {
 
 typedef struct config_cpu {
 	t_log* logger;
-	sem_t flag_dislodge;
-	sem_t flag_running;
 	int connection_kernel;
 } configuration_cpu;
+
+typedef struct config_filesystem {
+	t_log* logger;
+	t_bitarray* bitmap;
+	FILE* block_file;
+	int connection_kernel;
+	char PATH_SUPERBLOQUE;
+	char PATH_BITMAP;
+	char PATH_BLOQUES;
+	char PATH_FCB;
+} configuration_filesystem;
 
 typedef struct config_memory {
 	t_log* logger;
@@ -129,6 +138,9 @@ t_log* start_logger(char* module);
 
 // Retorna el valor de una key de un archivo de configuración
 char* get_config_type(char* module, char* file_type);
+
+// Retorna el valor del path completo a un archivo
+char* get_full_path(char* path);
 
 // Safe Memory Allocation. Crashea si no hay más memoria.
 void* s_malloc(size_t size);
