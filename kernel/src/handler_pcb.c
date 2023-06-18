@@ -8,52 +8,59 @@ void listen_consoles(t_global_config_kernel* gck) {
 			log_warning(gck->logger, "Hubo un error aceptando la conexión");
 			continue;
 		}
-		// Se crea el PCB y se agrega a la cola NEW
-		log_info(gck->logger, "El proceso %d se creó en NEW", console_socket);
-		t_pcb* pcb = pcb_new(console_socket, gck->default_burst_time);
-		queue_push(gck->new_pcbs, pcb);
+		helper_create_pcb *hcp = s_malloc(sizeof(helper_create_pcb));
+		hcp->connection = console_socket;
+		hcp->config = gck;
 		// Se crea un thread para escuchar las instrucciones
-		pthread_create(&thread, NULL, (void*)handle_incoming_instructions, pcb);
+		pthread_create(&thread, NULL, (void*)handle_incoming_instructions, hcp);
 		pthread_detach(thread);
-		// Se planifica el proceso
-		long_term_schedule(gck);
 	}
 }
 
-void handle_incoming_instructions(t_pcb* pcb) {
-	printf("Nueva consola conectada. PID: %i\n", pcb->pid);
-	char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
-	if (!socket_send(pcb->pid, serialize_message(welcome_message, true))) pcb->state = EXIT_PROCESS;
-	free(welcome_message);
-	while (1) {
-		//TODO: duda de si esto va aca
-		if (pcb->state == EXIT_PROCESS) break;
-		t_package* package = socket_receive(pcb->pid);
-		if (package == NULL) {
-			pcb->state = EXIT_PROCESS;
-			printf("El cliente se desconectó\n");
-			break;
-		}
-		if (package->type == MESSAGE_OK || package->type == MESSAGE_FLAW) {
-			if (!socket_send(pcb->pid, serialize_message("Mensaje recibido", false))) pcb->state = EXIT_PROCESS;
-			char* message = deserialize_message(package);
-			printf("< %s\n", message);
-			free(message);
-		} else if (package->type == INSTRUCTIONS) {
-			if (!socket_send(pcb->pid, serialize_message("Instrucciones recibidas", false))) pcb->state = EXIT_PROCESS;
-			deserialize_instructions(package, pcb->execution_context->instructions);
-			pcb->state = READY;
-		} else {
-			char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
-			if (!socket_send(pcb->pid, serialize_message(invalid_package, true))) pcb->state = EXIT_PROCESS;
-			free(invalid_package);
-		}
-		//TODO: deberia destruirlo el long_sheduler
+void handle_incoming_instructions(helper_create_pcb* hcp) {
+    t_pcb* pcb = pcb_new(hcp->connection, hcp->config->default_burst_time);
+	pcb->state = NEW;
+    printf("Nueva consola conectada. PID: %i\n", pcb->pid);
+    log_info(hcp->config->logger, "El proceso %d se creó en NEW", pcb->pid);
+    char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
+    if (!socket_send(pcb->pid, serialize_message(welcome_message, true))) {
+        pcb_destroy(pcb);
+        free(welcome_message);
+        return;
+    }
+    free(welcome_message);
+	
+    t_package* package = socket_receive(pcb->pid);
+    if (package == NULL) {
+        pcb_destroy(pcb);
+        printf("El cliente se desconectó\n");
+        return;
+    }
+
+    if (package->type == INSTRUCTIONS) {
+        if (!socket_send(pcb->pid, serialize_message("Instrucciones recibidas", false))) {
+            pcb_destroy(pcb);
+            package_destroy(package);
+            return;
+        }
+        
+        deserialize_instructions(package, pcb->execution_context->instructions);
+        queue_push(hcp->config->new_pcbs, pcb);
 		package_destroy(package);
-	}
-	//TODO: ESTO DEBE PASAR AL LONG_SCHEDULER
-	socket_close(pcb->pid);
+    } else {
+        char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
+        if (!socket_send(pcb->pid, serialize_message(invalid_package, true))) {
+            free(invalid_package);
+            pcb_destroy(pcb);
+            package_destroy(package);
+            return;
+        }
+        free(invalid_package);
+    }
+
+    long_term_schedule(hcp->config);
 }
+
 
 t_pcb* pcb_new(int pid, int burst_time) {
 	// La inicialización se hace de forma segura en memoria (con memset)

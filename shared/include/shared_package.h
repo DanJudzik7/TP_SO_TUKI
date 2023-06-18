@@ -9,13 +9,14 @@
 // Permite interpretar tipos recursivos con facilidad
 
 typedef enum t_package_type {
-	SERIALIZED,			// 0
-	MESSAGE_OK,			// 1
-	MESSAGE_FLAW,		// 2
-	MESSAGE_BUSY,		// 3
-	INSTRUCTIONS,		// 4
-	EXECUTION_CONTEXT,	// 5
-	INSTRUCTION,		// 6
+	SERIALIZED,				// 0
+	MESSAGE_OK,				// 1
+	MESSAGE_FLAW,			// 2
+	MESSAGE_BUSY,			// 3
+	MESSAGE_PCB_FINISHED,	// 5
+	INSTRUCTIONS,			// 6
+	EXECUTION_CONTEXT,		// 7
+	INSTRUCTION,			// 8
 } t_package_type;
 
 // Crea y retorna un paquete con el código de operación especificado.

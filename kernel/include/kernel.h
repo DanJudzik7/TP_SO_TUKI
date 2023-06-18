@@ -8,4 +8,6 @@
 #include "tests.h"
 #include "shared_socket.h"
 
+bool no_more_instructions(execution_context* ec);
+
 #endif

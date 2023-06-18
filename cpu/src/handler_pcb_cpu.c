@@ -17,7 +17,6 @@ void fetch(execution_context* execution_context) {
 		} while (sem_value > 0);
 
 		log_warning(config_cpu.logger, "-----------------------------------------------");
-		print_execution_context(execution_context);
 		t_package* package_context = serialize_execution_context(execution_context);
 		log_info(config_cpu.logger, "Context enviado al Kernel");
 		if (!socket_send(config_cpu.connection_kernel, package_context)) {
@@ -27,10 +26,6 @@ void fetch(execution_context* execution_context) {
 		// Desbloquea el semáforo
 		sem_post(&config_cpu.flag_dislodge);
 
-		// sem_post(&config_cpu.flag_dislodge);   Desbloquear el estado running una vez implementado el hilo
-		// t_package* package = package_create(MESSAGE_OK);
-		// package_add(package, execution_context , sizeof(*execution_context));
-		// socket_send_package(package,args->kernel_socket);
 }
 
 // Esta etapa consiste en interpretar qué instrucción es la que se va a ejecutar

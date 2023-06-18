@@ -34,40 +34,76 @@ int main(int argc, char** argv) {
 	gck->max_multiprogramming = *config_get_string_value(config, "GRADO_MAX_MULTIPROGRAMACION") - '0';
 	gck->default_burst_time = *config_get_string_value(config, "ESTIMACION_INICIAL") - '0';
 	gck->algorithm_is_hrrn = algorithm_is_hrrn;
+	sem_init(&(gck->flag_with_pcb), 0, 1);
 
 	// Manejo de consolas
 	pthread_t thread_consola;
 	pthread_create(&thread_consola, NULL, (void*)listen_consoles, gck);
 
+	int sem_pcb_value;
 	// Manejo de CPU y Short Term Scheduler. Antes era listener_cpu.
 	while (1) {
+		sem_getvalue(&gck->flag_with_pcb, &sem_pcb_value);
+		if (sem_pcb_value==1) {
+		sem_wait(&gck->flag_with_pcb);
 		// Organizo según el tipo de planificador
 		t_pcb* pcb = short_term_scheduler(gck);
-		if (pcb == NULL || pcb == 0) continue;
+		if (pcb == NULL || pcb == 0) {
+			sem_post(&gck->flag_with_pcb);
+			continue;
+		};
+		log_warning(logger, "-----------------------Tenemos un nuevo PCB----------------------");
 		pcb->state = EXEC;
 		// Mandar a CPU y esperar
-		log_warning(logger, "-----------------------Enviando context al CPU-----------------------");
+		log_warning(logger, "----------------------Enviando context al CPU-----------------------");
 		print_execution_context(pcb->execution_context);
-		log_warning(logger, "---------------------------------------------------------------------");
 		t_package* ec_package = serialize_execution_context(pcb->execution_context);
 		// Recibe el nuevo execution context, que puede estar en EXIT o BLOCK
-		if (!socket_send(socket_cpu, ec_package)) break;
+		if (!socket_send(socket_cpu, ec_package)) {
+			sem_post(&gck->flag_with_pcb);
+			break;
+		};
 		t_package* package = socket_receive(socket_cpu);
 		if (package != NULL && package->type == EXECUTION_CONTEXT) {
 			pcb->execution_context = deserialize_execution_context(package);
-			log_warning(logger, "--------------Recibiendo context %d al CPU-------------------",  pcb->pid);
+			log_warning(logger, "----------------------Recibiendo context %d al CPU----------------------", pcb->pid);
 			print_execution_context(pcb->execution_context);
-			log_warning(logger, "---------------------------------------------------------------------");
-		} else log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
+		} else {
+			log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
+			sem_post(&gck->flag_with_pcb);
+		}
 		// Revisa si está bloqueado
 		pcb->state = pcb->execution_context->updated_state;
-		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
-		if (queue_is_empty(pcb->execution_context->instructions)) pcb->state = BLOCK;
-		if (pcb->state == EXIT_PROCESS)
+		if (pcb->state == EXIT_PROCESS){
+			log_warning(logger, "----------------------El PCB %d tiene estado exit----------------------", pcb->pid);
+			//TODO: HARDCODEADO hasta que se pueda mover a long_term_shedule
+			log_info(gck->logger, "Se removió un proceso terminado");
+			if(!socket_send(pcb->pid, package_new(MESSAGE_PCB_FINISHED))) log_error(gck->logger, "Error al informar finalizacion a la consola %d",pcb->pid);
+			socket_close(pcb->pid);
+			pcb_destroy(pcb);
+			gck->max_multiprogramming += 1;
 			long_term_schedule(gck);
-		else
-			queue_push(gck->active_pcbs, pcb);
+			sem_post(&gck->flag_with_pcb);
+		}
+		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
+		else if (no_more_instructions(pcb->execution_context)){
+			log_warning(logger, "Bloqueando PCB, ya no posee mas instrucciones");
+			//TODO: MANEJAR QUE SUCEDE SI SE BLOQUEA PORQUE NO HAY MAS INSTRUCCIONES
+			pcb->state = BLOCK;
+			sem_post(&gck->flag_with_pcb);
+		} 
+		else {
+			 queue_push(gck->active_pcbs, pcb);
+			 log_warning(logger, "-----------------------Guardando PCB %d en cola de READY-----------------------", pcb->pid);
+			 sem_post(&gck->flag_with_pcb);
+		}
+	}
+	else continue;
 	}
 	log_warning(logger, "Finalizando el kernel. Se desconectó un módulo esencial.");
 	return 0;
+}
+
+bool no_more_instructions(execution_context* ec){
+	return ec->program_counter>= queue_size(ec->instructions);
 }

@@ -3,7 +3,6 @@
 configuration_cpu config_cpu;
 
 int main(int argc, char** argv) {
-	sem_init(&(config_cpu.flag_running), 0, 1);
 	sem_init(&(config_cpu.flag_dislodge), 0, 1);
 
 	t_log* logger = start_logger("cpu");
@@ -47,21 +46,12 @@ int main(int argc, char** argv) {
 }
 
 void listen_kernel(int* socket_cpu) {
-	int sem_value;
-
+	int kernel_socket = socket_accept(*socket_cpu);
 	while (1) {
-		int kernel_socket = socket_accept(*socket_cpu);
-		config_cpu.connection_kernel = kernel_socket;
-		sem_getvalue(&config_cpu.flag_running, &sem_value);
-		if (sem_value==1) {
-			sem_wait(&config_cpu.flag_running);
+			config_cpu.connection_kernel = kernel_socket;
 			t_package* package = socket_receive(kernel_socket);
-			if (package == NULL) {
-				// Definir si acá se tiene que hacer algo más
-				log_error(config_cpu.logger, "El kernel se desconectó");
-				break;
-			}
-			if (package->type != EXECUTION_CONTEXT) {
+			
+			if (package->type != EXECUTION_CONTEXT && package != NULL) {
 				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
 				socket_send(kernel_socket, serialize_message(invalid_package, true));
 				log_warning(config_cpu.logger, "Se recibió un paquete inválido: %i", package->type);
@@ -69,21 +59,14 @@ void listen_kernel(int* socket_cpu) {
 				package_destroy(package);
 				continue;
 			}
+			if (package == NULL) {
+				// Definir si acá se tiene que hacer algo más
+				log_error(config_cpu.logger, "El kernel se desconectó");
+				break;
+			}
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
 			execution_context* context = deserialize_execution_context(package);
-			
-			pthread_t thread;
-			// Se crea un thread para ejecutar el contexto y sus instrucciones
-			pthread_create(&thread, NULL, (void*)fetch, context);
-			log_warning(config_cpu.logger, "Hilo de ejecución creado");
-			pthread_join(thread, NULL);
-			sem_post(&config_cpu.flag_running);
-		} else {
-			// En caso contrario se envía un mensaje al kernel de que estoy ocupado
-			log_info(config_cpu.logger, "La CPU está ocupada");
-			t_package* package = package_new(MESSAGE_BUSY);
-			socket_send(kernel_socket, package);
-		}
+			fetch(context);
 	}
 	log_warning(config_cpu.logger, "Se cerró el socket de conexión con el kernel");
 }

@@ -17,8 +17,7 @@ t_package* serialize_execution_context(execution_context* ec) {
 	t_package* package = package_new(EXECUTION_CONTEXT);
 	uint64_t size4 = 4;
 	package_nest(package, serialize_instructions(ec->instructions, true));
-    uint64_t* program_counter_64 = ec->program_counter;
-	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(program_counter_64), &size4));
+	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(ec->program_counter), &size4));
 	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), &size4));
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
 	package_nest(package, serialize_segment_table(ec->segment_table));
@@ -39,9 +38,10 @@ execution_context* deserialize_execution_context(t_package* package) {
 				deserialize_instructions(nested_package, ec->instructions);
 				break;
 			case PROGRAM_COUNTER:
-				deserialize_program_counter(nested_package->buffer, &(ec->updated_state), &offset_start);
+				deserialize_program_counter(nested_package->buffer, &(ec->program_counter), &offset_start);
 				break;
 			case UPDATED_STATE:
+				offset_start = 0;
 				package_decode_buffer(nested_package->buffer, &(ec->updated_state), &offset_start);
 				break;
 			case CPU_REGISTERS:
