@@ -40,7 +40,9 @@
         "instructions_handler.h": "c",
         "history.h": "c",
         "filesystem.h": "c",
-        "scheduler.h": "c"
+        "scheduler.h": "c",
+        "utils_memoria.h": "c",
+        "conexions.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false

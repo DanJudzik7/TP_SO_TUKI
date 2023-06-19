@@ -5,26 +5,26 @@
 #include "shared_package.h"
 #include "shared_socket.h"
 #include "tests.h"
+#include <pthread.h>
 
-
+// ----------------------------- HEADERS -----------------------------
 
 void initialize();
 
-typedef struct empty_space {
-	void* base;
-	size_t size;
-	struct empty_space* next_empty_space;
-} empty_space;
-typedef struct segment_table_process {
-	void* base;
-	size_t size;
-	int process_pid;
-} segment_table_process;
 
-typedef struct auxiliary_structure {
-	segment_table_process* segment_table_process;
-	empty_space* empty_space;
-} auxiliary_structure;
+// ----------------------------- STRUCTS -----------------------------
+
+typedef struct segment{
+	void* base;
+	int offset;
+	int pid;
+	int is_in_use;
+} segment;
+
+typedef struct hole{
+	void* base;
+	int size;
+} hole;
 
 typedef struct memory {
 	size_t memory_size;
@@ -36,7 +36,7 @@ typedef struct memory {
     
 } memory;
 
-extern configuration_memory config_memory;
+extern configuration_memory memory_config;
 extern memory memory_shared;
 
 

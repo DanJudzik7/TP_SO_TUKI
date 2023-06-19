@@ -91,7 +91,7 @@ typedef struct config_cpu {
 	int connection_kernel;
 } configuration_cpu;
 
-typedef struct config_memory {
+typedef struct memory_config {
 	t_log* logger;
 	t_config* config;
 	char* port;
