@@ -19,7 +19,6 @@ void listen_consoles(t_global_config_kernel* gck) {
 
 void handle_incoming_instructions(helper_create_pcb* hcp) {
     t_pcb* pcb = pcb_new(hcp->connection, hcp->config->default_burst_time);
-	pcb->state = NEW;
     printf("Nueva consola conectada. PID: %i\n", pcb->pid);
     log_info(hcp->config->logger, "El proceso %d se creó en NEW", pcb->pid);
     char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
@@ -46,7 +45,7 @@ void handle_incoming_instructions(helper_create_pcb* hcp) {
         
         deserialize_instructions(package, pcb->execution_context->instructions);
         queue_push(hcp->config->new_pcbs, pcb);
-		package_destroy(package);
+	 package_destroy(package);
     } else {
         char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
         if (!socket_send(pcb->pid, serialize_message(invalid_package, true))) {

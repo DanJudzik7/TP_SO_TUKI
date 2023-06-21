@@ -26,8 +26,16 @@ void long_term_schedule(t_global_config_kernel* gck) {
 }
 
 t_pcb* short_term_scheduler(t_global_config_kernel* gck) {	
-	// Devuelve el próximo PCB a ejecutar en base al algoritmo y los PCBs activos.
-	return gck->algorithm_is_hrrn ? pick_with_hrrn(gck->active_pcbs) : pick_with_fifo(gck->active_pcbs);
+	if(gck->pcb_priority_helper != NULL) {
+		t_pcb* priority_helper = gck->pcb_priority_helper;
+ 		gck->pcb_priority_helper = NULL;
+		return priority_helper;
+	}
+	else {
+		gck->pcb_priority_helper = NULL;
+		// Devuelve el próximo PCB a ejecutar en base al algoritmo y los PCBs activos.
+		return gck->algorithm_is_hrrn ? pick_with_hrrn(gck->active_pcbs) : pick_with_fifo(gck->active_pcbs);
+	}
 }
 
 bool pcb_did_exit(t_pcb* pcb) {

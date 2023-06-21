@@ -6,17 +6,6 @@
 #include "shared_serializer.h"
 #include "shared_socket.h"
 
-typedef struct t_global_config_kernel {
-	t_log* logger;
-	t_queue* new_pcbs;
-	t_queue* active_pcbs;
-	sem_t flag_with_pcb;
-	bool algorithm_is_hrrn;
-	int max_multiprogramming;
-	int default_burst_time;
-	int connection_kernel;
-} t_global_config_kernel;
-
 typedef struct t_pcb {
 	int pid;  // También funciona como ID del socket
 	process_state state;
@@ -25,6 +14,19 @@ typedef struct t_pcb {
 	t_list* files;
 	execution_context* execution_context;
 } t_pcb;
+typedef struct t_global_config_kernel {
+	t_log* logger;
+	t_queue* new_pcbs;
+	t_queue* active_pcbs;
+	sem_t flag_with_pcb;
+	t_dictionary* resources;
+	bool algorithm_is_hrrn;
+	int max_multiprogramming;
+	int default_burst_time;
+	int connection_kernel;
+	int connection_cpu;
+	t_pcb* pcb_priority_helper;
+} t_global_config_kernel;
 
 typedef struct helper_create_pcb {
 	int connection;

@@ -2,12 +2,12 @@
 #define KERNEL_H
 
 #include "handler_pcb.h"
+#include "kernel_utils.h"
 #include "scheduler.h"
 #include "shared_serializer.h"
 #include "shared_utils.h"
 #include "tests.h"
 #include "shared_socket.h"
 
-bool no_more_instructions(execution_context* ec);
 
 #endif
