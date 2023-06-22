@@ -33,11 +33,11 @@ void add_segment(structures structures,char* process_id, int size,int s_id){
     {
        //recorro segun algoritmo
        if (strcmp(memory_shared.algorithm,"BEST") == 0){
-           // best_fit(structures,size);
+           best_fit(structures,size,process_id,s_id);
        } else if (strcmp(memory_shared.algorithm,"FIRST") == 0){
             first_fit(structures,size,process_id,s_id);
        } else if (strcmp(memory_shared.algorithm,"WORST") == 0){
-            //worst_fit(structures,size);
+            worst_fit(structures,size,process_id,s_id);
        } else{
            log_error(memory_config.logger,"No se reconoce el algoritmo de planificacion");
            exit(1);
@@ -88,3 +88,96 @@ segment* first_fit(structures structures, int size,char* pid,int s_id) {
 bool is_hole_empty(hole* h) {
     return h->size == 0;
 }
+
+    
+segment* best_fit(structures structures, int size,char* pid,int s_id) {
+    hole* best_hole = NULL;
+    // Iteramos a través de la lista de huecos.
+    for (int i = 0; i < list_size(structures.hole_list); i++) {
+        hole* current_hole = list_get(structures.hole_list, i);
+        // Si el hueco actual es lo suficientemente grande para alojar el segmento...
+        if (current_hole->size >= size) {
+            // ...y si no tenemos un "mejor hueco" aún, o si el hueco actual es más pequeño que el "mejor hueco"...
+            if (best_hole == NULL || current_hole->size < best_hole->size) {
+                // ...entonces el hueco actual se convierte en el "mejor hueco".
+                best_hole = current_hole;
+            }
+        }
+    }
+
+    // Si encontramos un "mejor hueco" adecuado...
+    if (best_hole != NULL) {
+        // ...creamos un nuevo segmento y lo ubicamos en ese hueco.
+        segment* new_segment = malloc(sizeof(segment));
+        new_segment->base = best_hole->base;
+        new_segment->offset = size;
+        new_segment->s_id = s_id;  
+
+        // Agregamos el nuevo segmento a la lista de todos los segmentos.
+        t_list* segment_table = dictionary_get(structures.all_segments, pid);
+        list_add_in_index(segment_table, new_segment->s_id,new_segment);
+        list_add(structures.ram, new_segment);
+
+        // Actualizamos la información del hueco.
+        best_hole->base += size;
+        best_hole->size -= size;
+
+        // Si el hueco se ha vaciado, lo eliminamos de la lista.
+        if (best_hole->size == 0) {
+            list_remove_by_condition(structures.hole_list, (bool (*)(void*)) is_hole_empty);
+        }
+
+        return new_segment;
+    }
+    // Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.
+    else {
+        return NULL;
+    }
+}
+
+
+segment* worst_fit(structures structures, int size, char* pid,int s_id) {
+    hole* worst_hole = NULL;
+    // Iteramos a través de la lista de huecos.
+    for (int i = 0; i < list_size(structures.hole_list); i++) {
+        hole* current_hole = list_get(structures.hole_list, i);
+        // Si el hueco actual es lo suficientemente grande para alojar el segmento...
+        if (current_hole->size >= size) {
+            // ...y si no tenemos un "peor hueco" aún, o si el hueco actual es más grande que el "peor hueco"...
+            if (worst_hole == NULL || current_hole->size > worst_hole->size) {
+                // ...entonces el hueco actual se convierte en el "peor hueco".
+                worst_hole = current_hole;
+            }
+        }
+    }
+
+    // Si encontramos un "peor hueco" adecuado...
+    if (worst_hole != NULL) {
+        // ...creamos un nuevo segmento y lo ubicamos en ese hueco.
+        segment* new_segment = malloc(sizeof(segment));
+        new_segment->base = worst_hole->base;
+        new_segment->offset = size;
+        new_segment->s_id = s_id;  // Asumiendo que hay un contador global para los IDs de segmentos.
+
+        // Agregamos el nuevo segmento a la lista de todos los segmentos.
+        t_list* segment_table = dictionary_get(structures.all_segments, pid);
+        list_add_in_index(segment_table, new_segment->s_id,new_segment);
+        list_add(structures.ram, new_segment);
+
+        // Actualizamos la información del hueco.
+        worst_hole->base += size;
+        worst_hole->size -= size;
+
+        // Si el hueco se ha vaciado, lo eliminamos de la lista.
+        if (worst_hole->size == 0) {
+            list_remove_by_condition(structures.hole_list, (bool (*)(void*)) is_hole_empty);
+        }
+
+        return new_segment;
+    }
+    // Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.
+    else {
+        return NULL;
+    }
+}
+

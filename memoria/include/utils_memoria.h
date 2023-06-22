@@ -53,6 +53,8 @@ void remove_sg_table(structures structures,char* process_id);
 void add_segment(structures structures,char* process_id, int size,int s_id);
 segment* first_fit(structures structures, int size, char* pid, int s_id);
 bool is_hole_empty(hole* h);
+segment* best_fit(structures structures, int size, char* pid, int s_id);
+segment* worst_fit(structures structures, int size, char* pid, int s_id);
 
 
 
