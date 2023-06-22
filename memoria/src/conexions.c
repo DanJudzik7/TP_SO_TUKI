@@ -34,7 +34,7 @@ int listen_fs(int socket_memory){
 			log_warning(memory_config.logger, "Hubo un error aceptando la conexión");
 			exit(-1);
 	}else {
-        	log_warning(memory_config.logger, "Se conecto el kernel en el puerto %d",socket_fs);
+        	log_warning(memory_config.logger, "Se conecto el File System en el puerto %d",socket_fs);
     }
     return socket_fs;
 }
@@ -45,7 +45,7 @@ int listen_cpu(int socket_memory){
 			log_warning(memory_config.logger, "Hubo un error aceptando la conexión");
 			exit(-1);
 	}else {
-        	log_warning(memory_config.logger, "Se conecto el kernel en el puerto %d",socket_cpu);
+        	log_warning(memory_config.logger, "Se conecto la CPU en el puerto %d",socket_cpu);
     }
     return socket_cpu;
 }
@@ -58,7 +58,7 @@ int listen_kernel(int socket_memory){
 			log_warning(memory_config.logger, "Hubo un error aceptando la conexión");
 			exit(-1);
 	}else {
-        	log_warning(memory_config.logger, "Se conecto el kernel en el puerto %d",socket_kernel);
+        	log_warning(memory_config.logger, "Se conecto el Kernel en el puerto %d",socket_kernel);
     }
     return socket_kernel;
 }

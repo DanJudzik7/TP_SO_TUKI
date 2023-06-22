@@ -26,6 +26,9 @@ void main() {
 	dictionary_put(structures.all_segments , "id0", structures.segment_zero);
 	free(structures.segment_zero); //no se si esta bien
 	listen_modules(socket_memory,structures);
+	log_destroy(memory_config.logger);
+	config_destroy(memory_config.config);
+	dictionary_clean_and_destroy_elements(structures.all_segments,free);
 }
 
 void createSGZero(void* memory, segment* segmentZero){
