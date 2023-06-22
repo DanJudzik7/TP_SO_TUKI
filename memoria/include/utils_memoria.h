@@ -10,17 +10,20 @@
 
 // ----------------------------- STRUCTS -----------------------------
 
+// Estructura de cada segmento
 typedef struct segment{
 	void* base;
 	int offset;
 	int s_id;
 } segment;
 
+// Estructura para cada agujero
 typedef struct hole{
 	void* base;
 	int size;
 } hole;
 
+// Estructura para la configuracion de memoria
 typedef struct memory {
 	size_t memory_size;
     size_t sg_zero_size;
@@ -28,12 +31,15 @@ typedef struct memory {
     int mem_delay;
     int com_delay;
     char* algorithm; 
+	int remaining_memory;
 } memory;
 
+// Estructuras para pasar solo este struct y no cada una de manera individual
 typedef struct structures{
 	segment* segment_zero;
 	t_dictionary* all_segments;
 	t_list* hole_list;
+	t_list* ram; // La memoria en si
 } structures;
 
 
@@ -42,8 +48,11 @@ extern memory memory_shared;
 // ----------------------------- HEADERS -----------------------------
 
 void initialize();
-void create_structure(structures structures);
-void remove_structure(structures structures);
+t_list* create_sg_table(structures structures,char* process_id);
+void remove_sg_table(structures structures,char* process_id);
+void add_segment(structures structures,char* process_id, int size,int s_id);
+segment* first_fit(structures structures, int size, char* pid, int s_id);
+bool is_hole_empty(hole* h);
 
 
 

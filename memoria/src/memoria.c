@@ -11,28 +11,45 @@ void main() {
 	}
 	log_warning(memory_config.logger, "Socket de servidor inicializado en puerto %s", memory_config.port);
 
+	// Inicializo la memoria
 	void* memory = s_malloc(memory_shared.memory_size);
+
+	// Inicializo las estructuras de memoria
 	structures structures;
 	structures.hole_list = list_create();
 	structures.all_segments = dictionary_create();
 	structures.segment_zero = malloc(sizeof(segment));
+	structures.ram = list_create();
 	
+	
+	// Creo el segmento 0 y lo agrego al diccionario y a la memoria
+	structures.segment_zero->base = memory;
+	structures.segment_zero->offset = memory_shared.sg_zero_size;
+	structures.segment_zero->s_id = 0;	
+	dictionary_put(structures.all_segments , "id0", structures.segment_zero);
+	list_add(structures.ram,structures.segment_zero);
+	memory_shared.remaining_memory -= memory_shared.sg_zero_size;
+	
+	// Creo el agujero inicial
 	hole* hole = malloc(sizeof(hole));
 	hole->base = memory + memory_shared.sg_zero_size;
 	hole->size = memory_shared.memory_size - memory_shared.sg_zero_size;
 	list_add(structures.hole_list,hole);
-	
-	createSGZero(memory,structures.segment_zero);
-	dictionary_put(structures.all_segments , "id0", structures.segment_zero);
-	free(structures.segment_zero); //no se si esta bien
+	list_add(structures.ram,hole);
+
+
+
+	// Creo los hilos TODO: implementar hilos
 	listen_modules(socket_memory,structures);
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);
 	dictionary_clean_and_destroy_elements(structures.all_segments,free);
 }
 
+
+/*
 void createSGZero(void* memory, segment* segmentZero){
 	segmentZero->base = memory;
 	segmentZero->offset = memory_shared.sg_zero_size;
 	segmentZero->s_id = 0;	
-}
+}*/

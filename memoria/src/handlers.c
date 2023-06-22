@@ -1,6 +1,6 @@
 #include "handlers.h"
 
-// No se si conviene hacerlo asi o poner todo en la misma funcion y que todos los hilos la usen
+// Manejo los recive con cada una de estas funciones
 void handle_fs(int socket_fs,structures structures){
     t_package* fs = socket_receive(socket_fs);
     if (fs == NULL) {
@@ -11,10 +11,10 @@ void handle_fs(int socket_fs,structures structures){
     switch (fs->type)
     {
     //case READ:
-        /* code */
+        sleep(memory_shared.mem_delay);
         break;
-    //case WRITE:       IMPLEMENTAR
-        /* code */
+    //case WRITE:       
+        sleep(memory_shared.mem_delay);
         break;   
 
     default:
@@ -35,10 +35,10 @@ void handle_cpu(int socket_cpu,structures structures){
     switch (cpu->type)
     {
     //case READ:
-        /* code */
+        sleep(memory_shared.mem_delay);
         break;
-    //case WRITE:       IMPLEMENTAR
-        /* code */
+    //case WRITE:       
+        sleep(memory_shared.mem_delay);
         break;   
      
     default:
@@ -54,23 +54,36 @@ void handle_kernel(int socket_kernel,structures structures){
 			printf("El cliente se desconectó\n");
 			exit(1);
 	}
+    int pid = 1;// HARDCODEADISIMO. ESTE PID LO DEBERIA RECIBIR DEL KERNEL
+    int size = 1234;// HARDCODEADISIMO. ESTE SIZE LO DEBERIA RECIBIR DEL KERNEL
+    int s_id = 1;// HARDCODEADISIMO. ESTE S_ID LO DEBERIA RECIBIR DEL KERNEL
+    
+    char* process_id;
+    sprintf(process_id, "id%d", pid);
 
     switch (kernel->type)
     {
     //case NEW_PROCCESS:
-       create_structure(structures);
+    // Creo la tabla de segmentos y la devuevlo al kernel cuando crea un proceso
+    t_list* segment_table = create_sg_table(structures,process_id);
+    log_info(memory_config.logger,"Creación de Proceso PID: %s",process_id);
+    send(socket_kernel,segment_table,sizeof(segment_table),0); 
         break;
     //case END_PROCCESS:
-        remove_structure(structures);
+    // Elimino la tabla de segmentos cuando termina un proceso
+        remove_sg_table(structures,process_id);
+        log_info(memory_config.logger,"Eliminación de Proceso PID: %s",process_id);
         break;
     case CREATE_SEGMENT:
-        /* code */
+        add_segment(structures,process_id,size,s_id);
+        log_info(memory_config.logger,"PID: %s - Crear Segmento",process_id);
         break;
     case DELETE_SEGMENT:
         /* code */
         break;
     //case COMPACT:
-        /* code */
+        log_info(memory_config.logger,"Solicitud de compactacion");
+        sleep(memory_shared.com_delay);
         break;
 
     default:
