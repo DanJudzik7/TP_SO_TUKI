@@ -4,6 +4,6 @@
 #include "utils_memoria.h"
 #include "conexions.h"
 
-void addSegmentZero(void* memory,t_list* segments_list);
+void createSGZero(void* memory, segment* segmentZero);
 
 #endif

@@ -1,5 +1,19 @@
 #include "conexions.h"
 
+
+void listen_modules(int socket_memory,structures structures){
+    int fs = listen_fs(socket_memory);
+    int cpu = listen_cpu(socket_memory);
+    int kernel = listen_kernel(socket_memory);
+    while (1)
+    {
+        handle_fs(fs, structures);
+        handle_cpu(cpu, structures);
+        handle_kernel(kernel, structures);
+    }
+}
+
+/* saque la implementacion porque iba a ser un quilombo hacer los threads
 void listen_modules(int socket_memory){
     pthread_t thread_fs;
     pthread_create(&thread_fs, NULL, (void*)listen_fs, socket_memory);
@@ -13,8 +27,8 @@ void listen_modules(int socket_memory){
     pthread_create(&thread_k, NULL, (void*)listen_kernel, socket_memory);
 	pthread_join(thread_k,NULL);
 }
-
-void listen_fs(int socket_memory){
+*/
+int listen_fs(int socket_memory){
     int socket_fs = socket_accept(socket_memory);
     if (socket_fs == -1) {
 			log_warning(memory_config.logger, "Hubo un error aceptando la conexión");
@@ -22,10 +36,10 @@ void listen_fs(int socket_memory){
 	}else {
         	log_warning(memory_config.logger, "Se conecto el kernel en el puerto %d",socket_fs);
     }
-    handle_fs(socket_fs);
+    return socket_fs;
 }
 
-void listen_cpu(int socket_memory){
+int listen_cpu(int socket_memory){
     int socket_cpu = socket_accept(socket_memory);
     if (socket_cpu == -1) {
 			log_warning(memory_config.logger, "Hubo un error aceptando la conexión");
@@ -33,13 +47,12 @@ void listen_cpu(int socket_memory){
 	}else {
         	log_warning(memory_config.logger, "Se conecto el kernel en el puerto %d",socket_cpu);
     }
-    handle_cpu(socket_cpu);
+    return socket_cpu;
 }
 
 
 
-void listen_kernel(int socket_memory){
-    pthread_t thread;
+int listen_kernel(int socket_memory){
     int socket_kernel = socket_accept(socket_memory);
     if (socket_kernel == -1) {
 			log_warning(memory_config.logger, "Hubo un error aceptando la conexión");
@@ -47,5 +60,5 @@ void listen_kernel(int socket_memory){
 	}else {
         	log_warning(memory_config.logger, "Se conecto el kernel en el puerto %d",socket_kernel);
     }
-    handle_kernel(socket_kernel);
+    return socket_kernel;
 }

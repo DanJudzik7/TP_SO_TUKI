@@ -1,7 +1,7 @@
 #include "handlers.h"
 
 // No se si conviene hacerlo asi o poner todo en la misma funcion y que todos los hilos la usen
-void handle_fs(int socket_fs){
+void handle_fs(int socket_fs,structures structures){
     t_package* fs = socket_receive(socket_fs);
     if (fs == NULL) {
 			printf("El cliente se desconectó\n");
@@ -25,7 +25,7 @@ void handle_fs(int socket_fs){
 
 }
 
-void handle_cpu(int socket_cpu){
+void handle_cpu(int socket_cpu,structures structures){
     t_package* cpu = socket_receive(socket_cpu);
     if (cpu == NULL) {
 			printf("El cliente se desconectó\n");
@@ -48,7 +48,7 @@ void handle_cpu(int socket_cpu){
     }
 }
 
-void handle_kernel(int socket_kernel){
+void handle_kernel(int socket_kernel,structures structures){
     t_package* kernel = socket_receive(socket_kernel);
     if (kernel == NULL) {
 			printf("El cliente se desconectó\n");
@@ -58,10 +58,10 @@ void handle_kernel(int socket_kernel){
     switch (kernel->type)
     {
     //case NEW_PROCCESS:
-        /* code */
+       create_structure(structures);
         break;
     //case END_PROCCESS:
-        /* code */
+        remove_structure(structures);
         break;
     case CREATE_SEGMENT:
         /* code */

@@ -12,27 +12,24 @@ void main() {
 	log_warning(memory_config.logger, "Socket de servidor inicializado en puerto %s", memory_config.port);
 
 	void* memory = s_malloc(memory_shared.memory_size);
-
-	t_list* segments_list = list_create();
-	t_list* hole_list = list_create();
-
+	structures structures;
+	structures.hole_list = list_create();
+	structures.all_segments = dictionary_create();
+	structures.segment_zero = malloc(sizeof(segment));
+	
 	hole* hole = malloc(sizeof(hole));
 	hole->base = memory + memory_shared.sg_zero_size;
 	hole->size = memory_shared.memory_size - memory_shared.sg_zero_size;
-	list_add(hole_list,hole);
-	//addSegmentZero(memory,segments_list);  // Tecnicamente el segmento zero deberia ir al principio de cada proceso asi que ta ma
-
-	listen_modules(socket_memory);
+	list_add(structures.hole_list,hole);
+	
+	createSGZero(memory,structures.segment_zero);
+	dictionary_put(structures.all_segments , "id0", structures.segment_zero);
+	free(structures.segment_zero); //no se si esta bien
+	listen_modules(socket_memory,structures);
 }
 
-void addSegmentZero(void* memory,t_list* segments_list){
-	segment* segmentZero;
+void createSGZero(void* memory, segment* segmentZero){
 	segmentZero->base = memory;
 	segmentZero->offset = memory_shared.sg_zero_size;
-	segmentZero->is_in_use = 1;
-	segmentZero->pid = 0;
-
-	list_add(segments_list,segmentZero);
-
-
+	segmentZero->s_id = 0;	
 }

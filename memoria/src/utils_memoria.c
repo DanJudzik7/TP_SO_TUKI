@@ -4,7 +4,6 @@ configuration_memory memory_config;
 memory memory_shared;
 
 
-
 void initialize(){
     memory_config.logger = start_logger("memoria");
     memory_config.config = start_config("memoria");
@@ -15,7 +14,14 @@ void initialize(){
     memory_shared.mem_delay = config_get_int_value(memory_config.config, "RETARDO_MEMORIA");
     memory_shared.com_delay = config_get_int_value(memory_config.config, "RETARDO_COMPACTACION");
     memory_shared.algorithm = config_get_string_value(memory_config.config, "ALGORITMO_PLANIFICACION");
+}
 
-    
+void create_structure(structures structures){
+    t_list* segment_table = list_create();
+    list_add(segment_table,structures.segment_zero);
+    dictionary_put(structures.all_segments , "id1", segment_table); //TODO: hacer que el id1 se modular 
+}
 
+void remove_structure(structures structures){
+    dictionary_remove(structures.all_segments,"id1"); //TODO: hacer que el id1 se modular 
 }

@@ -7,18 +7,13 @@
 #include "tests.h"
 #include <pthread.h>
 
-// ----------------------------- HEADERS -----------------------------
-
-void initialize();
-
 
 // ----------------------------- STRUCTS -----------------------------
 
 typedef struct segment{
 	void* base;
 	int offset;
-	int pid;
-	int is_in_use;
+	int s_id;
 } segment;
 
 typedef struct hole{
@@ -32,12 +27,23 @@ typedef struct memory {
     int sg_amount;
     int mem_delay;
     int com_delay;
-    char* algorithm;
-    
+    char* algorithm; 
 } memory;
+
+typedef struct structures{
+	segment* segment_zero;
+	t_dictionary* all_segments;
+	t_list* hole_list;
+} structures;
+
 
 extern configuration_memory memory_config;
 extern memory memory_shared;
+// ----------------------------- HEADERS -----------------------------
+
+void initialize();
+void create_structure(structures structures);
+void remove_structure(structures structures);
 
 
 
