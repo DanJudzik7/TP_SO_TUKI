@@ -1,7 +1,7 @@
 #include "handlers.h"
 
 // Manejo los recive con cada una de estas funciones
-void handle_fs(int socket_fs,structures structures){
+void handle_fs(int socket_fs,memory_structure* memory_structure){
     t_package* fs = socket_receive(socket_fs);
     if (fs == NULL) {
 			printf("El cliente se desconectó\n");
@@ -25,7 +25,7 @@ void handle_fs(int socket_fs,structures structures){
 
 }
 
-void handle_cpu(int socket_cpu,structures structures){
+void handle_cpu(int socket_cpu,memory_structure* memory_structure){
     t_package* cpu = socket_receive(socket_cpu);
     if (cpu == NULL) {
 			printf("El cliente se desconectó\n");
@@ -48,7 +48,7 @@ void handle_cpu(int socket_cpu,structures structures){
     }
 }
 
-void handle_kernel(int socket_kernel,structures structures){
+void handle_kernel(int socket_kernel,memory_structure* memory_structure){
     t_package* kernel = socket_receive(socket_kernel);
     if (kernel == NULL) {
 			printf("El cliente se desconectó\n");
@@ -65,17 +65,17 @@ void handle_kernel(int socket_kernel,structures structures){
     {
     //case NEW_PROCCESS:
     // Creo la tabla de segmentos y la devuevlo al kernel cuando crea un proceso
-    t_list* segment_table = create_sg_table(structures,process_id);
+    t_list* segment_table = create_sg_table(memory_structure,process_id);
     log_info(memory_config.logger,"Creación de Proceso PID: %s",process_id);
     send(socket_kernel,segment_table,sizeof(segment_table),0); 
         break;
     //case END_PROCCESS:
     // Elimino la tabla de segmentos cuando termina un proceso
-        remove_sg_table(structures,process_id);
+        remove_sg_table(memory_structure,process_id);
         log_info(memory_config.logger,"Eliminación de Proceso PID: %s",process_id);
         break;
     case CREATE_SEGMENT:
-        add_segment(structures,process_id,size,s_id);
+        add_segment(memory_structure,process_id,size,s_id);
         log_info(memory_config.logger,"PID: %s - Crear Segmento",process_id);
         break;
     case DELETE_SEGMENT:

@@ -35471,3 +35471,323 @@
 [WARNING] 19:23:53:271 memoria/(8245:8245): Socket de servidor inicializado en puerto 8002
 [INFO] 19:26:32:145 memoria/(8540:8540): Iniciando Memoria...
 [WARNING] 19:26:32:145 memoria/(8540:8540): Socket de servidor inicializado en puerto 8002
+[INFO] 18:32:00:012 memoria/(6618:6618): Iniciando Memoria...
+[WARNING] 18:32:00:016 memoria/(6618:6618): Socket de servidor inicializado en puerto 8002
+[INFO] 18:32:20:154 memoria/(6699:6699): Iniciando Memoria...
+[WARNING] 18:32:20:154 memoria/(6699:6699): Socket de servidor inicializado en puerto 8002
+[INFO] 18:32:47:866 memoria/(6799:6799): Iniciando Memoria...
+[WARNING] 18:32:47:866 memoria/(6799:6799): Socket de servidor inicializado en puerto 8002
+[INFO] 18:32:47:866 memoria/(6799:6799): Memoria inicializada correctamente
+[INFO] 18:32:55:517 memoria/(6900:6900): Iniciando Memoria...
+[WARNING] 18:32:55:517 memoria/(6900:6900): Socket de servidor inicializado en puerto 8002
+[INFO] 18:32:55:517 memoria/(6900:6900): Memoria inicializada correctamente
+[INFO] 18:33:55:216 memoria/(7094:7094): Iniciando Memoria...
+[WARNING] 18:33:55:216 memoria/(7094:7094): Socket de servidor inicializado en puerto 8002
+[INFO] 18:33:55:216 memoria/(7094:7094): Memoria inicializada correctamente
+[INFO] 18:33:55:216 memoria/(7094:7094): Memoria inicializada correctamente
+[INFO] 18:33:55:216 memoria/(7094:7094): Memoria inicializada correctamente
+[INFO] 18:33:55:216 memoria/(7094:7094): Se creo la tabla de segmentos del PID 1
+[INFO] 18:36:06:631 memoria/(7339:7339): Iniciando Memoria...
+[WARNING] 18:36:06:631 memoria/(7339:7339): Socket de servidor inicializado en puerto 8002
+[INFO] 18:36:06:631 memoria/(7339:7339): Memoria inicializada correctamente
+[INFO] 18:36:06:631 memoria/(7339:7339): Memoria inicializada correctamente
+[INFO] 18:36:06:631 memoria/(7339:7339): Memoria inicializada correctamente
+[INFO] 18:36:06:631 memoria/(7339:7339): Se creo la tabla de segmentos del PID 1
+[INFO] 18:38:30:321 memoria/(7551:7551): Iniciando Memoria...
+[WARNING] 18:38:30:321 memoria/(7551:7551): Socket de servidor inicializado en puerto 8002
+[INFO] 18:38:30:321 memoria/(7551:7551): Memoria inicializada correctamente
+[INFO] 18:38:30:321 memoria/(7551:7551): Se creo la tabla de segmentos del PID 1
+[INFO] 18:38:30:321 memoria/(7551:7551): El algoritmo es (null)
+[INFO] 18:39:45:644 memoria/(7724:7724): El algoritmo es (null)
+[INFO] 18:39:45:644 memoria/(7724:7724): Iniciando Memoria...
+[WARNING] 18:39:45:644 memoria/(7724:7724): Socket de servidor inicializado en puerto 8002
+[INFO] 18:39:45:644 memoria/(7724:7724): Memoria inicializada correctamente
+[INFO] 18:39:45:644 memoria/(7724:7724): Se creo la tabla de segmentos del PID 1
+[INFO] 18:39:45:644 memoria/(7724:7724): El algoritmo es (null)
+[INFO] 18:40:25:917 memoria/(7892:7892): El algoritmo es FIRST
+[INFO] 18:40:25:917 memoria/(7892:7892): Iniciando Memoria...
+[WARNING] 18:40:25:918 memoria/(7892:7892): Socket de servidor inicializado en puerto 8002
+[INFO] 18:40:25:918 memoria/(7892:7892): Memoria inicializada correctamente
+[INFO] 18:40:25:918 memoria/(7892:7892): Se creo la tabla de segmentos del PID 1
+[INFO] 18:40:25:918 memoria/(7892:7892): El algoritmo es FIRST
+[INFO] 18:44:26:450 memoria/(8166:8166): Iniciando Memoria...
+[WARNING] 18:44:26:450 memoria/(8166:8166): Socket de servidor inicializado en puerto 8002
+[INFO] 18:44:26:450 memoria/(8166:8166): Memoria inicializada correctamente
+[INFO] 18:44:26:450 memoria/(8166:8166): Se creo la tabla de segmentos del PID 1
+[INFO] 18:44:26:450 memoria/(8166:8166): El algoritmo es FIRST
+[INFO] 18:44:53:569 memoria/(8332:8332): Iniciando Memoria...
+[WARNING] 18:44:53:569 memoria/(8332:8332): Socket de servidor inicializado en puerto 8002
+[INFO] 18:44:53:569 memoria/(8332:8332): Memoria inicializada correctamente
+[INFO] 18:44:53:569 memoria/(8332:8332): Se creo la tabla de segmentos del PID 1
+[INFO] 18:44:53:569 memoria/(8332:8332): El algoritmo es FIRST
+[INFO] 18:45:15:663 memoria/(8441:8441): Iniciando Memoria...
+[WARNING] 18:45:15:664 memoria/(8441:8441): Socket de servidor inicializado en puerto 8002
+[INFO] 18:45:15:664 memoria/(8441:8441): Memoria inicializada correctamente
+[INFO] 18:45:15:664 memoria/(8441:8441): Se creo la tabla de segmentos del PID 1
+[INFO] 18:45:15:664 memoria/(8441:8441): El algoritmo es FIRST
+[INFO] 18:47:42:757 memoria/(8638:8638): Iniciando Memoria...
+[WARNING] 18:47:42:757 memoria/(8638:8638): Socket de servidor inicializado en puerto 8002
+[INFO] 18:47:42:757 memoria/(8638:8638): Memoria inicializada correctamente
+[INFO] 18:47:42:757 memoria/(8638:8638): Se creo la tabla de segmentos del PID 1
+[INFO] 18:47:42:757 memoria/(8638:8638): El algoritmo es FIRST
+[INFO] 18:48:00:097 memoria/(8773:8773): Iniciando Memoria...
+[WARNING] 18:48:00:097 memoria/(8773:8773): Socket de servidor inicializado en puerto 8002
+[INFO] 18:48:00:097 memoria/(8773:8773): Memoria inicializada correctamente
+[INFO] 18:48:00:097 memoria/(8773:8773): Se creo la tabla de segmentos del PID 1
+[INFO] 18:48:00:097 memoria/(8773:8773): El algoritmo es FIRST
+[INFO] 18:49:38:208 memoria/(8956:8956): Iniciando Memoria...
+[WARNING] 18:49:38:209 memoria/(8956:8956): Socket de servidor inicializado en puerto 8002
+[INFO] 18:49:38:209 memoria/(8956:8956): Memoria inicializada correctamente
+[INFO] 18:49:38:210 memoria/(8956:8956): Se creo la tabla de segmentos del PID 1
+[INFO] 18:49:38:210 memoria/(8956:8956): El algoritmo es FIRST
+[INFO] 18:51:02:346 memoria/(9146:9146): Iniciando Memoria...
+[WARNING] 18:51:02:346 memoria/(9146:9146): Socket de servidor inicializado en puerto 8002
+[INFO] 18:51:02:346 memoria/(9146:9146): Memoria inicializada correctamente
+[INFO] 18:51:02:346 memoria/(9146:9146): Se creo la tabla de segmentos del PID 1
+[INFO] 18:51:02:346 memoria/(9146:9146): El algoritmo es FIRST
+[INFO] 18:59:20:652 memoria/(9356:9356): Iniciando Memoria...
+[WARNING] 18:59:20:653 memoria/(9356:9356): Socket de servidor inicializado en puerto 8002
+[INFO] 18:59:20:653 memoria/(9356:9356): Memoria inicializada correctamente
+[INFO] 18:59:20:653 memoria/(9356:9356): Se creo la tabla de segmentos del PID 1
+[INFO] 18:59:20:653 memoria/(9356:9356): El algoritmo es FIRST
+[INFO] 19:01:54:385 memoria/(9636:9636): Iniciando Memoria...
+[WARNING] 19:01:54:385 memoria/(9636:9636): Socket de servidor inicializado en puerto 8002
+[INFO] 19:01:54:385 memoria/(9636:9636): Memoria inicializada correctamente
+[INFO] 19:01:54:385 memoria/(9636:9636): Se creo la tabla de segmentos del PID 1
+[INFO] 19:01:54:385 memoria/(9636:9636): El algoritmo es FIRST
+[INFO] 19:51:37:463 memoria/(10044:10044): Iniciando Memoria...
+[WARNING] 19:51:37:464 memoria/(10044:10044): Socket de servidor inicializado en puerto 8002
+[INFO] 19:51:37:464 memoria/(10044:10044): Memoria inicializada correctamente
+[INFO] 19:51:37:464 memoria/(10044:10044): Se creo la tabla de segmentos del PID 1
+[INFO] 19:51:37:465 memoria/(10044:10044): El algoritmo es FIRST
+[INFO] 19:53:01:030 memoria/(10185:10185): Iniciando Memoria...
+[WARNING] 19:53:01:030 memoria/(10185:10185): Socket de servidor inicializado en puerto 8002
+[INFO] 19:53:01:030 memoria/(10185:10185): Memoria inicializada correctamente
+[INFO] 19:53:01:030 memoria/(10185:10185): Se creo la tabla de segmentos del PID 1
+[INFO] 19:53:01:030 memoria/(10185:10185): El algoritmo es FIRST
+[INFO] 19:53:08:503 memoria/(10270:10270): Iniciando Memoria...
+[WARNING] 19:53:08:503 memoria/(10270:10270): Socket de servidor inicializado en puerto 8002
+[INFO] 19:53:08:503 memoria/(10270:10270): Memoria inicializada correctamente
+[INFO] 19:53:08:503 memoria/(10270:10270): Se creo la tabla de segmentos del PID 1
+[INFO] 19:53:08:503 memoria/(10270:10270): El algoritmo es FIRST
+[INFO] 19:55:45:718 memoria/(10419:10419): Iniciando Memoria...
+[WARNING] 19:55:45:719 memoria/(10419:10419): Socket de servidor inicializado en puerto 8002
+[INFO] 19:55:45:719 memoria/(10419:10419): Memoria inicializada correctamente
+[INFO] 19:55:45:719 memoria/(10419:10419): Se creo la tabla de segmentos del PID 1
+[INFO] 19:55:45:719 memoria/(10419:10419): El algoritmo es FIRST
+[INFO] 20:04:18:625 memoria/(10950:10950): Iniciando Memoria...
+[WARNING] 20:04:18:625 memoria/(10950:10950): Socket de servidor inicializado en puerto 8002
+[INFO] 20:04:18:625 memoria/(10950:10950): Memoria inicializada correctamente
+[INFO] 20:04:18:625 memoria/(10950:10950): Se creo la tabla de segmentos del PID 1
+[INFO] 20:10:24:629 memoria/(11207:11207): Iniciando Memoria...
+[WARNING] 20:10:24:629 memoria/(11207:11207): Socket de servidor inicializado en puerto 8002
+[INFO] 20:10:24:629 memoria/(11207:11207): Memoria inicializada correctamente
+[INFO] 20:10:24:629 memoria/(11207:11207): Se creo la tabla de segmentos del PID 1
+[INFO] 20:12:06:145 memoria/(11366:11366): Iniciando Memoria...
+[WARNING] 20:12:06:145 memoria/(11366:11366): Socket de servidor inicializado en puerto 8002
+[INFO] 20:12:06:145 memoria/(11366:11366): Memoria inicializada correctamente
+[INFO] 20:12:06:145 memoria/(11366:11366): Se creo la tabla de segmentos del PID 1
+[INFO] 20:15:31:961 memoria/(11615:11615): Iniciando Memoria...
+[WARNING] 20:15:31:961 memoria/(11615:11615): Socket de servidor inicializado en puerto 8002
+[INFO] 20:15:31:962 memoria/(11615:11615): Memoria inicializada correctamente
+[INFO] 20:15:31:962 memoria/(11615:11615): Se creo la tabla de segmentos del PID 1
+[INFO] 20:16:51:886 memoria/(11784:11784): Iniciando Memoria...
+[WARNING] 20:16:51:886 memoria/(11784:11784): Socket de servidor inicializado en puerto 8002
+[INFO] 20:16:51:886 memoria/(11784:11784): Memoria inicializada correctamente
+[INFO] 20:16:51:886 memoria/(11784:11784): Se creo la tabla de segmentos del PID 1
+[INFO] 20:19:12:070 memoria/(11940:11940): Iniciando Memoria...
+[WARNING] 20:19:12:070 memoria/(11940:11940): Socket de servidor inicializado en puerto 8002
+[INFO] 20:19:12:070 memoria/(11940:11940): Memoria inicializada correctamente
+[INFO] 20:19:12:070 memoria/(11940:11940): Se creó la tabla de segmentos del PID 1
+[INFO] 20:20:34:559 memoria/(12107:12107): Iniciando Memoria...
+[WARNING] 20:20:34:559 memoria/(12107:12107): Socket de servidor inicializado en puerto 8002
+[INFO] 20:20:34:559 memoria/(12107:12107): Memoria inicializada correctamente
+[INFO] 20:20:34:559 memoria/(12107:12107): Se creó la tabla de segmentos del PID 1
+[INFO] 20:21:22:198 memoria/(12257:12257): Iniciando Memoria...
+[WARNING] 20:21:22:198 memoria/(12257:12257): Socket de servidor inicializado en puerto 8002
+[INFO] 20:21:22:198 memoria/(12257:12257): Memoria inicializada correctamente
+[INFO] 20:21:22:199 memoria/(12257:12257): Se creó la tabla de segmentos del PID 1
+[INFO] 20:21:35:717 memoria/(12374:12374): Iniciando Memoria...
+[WARNING] 20:21:35:717 memoria/(12374:12374): Socket de servidor inicializado en puerto 8002
+[INFO] 20:21:35:717 memoria/(12374:12374): Memoria inicializada correctamente
+[INFO] 20:21:35:717 memoria/(12374:12374): Se creó la tabla de segmentos del PID 1
+[INFO] 20:24:33:229 memoria/(12688:12688): Iniciando Memoria...
+[WARNING] 20:24:33:229 memoria/(12688:12688): Socket de servidor inicializado en puerto 8002
+[INFO] 20:24:33:229 memoria/(12688:12688): Memoria inicializada correctamente
+[INFO] 20:24:33:229 memoria/(12688:12688): Se creó la tabla de segmentos del PID 1
+[INFO] 20:29:06:269 memoria/(13123:13123): Iniciando Memoria...
+[WARNING] 20:29:06:269 memoria/(13123:13123): Socket de servidor inicializado en puerto 8002
+[INFO] 20:29:06:269 memoria/(13123:13123): Memoria inicializada correctamente
+[INFO] 20:29:06:269 memoria/(13123:13123): Se creó la tabla de segmentos del PID 1
+[INFO] 20:32:10:869 memoria/(13606:13606): Iniciando Memoria...
+[WARNING] 20:32:10:869 memoria/(13606:13606): Socket de servidor inicializado en puerto 8002
+[INFO] 20:32:10:869 memoria/(13606:13606): Memoria inicializada correctamente
+[INFO] 20:32:10:869 memoria/(13606:13606): Se creó la tabla de segmentos del PID 1
+[INFO] 20:33:04:679 memoria/(13788:13788): Iniciando Memoria...
+[WARNING] 20:33:04:679 memoria/(13788:13788): Socket de servidor inicializado en puerto 8002
+[INFO] 20:33:04:679 memoria/(13788:13788): Memoria inicializada correctamente
+[INFO] 20:33:04:679 memoria/(13788:13788): Se creó la tabla de segmentos del PID 1
+[INFO] 20:45:36:848 memoria/(15020:15020): Iniciando Memoria...
+[WARNING] 20:45:36:848 memoria/(15020:15020): Socket de servidor inicializado en puerto 8002
+[INFO] 20:45:36:848 memoria/(15020:15020): Memoria inicializada correctamente
+[INFO] 20:45:36:848 memoria/(15020:15020): Se creó la tabla de segmentos del PID 1
+[INFO] 21:02:08:640 memoria/(15888:15888): Iniciando Memoria...
+[WARNING] 21:02:08:640 memoria/(15888:15888): Socket de servidor inicializado en puerto 8002
+[INFO] 21:02:08:640 memoria/(15888:15888): Memoria inicializada correctamente
+[INFO] 21:02:08:640 memoria/(15888:15888): Se creó la tabla de segmentos del PID 1
+[INFO] 22:35:51:239 memoria/(16609:16609): Iniciando Memoria...
+[WARNING] 22:35:51:239 memoria/(16609:16609): Socket de servidor inicializado en puerto 8002
+[INFO] 22:35:51:239 memoria/(16609:16609): Memoria inicializada correctamente
+[INFO] 22:35:51:239 memoria/(16609:16609): Se creó la tabla de segmentos del PID 1
+[INFO] 22:37:33:244 memoria/(16734:16734): Iniciando Memoria...
+[WARNING] 22:37:33:244 memoria/(16734:16734): Socket de servidor inicializado en puerto 8002
+[INFO] 22:37:33:244 memoria/(16734:16734): Memoria inicializada correctamente
+[INFO] 22:37:33:244 memoria/(16734:16734): Se creó la tabla de segmentos del PID 1
+[INFO] 22:38:02:888 memoria/(16861:16861): Iniciando Memoria...
+[WARNING] 22:38:02:888 memoria/(16861:16861): Socket de servidor inicializado en puerto 8002
+[INFO] 22:38:02:888 memoria/(16861:16861): Memoria inicializada correctamente
+[INFO] 22:38:02:888 memoria/(16861:16861): Se creó la tabla de segmentos del PID 1
+[INFO] 22:39:41:978 memoria/(17006:17006): Iniciando Memoria...
+[WARNING] 22:39:41:979 memoria/(17006:17006): Socket de servidor inicializado en puerto 8002
+[INFO] 22:39:41:979 memoria/(17006:17006): Memoria inicializada correctamente
+[INFO] 22:39:41:979 memoria/(17006:17006): Se creó la tabla de segmentos del PID 1
+[INFO] 22:40:51:936 memoria/(17161:17161): Iniciando Memoria...
+[WARNING] 22:40:51:936 memoria/(17161:17161): Socket de servidor inicializado en puerto 8002
+[INFO] 22:40:51:936 memoria/(17161:17161): Memoria inicializada correctamente
+[INFO] 22:40:51:936 memoria/(17161:17161): Se creó la tabla de segmentos del PID 1
+[INFO] 22:41:57:255 memoria/(17304:17304): Iniciando Memoria...
+[WARNING] 22:41:57:255 memoria/(17304:17304): Socket de servidor inicializado en puerto 8002
+[INFO] 22:41:57:255 memoria/(17304:17304): Memoria inicializada correctamente
+[INFO] 22:41:57:255 memoria/(17304:17304): Se creó la tabla de segmentos del PID 1
+[INFO] 22:42:15:588 memoria/(17448:17448): Iniciando Memoria...
+[WARNING] 22:42:15:588 memoria/(17448:17448): Socket de servidor inicializado en puerto 8002
+[INFO] 22:42:15:588 memoria/(17448:17448): Memoria inicializada correctamente
+[INFO] 22:42:15:589 memoria/(17448:17448): Se creó la tabla de segmentos del PID 1
+[INFO] 22:45:11:225 memoria/(17666:17666): Iniciando Memoria...
+[WARNING] 22:45:11:226 memoria/(17666:17666): Socket de servidor inicializado en puerto 8002
+[INFO] 22:45:11:226 memoria/(17666:17666): Memoria inicializada correctamente
+[INFO] 22:45:11:226 memoria/(17666:17666): Se creó la tabla de segmentos del PID 0
+[INFO] 22:46:11:393 memoria/(17784:17784): Iniciando Memoria...
+[WARNING] 22:46:11:393 memoria/(17784:17784): Socket de servidor inicializado en puerto 8002
+[INFO] 22:46:11:393 memoria/(17784:17784): Memoria inicializada correctamente
+[INFO] 22:46:11:393 memoria/(17784:17784): Se creó la tabla de segmentos del PID 0
+[INFO] 22:46:27:596 memoria/(17890:17890): Iniciando Memoria...
+[WARNING] 22:46:27:597 memoria/(17890:17890): Socket de servidor inicializado en puerto 8002
+[INFO] 22:46:27:597 memoria/(17890:17890): Memoria inicializada correctamente
+[INFO] 22:46:27:597 memoria/(17890:17890): Se creó la tabla de segmentos del PID 0
+[INFO] 22:46:56:330 memoria/(18005:18005): Iniciando Memoria...
+[WARNING] 22:46:56:330 memoria/(18005:18005): Socket de servidor inicializado en puerto 8002
+[INFO] 22:46:56:330 memoria/(18005:18005): Memoria inicializada correctamente
+[INFO] 22:46:56:330 memoria/(18005:18005): Se creó la tabla de segmentos del PID 0
+[INFO] 22:50:02:935 memoria/(18190:18190): Iniciando Memoria...
+[WARNING] 22:50:02:935 memoria/(18190:18190): Socket de servidor inicializado en puerto 8002
+[INFO] 22:50:02:935 memoria/(18190:18190): Memoria inicializada correctamente
+[INFO] 22:50:02:935 memoria/(18190:18190): Se creó la tabla de segmentos del PID 0
+[INFO] 22:52:25:458 memoria/(18372:18372): Iniciando Memoria...
+[WARNING] 22:52:25:459 memoria/(18372:18372): Socket de servidor inicializado en puerto 8002
+[INFO] 22:52:25:459 memoria/(18372:18372): Memoria inicializada correctamente
+[INFO] 22:52:25:459 memoria/(18372:18372): Se creó la tabla de segmentos del PID 0
+[INFO] 22:53:13:237 memoria/(18523:18523): Iniciando Memoria...
+[WARNING] 22:53:13:238 memoria/(18523:18523): Socket de servidor inicializado en puerto 8002
+[INFO] 22:53:13:238 memoria/(18523:18523): Memoria inicializada correctamente
+[INFO] 22:53:13:238 memoria/(18523:18523): Se creó la tabla de segmentos del PID 0
+[INFO] 22:53:13:238 memoria/(18523:18523): El segmento 1 está en la posición 0x555555560ee0
+[INFO] 22:54:05:421 memoria/(18661:18661): Iniciando Memoria...
+[WARNING] 22:54:05:421 memoria/(18661:18661): Socket de servidor inicializado en puerto 8002
+[INFO] 22:54:05:422 memoria/(18661:18661): Memoria inicializada correctamente
+[INFO] 22:54:05:422 memoria/(18661:18661): Se creó la tabla de segmentos del PID 0
+[INFO] 22:54:05:422 memoria/(18661:18661): El segmento 1 está en la posición 0x555555560ee0
+[INFO] 22:54:19:044 memoria/(18781:18781): Iniciando Memoria...
+[WARNING] 22:54:19:044 memoria/(18781:18781): Socket de servidor inicializado en puerto 8002
+[INFO] 22:54:19:044 memoria/(18781:18781): Memoria inicializada correctamente
+[INFO] 22:54:19:044 memoria/(18781:18781): Se creó la tabla de segmentos del PID 0
+[INFO] 22:54:19:044 memoria/(18781:18781): El segmento 1 está en la posición 0x555555560ee0
+[INFO] 22:56:45:608 memoria/(18984:18984): Iniciando Memoria...
+[WARNING] 22:56:45:608 memoria/(18984:18984): Socket de servidor inicializado en puerto 8002
+[INFO] 22:56:45:608 memoria/(18984:18984): Memoria inicializada correctamente
+[INFO] 22:56:45:608 memoria/(18984:18984): Se creó la tabla de segmentos del PID 0
+[INFO] 23:01:28:650 memoria/(19181:19181): Iniciando Memoria...
+[WARNING] 23:01:28:650 memoria/(19181:19181): Socket de servidor inicializado en puerto 8002
+[INFO] 23:01:28:650 memoria/(19181:19181): Memoria inicializada correctamente
+[INFO] 23:01:28:650 memoria/(19181:19181): Se creó la tabla de segmentos del PID 0
+[INFO] 23:03:23:528 memoria/(19332:19332): Iniciando Memoria...
+[WARNING] 23:03:23:528 memoria/(19332:19332): Socket de servidor inicializado en puerto 8002
+[INFO] 23:03:23:528 memoria/(19332:19332): Memoria inicializada correctamente
+[INFO] 23:03:23:528 memoria/(19332:19332): Se creó la tabla de segmentos del PID 0
+[INFO] 23:10:07:508 memoria/(19555:19555): Iniciando Memoria...
+[WARNING] 23:10:07:508 memoria/(19555:19555): Socket de servidor inicializado en puerto 8002
+[INFO] 23:10:07:508 memoria/(19555:19555): Memoria inicializada correctamente
+[INFO] 23:10:07:508 memoria/(19555:19555): Se creó la tabla de segmentos del PID 0
+[INFO] 23:11:44:449 memoria/(19686:19686): Iniciando Memoria...
+[WARNING] 23:11:44:449 memoria/(19686:19686): Socket de servidor inicializado en puerto 8002
+[INFO] 23:11:44:449 memoria/(19686:19686): Memoria inicializada correctamente
+[INFO] 23:11:44:449 memoria/(19686:19686): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:13:18:729 memoria/(19832:19832): Iniciando Memoria...
+[WARNING] 23:13:18:729 memoria/(19832:19832): Socket de servidor inicializado en puerto 8002
+[INFO] 23:13:18:729 memoria/(19832:19832): Memoria inicializada correctamente
+[INFO] 23:13:18:729 memoria/(19832:19832): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:15:27:921 memoria/(19982:19982): Iniciando Memoria...
+[WARNING] 23:15:27:921 memoria/(19982:19982): Socket de servidor inicializado en puerto 8002
+[INFO] 23:15:27:921 memoria/(19982:19982): Memoria inicializada correctamente
+[INFO] 23:15:27:921 memoria/(19982:19982): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:18:33:910 memoria/(20224:20224): Iniciando Memoria...
+[WARNING] 23:18:33:910 memoria/(20224:20224): Socket de servidor inicializado en puerto 8002
+[INFO] 23:18:33:910 memoria/(20224:20224): Memoria inicializada correctamente
+[INFO] 23:18:33:910 memoria/(20224:20224): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:19:27:983 memoria/(20340:20340): Iniciando Memoria...
+[WARNING] 23:19:27:983 memoria/(20340:20340): Socket de servidor inicializado en puerto 8002
+[INFO] 23:19:27:983 memoria/(20340:20340): Memoria inicializada correctamente
+[INFO] 23:19:27:983 memoria/(20340:20340): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:21:05:913 memoria/(20455:20455): Iniciando Memoria...
+[WARNING] 23:21:05:914 memoria/(20455:20455): Socket de servidor inicializado en puerto 8002
+[INFO] 23:21:05:914 memoria/(20455:20455): Memoria inicializada correctamente
+[INFO] 23:21:35:309 memoria/(20554:20554): Iniciando Memoria...
+[WARNING] 23:21:35:309 memoria/(20554:20554): Socket de servidor inicializado en puerto 8002
+[INFO] 23:21:35:309 memoria/(20554:20554): Memoria inicializada correctamente
+[INFO] 23:21:35:309 memoria/(20554:20554): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:22:00:259 memoria/(20652:20652): Iniciando Memoria...
+[WARNING] 23:22:00:259 memoria/(20652:20652): Socket de servidor inicializado en puerto 8002
+[INFO] 23:22:00:259 memoria/(20652:20652): Memoria inicializada correctamente
+[INFO] 23:22:00:259 memoria/(20652:20652): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:22:06:803 memoria/(20734:20734): Iniciando Memoria...
+[WARNING] 23:22:06:803 memoria/(20734:20734): Socket de servidor inicializado en puerto 8002
+[INFO] 23:22:06:803 memoria/(20734:20734): Memoria inicializada correctamente
+[INFO] 23:22:06:803 memoria/(20734:20734): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:26:00:624 memoria/(20894:20894): Iniciando Memoria...
+[WARNING] 23:26:00:624 memoria/(20894:20894): Socket de servidor inicializado en puerto 8002
+[INFO] 23:26:00:624 memoria/(20894:20894): Memoria inicializada correctamente
+[INFO] 23:26:00:624 memoria/(20894:20894): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:30:44:639 memoria/(21063:21063): Iniciando Memoria...
+[WARNING] 23:30:44:639 memoria/(21063:21063): Socket de servidor inicializado en puerto 8002
+[INFO] 23:30:44:639 memoria/(21063:21063): Memoria inicializada correctamente
+[INFO] 23:30:44:639 memoria/(21063:21063): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:30:59:540 memoria/(21168:21168): Iniciando Memoria...
+[WARNING] 23:30:59:540 memoria/(21168:21168): Socket de servidor inicializado en puerto 8002
+[INFO] 23:30:59:540 memoria/(21168:21168): Memoria inicializada correctamente
+[INFO] 23:30:59:540 memoria/(21168:21168): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:31:36:822 memoria/(21286:21286): Iniciando Memoria...
+[WARNING] 23:31:36:822 memoria/(21286:21286): Socket de servidor inicializado en puerto 8002
+[INFO] 23:31:36:822 memoria/(21286:21286): Memoria inicializada correctamente
+[INFO] 23:31:36:823 memoria/(21286:21286): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:32:23:422 memoria/(21382:21382): Iniciando Memoria...
+[WARNING] 23:32:23:422 memoria/(21382:21382): Socket de servidor inicializado en puerto 8002
+[INFO] 23:32:23:422 memoria/(21382:21382): Memoria inicializada correctamente
+[INFO] 23:32:23:423 memoria/(21382:21382): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 23:33:37:348 memoria/(21526:21526): Iniciando Memoria...
+[WARNING] 23:33:37:349 memoria/(21526:21526): Socket de servidor inicializado en puerto 8002
+[INFO] 23:33:37:349 memoria/(21526:21526): Memoria inicializada correctamente
+[INFO] 23:33:37:349 memoria/(21526:21526): 
+Se creó la tabla de segmentos del PID 0

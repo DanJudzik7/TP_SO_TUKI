@@ -43,7 +43,8 @@
         "scheduler.h": "c",
         "utils_memoria.h": "c",
         "conexions.h": "c",
-        "handlers.h": "c"
+        "handlers.h": "c",
+        "memory_structures.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false

@@ -1,15 +1,15 @@
 #include "conexions.h"
 
 
-void listen_modules(int socket_memory,structures structures){
+void listen_modules(int socket_memory,memory_structure* memory_structure){
     int fs = listen_fs(socket_memory);
     int cpu = listen_cpu(socket_memory);
     int kernel = listen_kernel(socket_memory);
     while (1)
     {
-        handle_fs(fs, structures);
-        handle_cpu(cpu, structures);
-        handle_kernel(kernel, structures);
+        handle_fs(fs, memory_structure);
+        handle_cpu(cpu, memory_structure);
+        handle_kernel(kernel, memory_structure);
     }
 }
 
