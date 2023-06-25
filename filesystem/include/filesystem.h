@@ -13,6 +13,8 @@
 #include <fcntl.h>
 #include "handler_instruction_filesystem.h"
 
+extern configuration_filesystem config_fs;
+
 typedef struct {
     char *file_name;
     int file_size;
@@ -21,10 +23,8 @@ typedef struct {
 } fcb;
 
 // Carga la configuración de un módulo
-t_config* start_superblock(char* path);
-t_bitarray* start_bitmap(int block_count,char* bitmap_file_path);
-FILE* start_block_file(int block_count, int block_size, char* path);
-fcb* load_fcb(char* path);
-void load_all_fcbs(char* fcb_directory, t_queue* fcb_queue);
+t_config* start_superblock();
+t_bitarray* start_bitmap(int block_count);
+char* start_block_file(int block_count);
 
 #endif

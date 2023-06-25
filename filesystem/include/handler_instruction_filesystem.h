@@ -3,9 +3,15 @@
 
 #include "shared_serializer.h"
 #include "shared_socket.h"
+#include <commons/config.h>
 
-int instruction_handler_filesystem(configuration_filesystem *config_fs);
-void open_file(configuration_filesystem* config_fs, t_instruction* instruction);
-void close_file(configuration_filesystem* config_fs, t_instruction* instruction);
+extern configuration_filesystem config_fs;
+
+int instruction_handler_filesystem();
+int next_bit_position();
+void open_file(t_instruction* instruction);
+void close_file(t_instruction* instruction);
+void create_file(char* full_file_path, char* file_name);
+void clear_bitmap_position(t_config* fcb_data);
 
 #endif

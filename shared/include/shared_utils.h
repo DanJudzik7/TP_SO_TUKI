@@ -7,6 +7,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/string.h>
+#include <commons/bitarray.h>
 #include <semaphore.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -91,13 +92,15 @@ typedef struct config_cpu {
 
 typedef struct config_filesystem {
 	t_log* logger;
+	t_config* config;
 	t_bitarray* bitmap;
 	FILE* block_file;
 	int connection_kernel;
-	char PATH_SUPERBLOQUE;
-	char PATH_BITMAP;
-	char PATH_BLOQUES;
-	char PATH_FCB;
+	int block_size;
+	char* PATH_SUPERBLOQUE;
+	char* PATH_BITMAP;
+	char* PATH_BLOQUES;
+	char* PATH_FCB;
 } configuration_filesystem;
 
 typedef struct config_memory {
