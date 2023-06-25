@@ -15,12 +15,14 @@ void segmento_hardcodeado(int PID, int SEGMENTO, memory_structure* memory_struct
 
 void initialize();
 // Función para graficar la RAM
-void graph_ram(t_list* ram);
+void graph_ram(t_list* ram, void* memory_base);
 // Función para graficar una tabla especifica de tipo table_pid_segments
-void graph_specific_table_pid_segments(t_list* segment_table, int process_id);
+void graph_specific_table_pid_segments(t_list* segment_table, int process_id, void* memory_base);
 // Función para graficar la tabla table_pid_segments
-void graph_table_pid_segments(t_dictionary* table_pid_segments);
+void graph_table_pid_segments(t_dictionary* table_pid_segments, void* memory_base);
 // Función para graficar la RAM y la tabla table_pid_segments
-void graph_memory(memory_structure* memory_struct) ;
+void graph_memory(memory_structure* memory_struct, void* memory_base) ;
+// Transforma la base dada a un entero para saber su posicion en la ram
+uint32_t transform_base_to_decimal(void*  address, void* memory_base);
 
 #endif

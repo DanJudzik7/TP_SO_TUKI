@@ -8,7 +8,7 @@
 
 int instruction_handler_memoria(int socket_client);
 // Crea una tabla de segmentos para un pid en especifico
-t_list* create_sg_table(memory_structure* structures,int process_id); 
+void create_sg_table(memory_structure* structures,int process_id); 
 // Remueve una tabla de segmentos para un pid en especifico
 void remove_sg_table(memory_structure* structures,int process_id);
 // Addiere un segmento a una tabla de segmentos de un pid en especifico

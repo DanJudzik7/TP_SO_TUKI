@@ -60,7 +60,6 @@ segment* first_fit(memory_structure* memory_structure, int size, int pid, int s_
                 list_add_in_index(segment_table, new_segment->s_id, new_segment);
                 list_add(memory_structure->ram, new_segment);
                 printf("Nuevo segmento agregado a la tabla de segmentos del proceso ID %d.\n", pid);
-                printf("----Dirección de memoria del segmento: %p\n", (void*)new_segment);
             } else {
                     printf("La tabla de segmentos para el proceso con ID %d es nula.\n", pid);
                 }

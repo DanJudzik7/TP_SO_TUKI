@@ -11,7 +11,7 @@ void main() {
 	}
 	log_warning(memory_config.logger, "Socket de servidor inicializado en puerto %s", memory_config.port);
 
-	// Inicializo la memoria
+	// Inicializo la memoria (ESTA ES LA MEMORIA REAL, OSEA MI HEAP)
 	void* memory = s_malloc(memory_shared.memory_size);
 
 	// Inicializo las estructuras de memoria
@@ -19,9 +19,10 @@ void main() {
 	memory_structure->hole_list = list_create();
 	memory_structure->table_pid_segments = dictionary_create();
 	memory_structure->segment_zero = s_malloc(sizeof(segment));
+	// Recordemos que la ram es una t_list unicamente de ayuda, que apunta a las direcciones de memoria [dir_segment_zer, sig direccion, etc ]
 	memory_structure->ram = list_create();
 	
-	// Creo el segmento 0 y lo agrego al diccionario y a la memoria
+	// Creo el segmento 0 y lo agrego al diccionario y a la memoria auxiliar ram
 	memory_structure->segment_zero->base = memory;
 	memory_structure->segment_zero->offset = memory_shared.sg_zero_size;
 	memory_structure->segment_zero->s_id = 0;	
@@ -34,19 +35,21 @@ void main() {
 	hole->base = memory + memory_shared.sg_zero_size;
 	hole->size = memory_shared.memory_size - memory_shared.sg_zero_size;
 	list_add(memory_structure->hole_list,hole);
-	list_add(memory_structure->ram,hole);
-
+	//No es necesario cargar el hole en la ram, 
+	//Cargamos procesos y si eliminamos uno lo mandamos a hole_list pero sigue en la ram hasta que borremos y compactemos
+	//list_add(memory_structure->ram,hole);
 
 	log_info(memory_config.logger, "Memoria inicializada correctamente");
+	printf("\nNuestro Heap de memoria ram arranca en: %p\n\n",  memory_structure->segment_zero->base);
 	// Creo los hilos TODO: implementar hilos
 	//listen_modules(socket_memory,memory_structure);
 	segmento_hardcodeado(0,1,memory_structure);
 	//Hasta aca termina perfecto
 
 	//Grafica toda la tabla de segmentos de todos los procesos
-	graph_table_pid_segments(memory_structure->table_pid_segments);
+	graph_table_pid_segments(memory_structure->table_pid_segments, memory);
 	// Función para graficar la RAM
-	graph_ram(memory_structure->ram);
+	graph_ram(memory_structure->ram, memory);
 
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);
@@ -60,12 +63,7 @@ void createSGZero(void* memory, segment* segmentZero){
 	segmentZero->s_id = 0;	
 }*/
 void segmento_hardcodeado(int PID, int SEGMENTO, memory_structure* memory_structure) {
-
-    t_list* tabla_de_segmentos_del_pid = create_sg_table(memory_structure, PID);
+    create_sg_table(memory_structure, PID);
     log_info(memory_config.logger, "\nSe creó la tabla de segmentos del PID %d", PID);
-	printf("----Su Dirección de memoria -> %p\n", (void*)tabla_de_segmentos_del_pid);
     add_segment(memory_structure, PID, 128, 1);
-	// ESTA NO ES LAS DIRECCIONES REALES
-	graph_specific_table_pid_segments(tabla_de_segmentos_del_pid, PID);
-
 }
