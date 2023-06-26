@@ -38,4 +38,6 @@ typedef struct memory_structure{
 	t_list* ram; // La memoria en si  
 } memory_structure;
 
+
+
 #endif

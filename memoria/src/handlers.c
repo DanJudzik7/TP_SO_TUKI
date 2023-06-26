@@ -8,13 +8,29 @@ void handle_fs(int socket_fs,memory_structure* memory_structure){
 			exit(1);
 	}
 
+    int s_id;
+    int offset;
+    int size;
+    char* buffer;
+    int pid;
     switch (fs->type)
     {
     //case READ:
         sleep(memory_shared.mem_delay);
+        buffer = read_memory(s_id,offset,size,memory_structure,pid);
+        if(buffer == NULL){
+            // devolver seg_fault
+        } else {
+            // devolver buffer
+        }
         break;
     //case WRITE:       
         sleep(memory_shared.mem_delay);
+        if(write_memory(s_id,offset,size,buffer,memory_structure,pid)) {
+              // devolver ok
+        } else {
+              // devolver seg_fault
+        }
         break;   
 
     default:
@@ -31,14 +47,30 @@ void handle_cpu(int socket_cpu,memory_structure* memory_structure){
 			printf("El cliente se desconectó\n");
 			exit(1);
 	}
-
+    int s_id;
+    int offset;
+    int size;
+    char* buffer;
+    int pid;
     switch (cpu->type)
     {
+        
     //case READ:
         sleep(memory_shared.mem_delay);
+        buffer = read_memory(s_id,offset,size,memory_structure,pid);
+        if(buffer == NULL){
+            // devolver seg_fault
+        } else {
+            // devolver buffer
+        }
         break;
     //case WRITE:       
         sleep(memory_shared.mem_delay);
+       if(write_memory(s_id,offset,size,buffer,memory_structure,pid)) {
+              // devolver ok
+        } else {
+              // devolver seg_fault
+        }
         break;   
      
     default:

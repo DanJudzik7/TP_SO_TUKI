@@ -49,7 +49,7 @@ void main() {
 	//Grafica toda la tabla de segmentos de todos los procesos
 	graph_table_pid_segments(memory_structure->table_pid_segments, memory);
 	// Función para graficar la RAM
-	graph_ram(memory_structure->ram, memory);
+	graph_ram(memory_structure, memory);
 
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);

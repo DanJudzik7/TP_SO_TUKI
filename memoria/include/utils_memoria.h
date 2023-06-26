@@ -15,7 +15,7 @@ void segmento_hardcodeado(int PID, int SEGMENTO, memory_structure* memory_struct
 
 void initialize();
 // Función para graficar la RAM
-void graph_ram(t_list* ram, void* memory_base);
+void graph_ram(memory_structure* memory_structure, void* memory_base);
 // Función para graficar una tabla especifica de tipo table_pid_segments
 void graph_specific_table_pid_segments(t_list* segment_table, int process_id, void* memory_base);
 // Función para graficar la tabla table_pid_segments

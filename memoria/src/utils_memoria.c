@@ -18,12 +18,38 @@ void initialize(){
 }
 
 // Función para graficar la RAM
-void graph_ram(t_list* ram, void* memory_base) {
+void graph_ram(memory_structure* memory_structure, void* memory_base) {
+
+    t_list* ram = memory_structure->ram;
+    t_list* hole_list = memory_structure->hole_list;
+
     printf("|RAM: \n");
-    for (int i = 0; i < list_size(ram); i++) {
-        segment* seg = list_get(ram, i);
-        printf("|Segmento %d | base: %-*lu | offset %d |\n", seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+
+    int ram_size = list_size(ram);
+    int hole_list_size = list_size(hole_list);
+    int ram_index = 0;
+    int hole_index = 0;
+
+    uintptr_t prev_base = 0;
+
+    // Recorrer tanto los segmentos en RAM como los huecos en hole_list
+    while (ram_index < ram_size || hole_index < hole_list_size) {
+        uintptr_t ram_base = (ram_index < ram_size) ? ((segment*)list_get(ram, ram_index))->base : UINTPTR_MAX;
+        uintptr_t hole_base = (hole_index < hole_list_size) ? ((segment*)list_get(hole_list, hole_index))->base : UINTPTR_MAX;
+
+        if (ram_base <= hole_base) {
+            segment* seg = list_get(ram, ram_index);
+            printf("|Segmento %d | base: %-*lu | offset %d |\n", seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+            ram_index++;
+        } else {
+            segment* hole_seg = list_get(hole_list, hole_index);
+            printf("|Segmento Hueco %d | base: %-*lu | offset %d |\n", hole_seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(hole_seg->base, memory_base), hole_seg->offset);
+            hole_index++;
+        }
+
+        prev_base = (ram_base <= hole_base) ? ram_base : hole_base;
     }
+    
     printf("\n");
 }
 

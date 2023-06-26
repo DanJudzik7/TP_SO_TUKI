@@ -117,6 +117,7 @@ segment* best_fit(memory_structure* memory_structure, int size,char* pid,int s_i
         t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid);
         list_add_in_index(segment_table, new_segment->s_id,new_segment);
         list_add(memory_structure->ram, new_segment);
+        
 
         // Actualizamos la información del hueco.
         best_hole->base += size;
