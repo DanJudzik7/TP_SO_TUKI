@@ -19,7 +19,7 @@ void remove_sg_table(memory_structure* memory_structure,int process_id){
 }
 
 void add_segment(memory_structure* memory_structure,int process_id, int size,int s_id){
-   	
+
 	segment* segment = malloc(sizeof(segment));
 	
 	if (memory_shared.remaining_memory > size)
@@ -36,41 +36,56 @@ void add_segment(memory_structure* memory_structure,int process_id, int size,int
            exit(1);
        }
 	   // Si el segmento es nulo pero tengo espacio, debo compactar
-	   if(segment == NULL){
-		// Avisar compactacion
+		if(segment != NULL){
+		int dir_base = transform_base_to_decimal(memory_structure->segment_zero->base, segment->base);
+    	log_info(memory_config.logger,"PID: %d - Crear Segmento: %d - Base: %-*lu - TAMAÑO:%d ",process_id, s_id, dir_base, size); 
 		}
+		//TODO: Si el segmento es nulo pero tengo espacio, debo compactar
+		else {
+
+		}
+   }          
 	else{
         log_error(memory_config.logger,"No hay espacio suficiente para crear el segmento");
         // Manejo el error devolviendo a kernel no hay espacio suficiente
-    }
+    
 	}
 }
 void delete_segment(memory_structure* memory_structure, int process_id, int s_id_to_delete) {
 
-	struc_helper_delete* struc_helper_delete;
+	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
+    sprintf(pid_str, "%d", process_id);
+
+	segment* segment_to_delete = NULL;
 
     // Obtengo la lista de segmentos del proceso a eliminar
-    t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, process_id);
+    t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
     // Obtengo el segmento que coincida con el que quiero eliminar en la tabla de su pid
-	for( int i = 1; i <= list_size(segment_table); i++){
+	for (int i = 1; i < list_size(segment_table); i++) {
 		segment* segment_pid = list_get(segment_table, i);
-		if( segment_pid->s_id == s_id_to_delete){
-			// Asigno para tener el segmento mas a mano{
-			struc_helper_delete = segment_pid;
+		if (segment_pid->s_id == s_id_to_delete) {
+			// Asigno para tener el segmento más a mano
+			segment_to_delete = segment_pid;
 			list_add(memory_structure->hole_list, segment_pid);
+			list_remove(segment_table, i);
 			break;
 		}
 	}
-	//Recorro la ram para eliminarla
-	for( int i = 1; i <= list_size(memory_structure->ram); i++ ){
+
+	// Recorro la RAM para eliminarla
+	for (int i = 1; i < list_size(memory_structure->ram); i++) {
 		segment* segment_ram = list_get(memory_structure->ram, i);
-		//Si tiene la misma base que la struct de ayuda
-		if (segment_ram->base == struc_helper_delete->segment->base)
-		{	// ELimino justo esa posicion
+		// Si tiene la misma base que el segmento a eliminar
+		if (segment_ram->base == segment_to_delete->base) {
+			// Elimino justo esa posición
 			list_remove(memory_structure->ram, i);
+			break;
 		}
 	}
-	//caso de que tenga huecos libres aledaños, los deberá consolidar actualizando sus estructuras administrativas.
+	int dir_base = transform_base_to_decimal(memory_structure->segment_zero->base, segment_to_delete->base);
+    log_info(memory_config.logger, "PID: %d - Eliminar Segmento: %d - Base: %-*lu - Tamaño: %d", process_id, s_id_to_delete, dir_base, segment_to_delete->offset); 
+
+	// Caso de que tenga huecos libres aledaños, los deberá consolidar actualizando sus estructuras administrativas.
 	compact_hole_list(memory_structure);
 }
 
@@ -85,7 +100,7 @@ void compact_hole_list(memory_structure* memory_structure){
 		 	// agarro su siguiente segmento para comparar
 		 	segment* segment_next = list_get(memory_structure->hole_list, i +1 );
 		 	// Si el sig segmento comienza dps del anterior los compacto y elimino el sigiente
-		 	if(segment_current->base + segment_current->offset + 1 == segment_next->base){
+		 	if(segment_current->base + segment_current->offset == segment_next->base){
 					segment_current->offset += segment_next->offset;
 					list_remove(memory_structure->hole_list, i +1);
 					//Como compacte la memoria eliminando uno, el size se acorta por lo tanto debo avanzar 1 mas
@@ -97,18 +112,21 @@ void compact_hole_list(memory_structure* memory_structure){
 }
 
 void swap(segment* a, segment* b) {
-    segment temp = *a;
-    *a = *b;
-    *b = temp;
+    segment temp;
+    memcpy(&temp, a, sizeof(segment));
+    memcpy(a, b, sizeof(segment));
+    memcpy(b, &temp, sizeof(segment));
 }
 
-void more_close_to_heap(segment* a, segment* b){
-	return a->base < b->base;
+bool more_close_to_heap(segment* a, segment* b) {
+    segment* segment_a = (segment*)a;
+    segment* segment_b = (segment*)b;
+    return segment_a->base < segment_b->base;
 }
 
 void compact_memory(memory_structure* memory_structure){
-
-	if(list_size(memory_structure->hole_list > 1 )){ 
+	int size_of_hole = list_size(memory_structure->hole_list);
+	if(size_of_hole > 1){ 
 	// Ordeno la lista de hole para tener siempre a mano el mas cercano al heap
 	list_sort(memory_structure->hole_list, more_close_to_heap);
 		// Recorro la memoria ram auxiliar donde estan mis procesos actuales
@@ -119,14 +137,24 @@ void compact_memory(memory_structure* memory_structure){
 				segment* ram_segment = list_get(memory_structure->ram, i);
 				// agarro el primer hole que siempre va a ser el mas cercano al heap
 				segment* hole_segment = list_get(memory_structure->hole_list,0);
-				// Si el segmento en ram esta mas abajo que el hueco (osea tengo un hueco arriba en ram), hago el swap 
+				// Si el segmento en ram esta mas abajo que el hueco (osea tengo un hueco arriba en ram), hago el swap
 				if (ram_segment->base > hole_segment->base) {
-       	     		swap(ram_segment, hole_segment);
-       	    	}
+                	// Agrego el segmento a la lista de huecos
+                	list_add(memory_structure->hole_list, ram_segment);
+					// Agrego el segmento a la lista de ram
+					list_add(memory_structure->ram, hole_segment);
+                	// Remuevo el segmento de la RAM
+                	list_remove(memory_structure->ram, i);
+					// Remuevo el primer segmento de la hole
+					list_remove(memory_structure->hole_list, 0);
+                	i--; // Disminuyo el índice para mantenerlo en la posición correcta en el siguiente ciclo
+            	}
 			}
 		list_sort(memory_structure->hole_list, more_close_to_heap);
 		}
 	}
+	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
+	compact_hole_list(memory_structure);
 }
 
 char* read_memory(int s_id,int offset, int size,memory_structure* structures,int pid){

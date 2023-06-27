@@ -12,10 +12,14 @@ typedef struct struc_helper_delete {
 } struc_helper_delete;
 
 int instruction_handler_memoria(int socket_client);
-// Crea una tabla de segmentos para un pid en especifico
+// Crea la tabla de segmentos para un pid en especifico
 void create_sg_table(memory_structure* structures,int process_id); 
-// Remueve una tabla de segmentos para un pid en especifico
+// Remueve la tabla de segmentos para un pid en especifico
 void remove_sg_table(memory_structure* structures,int process_id);
+// adhiere un segmento especifico de un pid en especifico
+void add_segment(memory_structure* memory_structure,int process_id, int size,int s_id);
+// Remueve un segmento especifico de un pid en especifico
+void delete_segment(memory_structure* memory_structure, int process_id, int s_id_to_delete);
 // Addiere un segmento a una tabla de segmentos de un pid en especifico
 void add_segment(memory_structure* structures,int process_id, int size,int s_id);
 // Compacta la lista de agujeros libres en caso que esten seguidos sus espacios
@@ -26,5 +30,10 @@ char* read_memory(int s_id,int offset,int size,memory_structure* structures,int 
 bool write_memory(int s_id,int offset,int size,char* buffer,memory_structure* structures,int pid);
 // Devuelve el segmento en base a su id y del proceso correspondiente
 segment* get_segment_by_id(int s_id,memory_structure* structures,int pid);
-
+// Intercambia dos segmentos
+void swap(segment* a, segment* b);
+// Devuelve el segmento mas cercano al heap
+bool more_close_to_heap(segment* a, segment* b);
+// Compacta la memoria
+void compact_memory(memory_structure* memory_structure);
 #endif

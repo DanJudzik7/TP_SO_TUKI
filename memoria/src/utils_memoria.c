@@ -39,11 +39,11 @@ void graph_ram(memory_structure* memory_structure, void* memory_base) {
 
         if (ram_base <= hole_base) {
             segment* seg = list_get(ram, ram_index);
-            printf("|Segmento %d | base: %-*lu | offset %d |\n", seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+            printf("|Segmento: %d | base: %-*lu | tamaño: %d |\n", seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
             ram_index++;
         } else {
             segment* hole_seg = list_get(hole_list, hole_index);
-            printf("|Segmento Hueco %d | base: %-*lu | offset %d |\n", hole_seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(hole_seg->base, memory_base), hole_seg->offset);
+            printf("|Segmento Hueco | base: %-*lu | tamaño: %d |\n", sizeof(uintptr_t)/2, transform_base_to_decimal(hole_seg->base, memory_base), hole_seg->offset);
             hole_index++;
         }
 
@@ -84,7 +84,7 @@ void graph_specific_table_pid_segments(t_list* segment_table, int process_id, vo
     printf("--------------------------------------\n");
     for (int i = 0; i < list_size(segment_table); i++) {
         segment* seg = list_get(segment_table, i);
-        printf("|Segmento %d | base: %-*lu | offset %d |\n", seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+        log_info(memory_config.logger,"|PID: %d |Segmento: %d | base: %-*lu | tamaño: %d |\n", process_id ,seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
     }
     printf("--------------------------------------\n");
 }

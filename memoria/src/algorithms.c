@@ -53,12 +53,14 @@ segment* first_fit(memory_structure* memory_structure, int size, int pid, int s_
             //TODO: Transformar a una funcion en utility
             char pid_str[10];  
             sprintf(pid_str, "%d", pid);
-            
+           
             if (dictionary_has_key(memory_structure->table_pid_segments, pid_str)) {
             t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
             if (segment_table != NULL) {
                 list_add_in_index(segment_table, new_segment->s_id, new_segment);
                 list_add(memory_structure->ram, new_segment);
+                int dir_base = transform_base_to_decimal(memory_structure->segment_zero->base, new_segment->base);
+                log_info("PID: %d - Crear Segmento: %d - Base: <DIRECCIÓN BASE> - TAMAÑO: <TAMAÑO> ",pid,s_id, dir_base,size); 
                 printf("Nuevo segmento agregado a la tabla de segmentos del proceso ID %d.\n", pid);
             } else {
                     printf("La tabla de segmentos para el proceso con ID %d es nula.\n", pid);

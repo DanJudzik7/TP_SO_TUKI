@@ -108,7 +108,6 @@ void handle_kernel(int socket_kernel,memory_structure* memory_structure){
         break;
     case CREATE_SEGMENT:
         add_segment(memory_structure,process_id,size,s_id);
-        log_info(memory_config.logger,"PID: %s - Crear Segmento",process_id);
         break;
     case DELETE_SEGMENT:
         /* code */
