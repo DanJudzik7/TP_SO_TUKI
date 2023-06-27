@@ -91,7 +91,7 @@ void handle_kernel(int socket_kernel,memory_structure* memory_structure){
     int s_id = 1;// HARDCODEADISIMO. ESTE S_ID LO DEBERIA RECIBIR DEL KERNEL
     
     char* process_id;
-    sprintf(process_id, "id%d", pid);
+    sprintf(process_id, "%d", pid);
 
     switch (kernel->type)
     {

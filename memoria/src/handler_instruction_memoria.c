@@ -3,32 +3,29 @@
 
 void create_sg_table(memory_structure* memory_structure,int process_id){
     t_list* segment_table = list_create();
-    printf("--------Creando una tabla de segmentos para el proceso con PID: %d\n", process_id);
     list_add(segment_table, memory_structure->segment_zero);
     char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
-    snprintf(pid_str, sizeof(pid_str), "%d", process_id);
-    printf("--------Agregando una tabla de segmentos al diccionario\n");
+    sprintf(pid_str, "%d", process_id);
     dictionary_put(memory_structure->table_pid_segments, pid_str, segment_table);
-    printf("--------Tabla de segmentos creada y agregada correctamente\n\n");
 }
 
 void remove_sg_table(memory_structure* memory_structure,int process_id){
     char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
     sprintf(pid_str, "%d", process_id);
-    dictionary_remove(memory_structure->table_pid_segments,process_id); 
+    dictionary_remove(memory_structure->table_pid_segments, pid_str); 
 }
 
 void add_segment(memory_structure* memory_structure,int process_id, int size,int s_id){
 
-	segment* segment = malloc(sizeof(segment));
+	segment* segment;
 	
 	if (memory_shared.remaining_memory > size)
     {
        // Recorro la ram para asignar el segmento segun el algoritmo
        if (strcmp(memory_shared.algorithm,"BEST") == 0){
-          segment = best_fit(memory_structure,size,process_id,s_id);
+        	segment = best_fit(memory_structure,size,process_id ,s_id);
        } else if (strcmp(memory_shared.algorithm,"FIRST") == 0){
-          segment = first_fit(memory_structure,size,process_id, s_id);
+        	segment = first_fit(memory_structure,size,process_id,s_id);
        } else if (strcmp(memory_shared.algorithm,"WORST") == 0){
         	segment = worst_fit(memory_structure,size,process_id,s_id);
        } else{
@@ -37,8 +34,8 @@ void add_segment(memory_structure* memory_structure,int process_id, int size,int
        }
 	   // Si el segmento es nulo pero tengo espacio, debo compactar
 		if(segment != NULL){
-		int dir_base = transform_base_to_decimal(memory_structure->segment_zero->base, segment->base);
-    	log_info(memory_config.logger,"PID: %d - Crear Segmento: %d - Base: %-*lu - TAMAÑO:%d ",process_id, s_id, dir_base, size); 
+			int dir_base = transform_base_to_decimal(segment->base ,memory_structure->segment_zero->base);
+       		log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %-*u  | Tamaño: %i |\n", segment->s_id , process_id, segment->s_id, segment->offset);
 		}
 		//TODO: Si el segmento es nulo pero tengo espacio, debo compactar
 		else {
@@ -82,8 +79,8 @@ void delete_segment(memory_structure* memory_structure, int process_id, int s_id
 			break;
 		}
 	}
-	int dir_base = transform_base_to_decimal(memory_structure->segment_zero->base, segment_to_delete->base);
-    log_info(memory_config.logger, "PID: %d - Eliminar Segmento: %d - Base: %-*lu - Tamaño: %d", process_id, s_id_to_delete, dir_base, segment_to_delete->offset); 
+	int dir_base = transform_base_to_decimal( segment_to_delete->base, memory_structure->segment_zero->base);
+	log_info(memory_config.logger,"|PID: %i | Eliminar Segmento: %i | Base: %-*u  | Tamaño: %i |\n", process_id , s_id_to_delete, dir_base, segment_to_delete->offset);
 
 	// Caso de que tenga huecos libres aledaños, los deberá consolidar actualizando sus estructuras administrativas.
 	compact_hole_list(memory_structure);
@@ -118,10 +115,10 @@ void swap(segment* a, segment* b) {
     memcpy(b, &temp, sizeof(segment));
 }
 
-bool more_close_to_heap(segment* a, segment* b) {
-    segment* segment_a = (segment*)a;
-    segment* segment_b = (segment*)b;
-    return segment_a->base < segment_b->base;
+bool more_close_to_heap(void *segment1, void *segment2) {
+    segment *seg1 = (segment *)segment1;
+    segment *seg2 = (segment *)segment2;
+    return seg1->base < seg2->base;
 }
 
 void compact_memory(memory_structure* memory_structure){
@@ -131,29 +128,24 @@ void compact_memory(memory_structure* memory_structure){
 	list_sort(memory_structure->hole_list, more_close_to_heap);
 		// Recorro la memoria ram auxiliar donde estan mis procesos actuales
 		for (int i = 1; i < list_size(memory_structure->ram) ; i++){
-			// Mientras que no este en la ultima pos de la ram auxiliar
-			if(i < list_size(memory_structure->ram) - 1){
+	
 				//Agarro la posicion de memoria en la ram
 				segment* ram_segment = list_get(memory_structure->ram, i);
 				// agarro el primer hole que siempre va a ser el mas cercano al heap
 				segment* hole_segment = list_get(memory_structure->hole_list,0);
 				// Si el segmento en ram esta mas abajo que el hueco (osea tengo un hueco arriba en ram), hago el swap
 				if (ram_segment->base > hole_segment->base) {
-                	// Agrego el segmento a la lista de huecos
-                	list_add(memory_structure->hole_list, ram_segment);
-					// Agrego el segmento a la lista de ram
-					list_add(memory_structure->ram, hole_segment);
-                	// Remuevo el segmento de la RAM
-                	list_remove(memory_structure->ram, i);
-					// Remuevo el primer segmento de la hole
-					list_remove(memory_structure->hole_list, 0);
+
+					segment temp;
+   					memcpy(&temp, hole_segment, sizeof(segment));
+    				memcpy(hole_segment, ram_segment, sizeof(segment));
+    				memcpy(ram_segment, &temp, sizeof(segment));
+
                 	i--; // Disminuyo el índice para mantenerlo en la posición correcta en el siguiente ciclo
-            	}
-			}
-		list_sort(memory_structure->hole_list, more_close_to_heap);
+				}
+			list_sort(memory_structure->hole_list, more_close_to_heap);
 		}
 	}
-	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
 	compact_hole_list(memory_structure);
 }
 
@@ -181,7 +173,7 @@ bool write_memory(int s_id,int offset,int size,char* buffer,memory_structure* st
 			log_error(memory_config.logger,"Segmentation fault, no se puede escribir mas alla del segment");
 			return false;
 		}else {
-			memcpy(segment->base + offset, buffer, sizeof(char*));
+			memcpy(segment->base + offset, buffer, strlen(buffer) + 1);
 			return true;
 		}
 	} else {
@@ -195,7 +187,7 @@ segment* get_segment_by_id(int s_id,memory_structure* structures,int pid){
 	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
     sprintf(pid_str, "%d", pid);
 
-	t_list* segment_table = dictionary_get(structures->table_pid_segments, pid);
+	t_list* segment_table = dictionary_get(structures->table_pid_segments, pid_str);
 	
 	segment* segment;
 	for (int i = 0; i < list_size(segment_table); i++) {

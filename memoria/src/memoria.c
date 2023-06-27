@@ -60,7 +60,7 @@ void createSGZero(void* memory, segment* segmentZero){
 }*/
 void segmento_hardcodeado(int PID, int SEGMENTO, memory_structure* memory_structure) {
     create_sg_table(memory_structure, PID);
-    log_info(memory_config.logger, "\nSe creó la tabla de segmentos del PID %d", PID);
+    log_info(memory_config.logger, "\nSe creó la tabla de segmentos del PID %i", PID);
     add_segment(memory_structure, PID, 128, 1);
 }
 
@@ -89,10 +89,7 @@ void test_compact(memory_structure* memory_structure, void* memory_base){
 	segmento_hardcodeado(1,1,memory_structure);
 	segmento_hardcodeado(2,1,memory_structure);
 	segmento_hardcodeado(3,1,memory_structure);
-	
 	delete_segment(memory_structure,1,1);
-	//Grafica toda la tabla de segmentos de todos los procesos
-	graph_table_pid_segments(memory_structure->table_pid_segments, memory_base);
 	// Función para graficar la RAM
 	graph_ram(memory_structure, memory_base);
 
@@ -100,4 +97,5 @@ void test_compact(memory_structure* memory_structure, void* memory_base){
 
 	// Función para graficar la RAM
 	graph_ram(memory_structure, memory_base);
+	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
 }

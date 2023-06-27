@@ -52,18 +52,15 @@ segment* first_fit(memory_structure* memory_structure, int size, int pid, int s_
             new_segment->s_id = s_id;
             //TODO: Transformar a una funcion en utility
             char pid_str[10];  
-            sprintf(pid_str, "%d", pid);
+            sprintf(pid_str, "%i", pid);
            
             if (dictionary_has_key(memory_structure->table_pid_segments, pid_str)) {
             t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
             if (segment_table != NULL) {
                 list_add_in_index(segment_table, new_segment->s_id, new_segment);
                 list_add(memory_structure->ram, new_segment);
-                int dir_base = transform_base_to_decimal(memory_structure->segment_zero->base, new_segment->base);
-                log_info("PID: %d - Crear Segmento: %d - Base: <DIRECCIÓN BASE> - TAMAÑO: <TAMAÑO> ",pid,s_id, dir_base,size); 
-                printf("Nuevo segmento agregado a la tabla de segmentos del proceso ID %d.\n", pid);
             } else {
-                    printf("La tabla de segmentos para el proceso con ID %d es nula.\n", pid);
+                    printf("La tabla de segmentos para el proceso con ID %i es nula.\n", pid);
                 }
             } else {
                 printf("No se encontró la clave %s en el diccionario de segmentos de pid.\n", pid_str);
@@ -92,7 +89,10 @@ bool is_hole_empty(hole* h) {
 }
 
     
-segment* best_fit(memory_structure* memory_structure, int size,char* pid,int s_id) {
+segment* best_fit(memory_structure* memory_structure, int size, int pid,int s_id) {
+    //TODO: Transformar a una funcion en utility
+    char pid_str[10];  
+    sprintf(pid_str, "%i", pid);
     hole* best_hole = NULL;
     // Iteramos a través de la lista de huecos.
     for (int i = 0; i < list_size(memory_structure->hole_list); i++) {
@@ -116,7 +116,7 @@ segment* best_fit(memory_structure* memory_structure, int size,char* pid,int s_i
         new_segment->s_id = s_id;  
 
         // Agregamos el nuevo segmento a la lista de todos los segmentos.
-        t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid);
+        t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
         list_add_in_index(segment_table, new_segment->s_id,new_segment);
         list_add(memory_structure->ram, new_segment);
         
@@ -139,7 +139,11 @@ segment* best_fit(memory_structure* memory_structure, int size,char* pid,int s_i
 }
 
 
-segment* worst_fit(memory_structure* memory_structure, int size, char* pid,int s_id) {
+segment* worst_fit(memory_structure* memory_structure, int size, int pid,int s_id) {
+    //TODO: Transformar a una funcion en utility
+    char pid_str[10];  
+    sprintf(pid_str, "%i", pid);
+
     hole* worst_hole = NULL;
     // Iteramos a través de la lista de huecos.
     for (int i = 0; i < list_size(memory_structure->hole_list); i++) {
@@ -163,7 +167,7 @@ segment* worst_fit(memory_structure* memory_structure, int size, char* pid,int s
         new_segment->s_id = s_id;  // Asumiendo que hay un contador global para los IDs de segmentos.
 
         // Agregamos el nuevo segmento a la lista de todos los segmentos.
-        t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid);
+        t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
         list_add_in_index(segment_table, new_segment->s_id,new_segment);
         list_add(memory_structure->ram, new_segment);
 

@@ -30,10 +30,10 @@ char* read_memory(int s_id,int offset,int size,memory_structure* structures,int 
 bool write_memory(int s_id,int offset,int size,char* buffer,memory_structure* structures,int pid);
 // Devuelve el segmento en base a su id y del proceso correspondiente
 segment* get_segment_by_id(int s_id,memory_structure* structures,int pid);
-// Intercambia dos segmentos
-void swap(segment* a, segment* b);
 // Devuelve el segmento mas cercano al heap
-bool more_close_to_heap(segment* a, segment* b);
+bool more_close_to_heap(void *segment1, void *segment2);
 // Compacta la memoria
 void compact_memory(memory_structure* memory_structure);
+// Compacta toda la lista de huecos para que quede uno solo
+void compact_hole(memory_structure* memory_structure);
 #endif

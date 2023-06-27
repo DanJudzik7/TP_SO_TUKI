@@ -39,11 +39,11 @@ void graph_ram(memory_structure* memory_structure, void* memory_base) {
 
         if (ram_base <= hole_base) {
             segment* seg = list_get(ram, ram_index);
-            printf("|Segmento: %d | base: %-*lu | tamaño: %d |\n", seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+            printf("| Segmento: %i | base: %-*u | tamaño: %i |\n", seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
             ram_index++;
         } else {
             segment* hole_seg = list_get(hole_list, hole_index);
-            printf("|Segmento Hueco | base: %-*lu | tamaño: %d |\n", sizeof(uintptr_t)/2, transform_base_to_decimal(hole_seg->base, memory_base), hole_seg->offset);
+            printf("|Segmento Hueco | base: %-*u  | tamaño: %i |\n", sizeof(uintptr_t)/2, transform_base_to_decimal(hole_seg->base, memory_base), hole_seg->offset);
             hole_index++;
         }
 
@@ -80,11 +80,11 @@ uint32_t transform_base_to_decimal(void* address, void* memory_base) {
 
 // Función para graficar una tabla especifica de tipo table_pid_segments
 void graph_specific_table_pid_segments(t_list* segment_table, int process_id, void* memory_base) {
-    printf("\n|Tabla de segmentos del proceso PID  %d|\n", process_id);
+    printf("\n|Tabla de segmentos del proceso PID  %i|\n", process_id);
     printf("--------------------------------------\n");
     for (int i = 0; i < list_size(segment_table); i++) {
         segment* seg = list_get(segment_table, i);
-        log_info(memory_config.logger,"|PID: %d |Segmento: %d | base: %-*lu | tamaño: %d |\n", process_id ,seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+        log_info(memory_config.logger,"|PID: %i |Segmento: %i | base: %-*u  | tamaño: %i |\n", process_id ,seg->s_id, sizeof(uintptr_t)/2, transform_base_to_decimal(seg->base, memory_base), seg->offset);
     }
     printf("--------------------------------------\n");
 }
