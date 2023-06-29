@@ -141,20 +141,59 @@ cpu_register* deserialize_cpu_registers(void* source) {
 }
 
 t_package* serialize_segment_table(segment_table* st) {
-	t_package* package = package_new(SEGMENT_TABLE);
-	// Implementar segment tables acá. Por ahora, manda solo un dato de ejemplo.
-	uint64_t size = sizeof(uint32_t);
-	package_add(package, &(st->id), &size);
-	return package;
+	
+    t_package* package = package_new(SEGMENT_TABLE);
+    uint64_t size = sizeof(uint32_t);
+	uint64_t size_data_segment = sizeof(uint8_t);
+    
+    package_add(package, &(st->pid), &size);
+    package_add(package, &(st->s_id), &size);
+    package_add(package, &(st->segment_table_direction), &size);
+    package_add(package, &(st->size_data_segment), &size_data_segment);
+
+    return package;
 }
 
 segment_table* deserialize_segment_table(void* source) {
+
+    uint64_t offset = 0;
+    segment_table* st = s_malloc(sizeof(segment_table));
+    memset(st, 0, sizeof(segment_table));
+
+    package_decode_buffer(source, &(st->pid), &offset);
+    package_decode_buffer(source, &(st->s_id), &offset);
+    package_decode_buffer(source, &(st->segment_table_direction), &offset);
+    package_decode_buffer(source, &(st->size_data_segment), &offset);
+
+    return st;
+}
+
+t_package* serialize_segment_read_write(segment_read_write* seg_rw) {
+	t_package* package = package_new(F_WRITE_READ);
+
+	uint32_t size = sizeof(uint32_t);
+    char* buffer_size = sizeof(seg_rw->buffer);
+	
+	package_add(package, &(seg_rw->pid),	&size);
+	package_add(package, &(seg_rw->buffer),	&buffer_size);
+	package_add(package, &(seg_rw->size),	&size);
+	package_add(package, &(seg_rw->offset), &size);
+	package_add(package, &(seg_rw->s_id), 	&size);
+	return package;
+}
+
+segment_read_write* deserialize_segment_read_write(void* source) {
 	uint64_t offset = 0;
-	segment_table* st = s_malloc(sizeof(segment_table));
-	memset(st, 0, sizeof(segment_table));
-	// Implementar segment tables acá. Por ahora, manda solo un dato de ejemplo.
-	package_decode_buffer(source, &(st->id), &offset);
-	return st;
+    segment_read_write* seg_rw = s_malloc(sizeof(segment_read_write));
+    memset(seg_rw, 0, sizeof(segment_read_write));
+
+    package_decode_buffer(source, &(seg_rw->pid), &offset);
+    package_decode_buffer(source, &(seg_rw->buffer), &offset);
+    package_decode_buffer(source, &(seg_rw->size), &offset);
+    package_decode_buffer(source, &(seg_rw->offset), &offset);
+    package_decode_buffer(source, &(seg_rw->s_id), &offset);
+
+	return seg_rw;
 }
 
 void serialize_package(t_package* package) {

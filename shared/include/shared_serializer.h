@@ -36,10 +36,19 @@ t_package* serialize_segment_table(segment_table* st);
 
 // Deserializa un segmento de memoria
 segment_table* deserialize_segment_table(void* source);
+
+// Serializa un segmento de f_write y f_read
+t_package* serialize_segment_read_write(segment_read_write* seg_rw);
+
+// Derializa un segmento de f_write y f_read
+segment_read_write* deserialize_segment_read_write(void* source);
+
 // Serializa un program counter
 t_package* serialize_program_counter(uint32_t *program_counter, uint64_t* value_size);
+
 // Deserializa un program counter
 uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset);
+
 // Serializa el paquete especificado reemplazando al original
 void serialize_package(t_package* package);
 

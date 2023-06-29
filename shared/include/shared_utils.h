@@ -50,10 +50,19 @@ typedef struct cpu_register {
 } cpu_register;
 
 typedef struct segment_table {
-	uint32_t id;
+	uint32_t pid;
+	uint32_t s_id;
 	void* segment_table_direction;
 	uint8_t size_data_segment;
 } segment_table;
+
+typedef struct segment_read_write {
+	uint32_t s_id;
+    uint32_t offset;
+    uint32_t size;
+    char* buffer;
+    uint32_t pid;
+} segment_read_write;
 
 typedef struct t_file {
 	uint32_t size_file;
@@ -81,7 +90,8 @@ typedef enum execution_context_index {
 	PROGRAM_COUNTER,
 	UPDATED_STATE,
 	CPU_REGISTERS,
-	SEGMENT_TABLE
+	SEGMENT_TABLE,
+	F_WRITE_READ,
 } execution_context_index;
 
 typedef struct config_cpu {
@@ -113,7 +123,10 @@ typedef enum op_code {
 	F_CLOSE,		 // 12
 	DELETE_SEGMENT,	 // 13
 	EXIT,			 // 14
-	YIELD			 // 15
+	YIELD,		 // 15
+	CREATE_PROCESS_MEMORY,
+	END_PROCCESS_MEMORY,
+	COMPACT_MEMORY
 } op_code;
 
 typedef struct t_instruction {
