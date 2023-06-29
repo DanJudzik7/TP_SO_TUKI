@@ -126,7 +126,9 @@ typedef enum op_code {
 	YIELD,		 // 15
 	CREATE_PROCESS_MEMORY,
 	END_PROCCESS_MEMORY,
-	COMPACT_MEMORY
+	COMPACT_MEMORY,
+	SEG_FAULT,
+	OK_INSTRUCTION
 } op_code;
 
 typedef struct t_instruction {

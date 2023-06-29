@@ -21,17 +21,19 @@ void handle_fs(int socket_fs,memory_structure* memory_structure){
             char* buffer = read_memory(segment_rw->s_id, segment_rw->offset, segment_rw->size, memory_structure, segment_rw->pid);
             if(buffer == NULL){
                 // devolver seg_fault
+                send(socket_fs,package_new(SEG_FAULT),sizeof(t_package),0);
             } else {
                 // devolver buffer
+                send(socket_fs,buffer,sizeof(buffer),0);
             }
             break;
         case F_WRITE:       
             sleep(memory_shared.mem_delay);
             pthread_mutex_lock(&mutex_write);
             if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
-                // devolver ok
+                send(socket_fs,package_new(OK_INSTRUCTION),sizeof(t_package),0);
             } else {
-                // devolver seg_fault
+                send(socket_fs,package_new(SEG_FAULT),sizeof(t_package),0);
             }
             pthread_mutex_unlock(&mutex_write);
             break;   
@@ -62,17 +64,22 @@ void handle_cpu(int socket_cpu,memory_structure* memory_structure){
         char* buffer = read_memory(segment_rw->s_id, segment_rw->offset, segment_rw->size, memory_structure, segment_rw->pid);
         if(buffer == NULL){
             // devolver seg_fault
+            send(socket_cpu,package_new(SEG_FAULT),sizeof(t_package),0);
         } else {
             // devolver buffer
-        }
+            send(socket_cpu,buffer,sizeof(buffer),0);
+         }
         break;
     case F_WRITE:       
         sleep(memory_shared.mem_delay);
         pthread_mutex_lock(&mutex_write);
-       if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
-              // devolver ok
+        if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
+            // devolver ok
+            send(socket_cpu,package_new(OK_INSTRUCTION),sizeof(t_package),0);
         } else {
-              // devolver seg_fault
+            // devolver seg_fault
+            send(socket_cpu,package_new(SEG_FAULT),sizeof(t_package),0);
+
         }
         pthread_mutex_unlock(&mutex_write);
         break;   
