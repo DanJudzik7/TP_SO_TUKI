@@ -17,7 +17,7 @@ void create_sg_table(memory_structure* structures,int process_id);
 // Remueve la tabla de segmentos para un pid en especifico
 void remove_sg_table(memory_structure* structures,int process_id);
 // adhiere un segmento especifico de un pid en especifico
-void add_segment(memory_structure* memory_structure,int process_id, int size,int s_id);
+int add_segment(memory_structure* memory_structure,int process_id, int size,int s_id);
 // Remueve un segmento especifico de un pid en especifico
 void delete_segment(memory_structure* memory_structure, int process_id, int s_id_to_delete);
 // Addiere un segmento a una tabla de segmentos de un pid en especifico

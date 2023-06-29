@@ -15,8 +15,7 @@ void remove_sg_table(memory_structure* memory_structure,int process_id){
     dictionary_remove(memory_structure->table_pid_segments, pid_str); 
 }
 
-void add_segment(memory_structure* memory_structure,int process_id, int size,int s_id){
-
+int add_segment(memory_structure* memory_structure,int process_id, int size,int s_id){	
 	segment* segment;
 	
 	if (memory_shared.remaining_memory > size)
@@ -35,16 +34,19 @@ void add_segment(memory_structure* memory_structure,int process_id, int size,int
 	   // Si el segmento es nulo pero tengo espacio, debo compactar
 		if(segment != NULL){
 			int dir_base = transform_base_to_decimal(segment->base ,memory_structure->segment_zero->base);
-       		log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %-*u  | Tamaño: %i |\n", segment->s_id , process_id, segment->s_id, segment->offset);
+			memory_shared.remaining_memory -= size;
+			log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %-*u  | Tamaño: %i |\n", process_id, segment->s_id, segment-> base,segment->offset);
+       		return 0; // Segmento creado
 		}
-		//TODO: Si el segmento es nulo pero tengo espacio, debo compactar
+		//Si el segmento es nulo pero tengo espacio, debo compactar
 		else {
-
+			return 1; // Compactacion
 		}
    }          
 	else{
         log_error(memory_config.logger,"No hay espacio suficiente para crear el segmento");
         // Manejo el error devolviendo a kernel no hay espacio suficiente
+		return 2; // No hay espacio
     
 	}
 }
@@ -63,6 +65,7 @@ void delete_segment(memory_structure* memory_structure, int process_id, int s_id
 		if (segment_pid->s_id == s_id_to_delete) {
 			// Asigno para tener el segmento más a mano
 			segment_to_delete = segment_pid;
+			memory_shared.remaining_memory += segment_pid->offset;
 			list_add(memory_structure->hole_list, segment_pid);
 			list_remove(segment_table, i);
 			break;

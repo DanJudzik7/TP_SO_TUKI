@@ -3,9 +3,9 @@
 
 void listen_modules(int socket_memory,memory_structure* memory_structure){
 
-    int kernel = listen_kernel(socket_memory);
-    int cpu = listen_cpu(socket_memory);
     int fs = listen_fs(socket_memory);
+    int cpu = listen_cpu(socket_memory);
+    int kernel = listen_kernel(socket_memory);
 
     pthread_t thread_filesystem;
     pthread_create(&thread_filesystem, NULL, (void*)handle_fs, socket_memory);
@@ -22,7 +22,14 @@ void listen_modules(int socket_memory,memory_structure* memory_structure){
 }
 
 int listen_fs(int socket_memory){
- 
+    int socket_fs = socket_accept(socket_memory);
+    if (socket_fs == -1) {
+			log_warning(memory_config.logger, "Hubo un error aceptando la conexión");
+			exit(-1);
+	}else {
+        	log_warning(memory_config.logger, "Se conecto el File System en el puerto %d",socket_fs);
+    }
+    return socket_fs;
 }
 
 int listen_cpu(int socket_memory){

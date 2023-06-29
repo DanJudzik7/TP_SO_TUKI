@@ -14,7 +14,7 @@ void handle_fs(int socket_fs,memory_structure* memory_structure){
         segment_read_write* segment_rw= deserialize_segment_read_write(package_fs);
 
         switch (package_fs->type){
-        case F_WRITE:
+        case F_READ:
             sleep(memory_shared.mem_delay);
             char* buffer = read_memory(segment_rw->s_id, segment_rw->offset, segment_rw->size, memory_structure, segment_rw->pid);
             if(buffer == NULL){
@@ -23,7 +23,7 @@ void handle_fs(int socket_fs,memory_structure* memory_structure){
                 // devolver buffer
             }
             break;
-        case F_READ:       
+        case F_WRITE:       
             sleep(memory_shared.mem_delay);
             if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
                 // devolver ok
@@ -106,7 +106,22 @@ void handle_kernel(int socket_kernel,memory_structure* memory_structure){
         log_info(memory_config.logger,"Eliminación de Proceso PID: %s",process_id);
         break;
     case CREATE_SEGMENT:
-        add_segment(memory_structure, sg->pid, sg->size_data_segment, sg->s_id);
+        int flag = add_segment(memory_structure, sg->pid, sg->size_data_segment, sg->s_id);
+        switch (flag)
+        {
+        case 0:
+            // Devuelvo al kernel la base del segmento
+            break;
+        case 1:
+            // Devuelvo solicitud de compactacion
+            break;
+        case 2:
+            // Devuelvo no hay espacio suficiente
+            break;
+        
+        default:
+            break;
+        }
         break;
     case DELETE_SEGMENT:
         delete_segment(memory_structure, sg->pid, sg->s_id);
