@@ -1,4 +1,6 @@
 #include "handlers.h"
+pthread_mutex_t mutex_compact;
+pthread_mutex_t mutex_write;
 
 // Manejo los recive con cada una de estas funciones
 void handle_fs(int socket_fs,memory_structure* memory_structure){
@@ -25,11 +27,13 @@ void handle_fs(int socket_fs,memory_structure* memory_structure){
             break;
         case F_WRITE:       
             sleep(memory_shared.mem_delay);
+            pthread_mutex_lock(&mutex_write);
             if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
                 // devolver ok
             } else {
                 // devolver seg_fault
             }
+            pthread_mutex_unlock(&mutex_write);
             break;   
 
         default:
@@ -64,11 +68,13 @@ void handle_cpu(int socket_cpu,memory_structure* memory_structure){
         break;
     case F_WRITE:       
         sleep(memory_shared.mem_delay);
+        pthread_mutex_lock(&mutex_write);
        if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
               // devolver ok
         } else {
               // devolver seg_fault
         }
+        pthread_mutex_unlock(&mutex_write);
         break;   
      
     default:
@@ -129,6 +135,9 @@ void handle_kernel(int socket_kernel,memory_structure* memory_structure){
     case COMPACT_MEMORY:
         log_info(memory_config.logger,"Solicitud de compactacion");
         sleep(memory_shared.com_delay);
+        pthread_mutex_lock(&mutex_compact);
+        compact_memory(memory_structure);
+        pthread_mutex_unlock(&mutex_compact);
         break;
 
     default:

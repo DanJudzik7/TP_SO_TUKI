@@ -2,7 +2,8 @@
 
 configuration_memory memory_config;
 memory memory_shared;
-
+extern pthread_mutex_t mutex_compact;
+extern pthread_mutex_t mutex_write;
 
 void initialize(){
     memory_config.logger = start_logger("memoria");
@@ -15,6 +16,8 @@ void initialize(){
     memory_shared.com_delay = config_get_int_value(memory_config.config, "RETARDO_COMPACTACION");
     memory_shared.algorithm = config_get_string_value(memory_config.config, "ALGORITMO_ASIGNACION");
     memory_shared.remaining_memory = memory_shared.memory_size;
+    pthread_mutex_init(&mutex_compact, NULL);
+    pthread_mutex_init(&mutex_write, NULL);
 }
 
 // Función para graficar la RAM

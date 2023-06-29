@@ -10,7 +10,6 @@ void main() {
 		exit(EXIT_FAILURE);
 	}
 	log_warning(memory_config.logger, "Socket de servidor inicializado en puerto %s", memory_config.port);
-
 	// Inicializo la memoria (ESTA ES LA MEMORIA REAL, OSEA MI HEAP)
 	void* memory = s_malloc(memory_shared.memory_size);
 
