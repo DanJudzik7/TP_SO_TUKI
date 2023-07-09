@@ -24,7 +24,7 @@ typedef struct {
 
 // Carga la configuración de un módulo
 t_config* start_superblock();
-t_bitarray* start_bitmap(int block_count);
-char* start_block_file(int block_count);
+t_bitarray* start_bitmap();
+char* start_block_file();
 
 #endif
