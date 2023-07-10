@@ -12,6 +12,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include "handler_instruction_filesystem.h"
+#include <math.h>
 
 extern configuration_filesystem config_fs;
 
