@@ -1,21 +1,8 @@
-[INFO] 21:52:49:422 memoria/(2504:2504): Iniciando Memoria...
-[WARNING] 21:52:49:423 memoria/(2504:2504): Socket de servidor inicializado en puerto 8002
-[INFO] 21:52:49:423 memoria/(2504:2504): Memoria inicializada correctamente
-[INFO] 21:52:49:423 memoria/(2504:2504): 
-Se creó la tabla de segmentos del PID 0
-[INFO] 15:58:47:092 memoria/(4896:4896): Iniciando Memoria...
-[WARNING] 15:58:47:092 memoria/(4896:4896): Socket de servidor inicializado en puerto 8002
-[INFO] 15:58:47:092 memoria/(4896:4896): Memoria inicializada correctamente
-[INFO] 15:58:47:092 memoria/(4896:4896): 
-Se creó la tabla de segmentos del PID 0
-[INFO] 16:01:41:435 memoria/(5145:5145): Iniciando Memoria...
-[WARNING] 16:01:41:436 memoria/(5145:5145): Socket de servidor inicializado en puerto 8002
-[INFO] 16:01:41:436 memoria/(5145:5145): Memoria inicializada correctamente
-[INFO] 16:01:41:436 memoria/(5145:5145): 
-Se creó la tabla de segmentos del PID 0
-[INFO] 16:02:34:428 memoria/(5278:5278): Iniciando Memoria...
-[WARNING] 16:02:34:428 memoria/(5278:5278): Socket de servidor inicializado en puerto 8002
-[INFO] 16:02:34:428 memoria/(5278:5278): Memoria inicializada correctamente
-[INFO] 16:02:34:428 memoria/(5278:5278): 
-Se creó la tabla de segmentos del PID 0
-[ERROR] 16:02:34:428 memoria/(5278:5278): No hay espacio suficiente para crear el segmento
+[INFO] 15:18:31:747 memoria/(8875:8875): Iniciando Memoria...
+[WARNING] 15:18:31:747 memoria/(8875:8875): Socket de servidor inicializado en puerto 8002
+[INFO] 15:18:31:747 memoria/(8875:8875): Memoria inicializada correctamente
+[INFO] 15:18:31:747 memoria/(8875:8875): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 15:18:31:747 memoria/(8875:8875): Iniciando escritura
+[INFO] 15:18:31:747 memoria/(8875:8875): Se escribió correctamente en memoria
+[INFO] 15:18:31:747 memoria/(8875:8875): El valor leido es: hola

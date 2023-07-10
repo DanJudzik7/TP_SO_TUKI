@@ -35,7 +35,7 @@ int add_segment(memory_structure* memory_structure,int process_id, int size,int 
 		if(segment != NULL){
 			int dir_base = transform_base_to_decimal(segment->base ,memory_structure->segment_zero->base);
 			memory_shared.remaining_memory -= size;
-			log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %-*u  | Tamaño: %i |\n", process_id, segment->s_id, segment-> base,segment->offset);
+			//log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %-*u  | Tamaño: %i |\n", process_id, segment->s_id, segment-> base,segment->offset);
        		return 0; // Segmento creado
 		}
 		//Si el segmento es nulo pero tengo espacio, debo compactar
@@ -153,14 +153,15 @@ void compact_memory(memory_structure* memory_structure){
 }
 
 char* read_memory(int s_id,int offset, int size,memory_structure* structures,int pid){
-	char* buffer;
+	char* buffer = malloc(size + 1);;
 	segment* segment = get_segment_by_id(s_id,structures,pid);
 	if (segment != NULL){
 		if(segment-> base + offset + size > segment->base + segment->offset){
 			log_error(memory_config.logger,"Segmentation fault, no se puede leer mas alla del segment");
 			return NULL;
 		}else {
-			memcpy(&buffer, segment->base + offset, sizeof(char*));
+			memcpy(buffer, segment->base + offset, sizeof(char*));
+			buffer[size] = '\0';
 			return buffer;
 		}
 	} else {
@@ -176,6 +177,7 @@ bool write_memory(int s_id,int offset,int size,char* buffer,memory_structure* st
 			log_error(memory_config.logger,"Segmentation fault, no se puede escribir mas alla del segment");
 			return false;
 		}else {
+			
 			memcpy(segment->base + offset, buffer, strlen(buffer) + 1);
 			return true;
 		}
@@ -189,7 +191,6 @@ segment* get_segment_by_id(int s_id,memory_structure* structures,int pid){
 	
 	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
     sprintf(pid_str, "%d", pid);
-
 	t_list* segment_table = dictionary_get(structures->table_pid_segments, pid_str);
 	
 	segment* segment;
@@ -202,43 +203,3 @@ segment* get_segment_by_id(int s_id,memory_structure* structures,int pid){
 	return NULL;
 }
 
-/*
-int instruction_handler_memoria(int socket_client) {
-	// Todo esto no está adaptado al nuevo packaging
-
-	while (1) {
-		t_package* package = socket_receive(socket_client);
-		if (package == NULL) {
-			printf("El cliente se desconectó\n");
-			break;
-		}
-		printf("El código de operación es: %i\n", package->type);
-		// To do: Mejorar lo que hace acá. Tiene que recibir un paquete de tipo INSTRUCTION, con el t_instruction nesteado adentro
-
-		switch (package->type) {
-			case CREATE_SEGMENT:
-				printf("RECIBIMOS UNA INSTRUCCIÓN DE CREAR SEGMENTO DE MEMORIA\n");
-				bool success_creation_segment = create_memory_segment();
-				if (!socket_send(socket_client, serialize_message(success_creation_segment ? "Eliminado": "Error", false))) {
-					printf("Error al enviar el paquete\n");
-					return -1;
-				}
-				break;
-			case DELETE_SEGMENT:
-				printf("RECIBIMOS UNA INSTRUCCIÓN DE ELIMINAR UN SEGMENTO DE MEMORIA\n");
-				bool success_delete_segment = delete_memory_segment(0);  // ACTUALMENTE PASO UN ID = 0, PERO LUEGO NECESITO SABERLO DADO EL
-				if (!socket_send(socket_client, serialize_message(success_delete_segment ? "Eliminado": "Error", false))) {
-					printf("Error al enviar el paquete\n");
-					return -1;
-				}
-				break;
-			case MESSAGE_OK:
-				printf("RECIBIMOS UN HANDSAKE\n");
-				break;
-			default:
-				printf("Error al recibir código de operación\n");
-				return -1;
-		}
-	}
-	return 0;
-}*/

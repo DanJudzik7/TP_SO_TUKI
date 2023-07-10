@@ -78,7 +78,7 @@ segment* best_fit(memory_structure* memory_structure, int size, int pid,int s_id
 
         // Agregamos el nuevo segmento a la lista de todos los segmentos.
         t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
-        list_add_in_index(segment_table, new_segment->s_id,new_segment);
+        list_add(segment_table, new_segment->s_id);
         list_add(memory_structure->ram, new_segment);
         
 
@@ -90,7 +90,6 @@ segment* best_fit(memory_structure* memory_structure, int size, int pid,int s_id
         if (best_hole->size == 0) {
             list_remove_by_condition(memory_structure->hole_list, (bool (*)(void*)) is_hole_empty);
         }
-
         return new_segment;
     }
     // Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.

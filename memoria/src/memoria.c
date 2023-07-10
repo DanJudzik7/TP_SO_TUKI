@@ -40,27 +40,23 @@ void main() {
 
 	log_info(memory_config.logger, "Memoria inicializada correctamente");
 	printf("\nNuestro Heap de memoria ram arranca en: %p\n\n",  memory_structure->segment_zero->base);
-	// Creo los hilos TODO: implementar hilos
+	// Creo los hilos 
 	//listen_modules(socket_memory,memory_structure);
 	
  	//test_create_del_segm(memory_structure, memory);
-	test_compact(memory_structure, memory);
+	//test_compact(memory_structure, memory);
+	test_rw(memory_structure, memory);
 
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);
 	dictionary_clean_and_destroy_elements(memory_structure->table_pid_segments,free);
 }
 
-/*
-void createSGZero(void* memory, segment* segmentZero){
-	segmentZero->base = memory;
-	segmentZero->offset = memory_shared.sg_zero_size;
-	segmentZero->s_id = 0;	
-}*/
+
 void segmento_hardcodeado(int PID, int SEGMENTO, memory_structure* memory_structure) {
     create_sg_table(memory_structure, PID);
     log_info(memory_config.logger, "\nSe creó la tabla de segmentos del PID %i", PID);
-    add_segment(memory_structure, PID, 128, 1);
+   	int test = add_segment(memory_structure, PID, 128, 1);
 }
 
 void test_create_del_segm(memory_structure* memory_structure, void* memory_base){
@@ -97,4 +93,16 @@ void test_compact(memory_structure* memory_structure, void* memory_base){
 	// Función para graficar la RAM
 	graph_ram(memory_structure, memory_base);
 	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
+}
+
+void test_rw(memory_structure* memory_structure, void* memory_base){
+	//segmento_hardcodeado(1,1,memory_structure);
+	segmento_hardcodeado(1,1,memory_structure);
+	log_info(memory_config.logger, "Iniciando escritura");
+	if(write_memory(1,4,sizeof("hola"),"hola",memory_structure,1)){
+		log_info(memory_config.logger, "Se escribió correctamente en memoria");
+		char* buffer = read_memory(1,4,sizeof("hola"),memory_structure,1);
+		log_info(memory_config.logger, "El valor leido es: %s", buffer);
+	}else 
+		log_info(memory_config.logger, "No se pudo escribir en memoria");
 }

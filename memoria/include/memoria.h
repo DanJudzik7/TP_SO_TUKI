@@ -12,5 +12,6 @@ void segmento_hardcodeado(int PID, int SEGMENTO, memory_structure* memory_struct
 void test_create_del_segm(memory_structure* memory_structure, void* memory_base);
 //Test de compactacion de la mem principal
 void test_compact(memory_structure* memory_structure, void* memory_base);
-
+//Test de lectura y escritura
+void test_rw(memory_structure* memory_structure, void* memory_base);
 #endif
