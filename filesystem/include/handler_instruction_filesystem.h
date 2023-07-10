@@ -4,6 +4,7 @@
 #include "shared_serializer.h"
 #include "shared_socket.h"
 #include <commons/config.h>
+#include <math.h>
 
 extern configuration_filesystem config_fs;
 

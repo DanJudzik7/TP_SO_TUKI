@@ -94,9 +94,11 @@ typedef struct config_filesystem {
 	t_log* logger;
 	t_config* config;
 	t_bitarray* bitmap;
-	FILE* block_file;
+	char* block_file;
 	int connection_kernel;
+	int socket_memoria;
 	int block_size;
+	int block_count;
 	char* PATH_SUPERBLOQUE;
 	char* PATH_BITMAP;
 	char* PATH_BLOQUES;
