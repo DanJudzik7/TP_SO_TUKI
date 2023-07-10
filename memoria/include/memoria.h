@@ -14,4 +14,9 @@ void test_create_del_segm(memory_structure* memory_structure, void* memory_base)
 void test_compact(memory_structure* memory_structure, void* memory_base);
 //Test de lectura y escritura
 void test_rw(memory_structure* memory_structure, void* memory_base);
+//Test de instrucciones a memoria
+void test_instruction_memory();
+//Test de buffer de memoria
+void test_buffer_memory();
+
 #endif

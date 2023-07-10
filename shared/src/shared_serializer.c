@@ -17,7 +17,7 @@ t_package* serialize_execution_context(execution_context* ec) {
 	t_package* package = package_new(EXECUTION_CONTEXT);
 	uint64_t size4 = 4;
 	package_nest(package, serialize_instructions(ec->instructions, true));
-    uint64_t* program_counter_64 = ec->program_counter;
+	uint64_t* program_counter_64 = ec->program_counter;
 	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(program_counter_64), &size4));
 	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), &size4));
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
@@ -97,6 +97,24 @@ void deserialize_instructions(t_package* package, t_queue* instructions) {
 		package_destroy(instruction_package);
 	}
 }
+//TODO: ERROR falla esta parte con el add
+t_package* serialize_memory_buffer(uint32_t pid ,char* buffer) {
+	uint64_t size4 = 4;
+	t_package* package = package_new(MEMORY_BUFFER_R);
+	package_add(package, pid, size4);
+	package_write(package, buffer);
+
+	return package;
+}
+
+memory_buffer* deserialize_memory_buffer(t_package* package) {
+	memory_buffer *mem_buffer = s_malloc(sizeof(memory_buffer));
+	uint64_t offset = 0;
+	package_decode_buffer(package->buffer, mem_buffer->pid, sizeof(uint32_t));
+	mem_buffer->buffer = package_decode_string(package->buffer, &offset);
+
+	return mem_buffer;
+}
 
 t_package* serialize_cpu_registers(cpu_register* registers) {
 	t_package* package = package_new(CPU_REGISTERS);
@@ -172,7 +190,7 @@ t_package* serialize_segment_read_write(segment_read_write* seg_rw) {
 	t_package* package = package_new(F_WRITE_READ);
 
 	uint32_t size = sizeof(uint32_t);
-    char* buffer_size = sizeof(seg_rw->buffer);
+	char* buffer_size = sizeof(seg_rw->buffer);
 	
 	package_add(package, &(seg_rw->pid),	&size);
 	package_add(package, &(seg_rw->buffer),	&buffer_size);
@@ -210,3 +228,4 @@ void serialize_package(t_package* package) {
     free(package->buffer);
     package->buffer = stream;
 }
+

@@ -35,8 +35,8 @@ int add_segment(memory_structure* memory_structure,int process_id, int size,int 
 		if(segment != NULL){
 			int dir_base = transform_base_to_decimal(segment->base ,memory_structure->segment_zero->base);
 			memory_shared.remaining_memory -= size;
-			//log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %-*u  | Tamaño: %i |\n", process_id, segment->s_id, segment-> base,segment->offset);
-       		return 0; // Segmento creado
+			log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %i | Tamaño: %i |", process_id, segment->s_id, dir_base,size);
+       		return dir_base; // Segmento creado
 		}
 		//Si el segmento es nulo pero tengo espacio, debo compactar
 		else {
@@ -65,6 +65,7 @@ void delete_segment(memory_structure* memory_structure, int process_id, int s_id
 		if (segment_pid->s_id == s_id_to_delete) {
 			// Asigno para tener el segmento más a mano
 			segment_to_delete = segment_pid;
+			segment_to_delete->offset = segment_pid->offset;
 			memory_shared.remaining_memory += segment_pid->offset;
 			list_add(memory_structure->hole_list, segment_pid);
 			list_remove(segment_table, i);
@@ -83,7 +84,7 @@ void delete_segment(memory_structure* memory_structure, int process_id, int s_id
 		}
 	}
 	int dir_base = transform_base_to_decimal( segment_to_delete->base, memory_structure->segment_zero->base);
-	log_info(memory_config.logger,"|PID: %i | Eliminar Segmento: %i | Base: %-*u  | Tamaño: %i |\n", process_id , s_id_to_delete, dir_base, segment_to_delete->offset);
+	log_info(memory_config.logger,"|PID: %i | Eliminar Segmento: %i | Base: %i  | Tamaño: %i |", process_id , s_id_to_delete, dir_base, segment_to_delete->offset);
 
 	// Caso de que tenga huecos libres aledaños, los deberá consolidar actualizando sus estructuras administrativas.
 	compact_hole_list(memory_structure);

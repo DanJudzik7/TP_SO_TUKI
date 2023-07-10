@@ -242,3 +242,339 @@ Se creó la tabla de segmentos del PID 3
 
 [INFO] 18:29:15:955 memoria/(5113:5113): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
 
+[INFO] 19:36:35:917 memoria/(8929:8929): Iniciando Memoria...
+[WARNING] 19:36:35:920 memoria/(8929:8929): Socket de servidor inicializado en puerto 8002
+[INFO] 19:36:35:923 memoria/(8929:8929): Memoria inicializada correctamente
+[INFO] 19:36:35:924 memoria/(8929:8929): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:36:35:924 memoria/(8929:8929): |PID: 0 | Crear Segmento: 1 | Base: -2059104544  | Tamaño: 128 |
+
+[INFO] 19:36:35:924 memoria/(8929:8929): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:36:35:924 memoria/(8929:8929): |PID: 1 | Crear Segmento: 1 | Base: -2059104416  | Tamaño: 128 |
+
+[INFO] 19:36:35:924 memoria/(8929:8929): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:36:35:924 memoria/(8929:8929): |PID: 2 | Crear Segmento: 1 | Base: -2059104288  | Tamaño: 128 |
+
+[INFO] 19:36:35:924 memoria/(8929:8929): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:36:35:924 memoria/(8929:8929): |PID: 3 | Crear Segmento: 1 | Base: -2059104160  | Tamaño: 128 |
+
+[INFO] 19:36:35:924 memoria/(8929:8929): |PID: 1 | Eliminar Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 1 |
+
+[INFO] 19:36:35:924 memoria/(8929:8929): El valor leido es: hola
+[INFO] 19:36:35:925 memoria/(8929:8929): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:36:35:925 memoria/(8929:8929): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:36:35:925 memoria/(8929:8929): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:36:35:925 memoria/(8929:8929): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:36:35:925 memoria/(8929:8929): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:36:35:925 memoria/(8929:8929): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:36:35:925 memoria/(8929:8929): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:37:18:257 memoria/(9028:9028): Iniciando Memoria...
+[WARNING] 19:37:18:257 memoria/(9028:9028): Socket de servidor inicializado en puerto 8002
+[INFO] 19:37:18:257 memoria/(9028:9028): Memoria inicializada correctamente
+[INFO] 19:37:18:257 memoria/(9028:9028): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:38:09:137 memoria/(9144:9144): Iniciando Memoria...
+[WARNING] 19:38:09:137 memoria/(9144:9144): Socket de servidor inicializado en puerto 8002
+[INFO] 19:38:09:137 memoria/(9144:9144): Memoria inicializada correctamente
+[INFO] 19:38:09:137 memoria/(9144:9144): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 0 | Crear Segmento: 1 | Base: 128                                                                                                                               | Tamaño: -2085245232 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 1 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: -2085245232 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 2 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: -2085245232 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 3 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: -2085245232 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 1 | Eliminar Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 1 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): El valor leido es: hola
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:09:138 memoria/(9144:9144): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:38:09:139 memoria/(9144:9144): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:09:139 memoria/(9144:9144): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:38:56:494 memoria/(9274:9274): Iniciando Memoria...
+[WARNING] 19:38:56:494 memoria/(9274:9274): Socket de servidor inicializado en puerto 8002
+[INFO] 19:38:56:495 memoria/(9274:9274): Memoria inicializada correctamente
+[INFO] 19:38:56:495 memoria/(9274:9274): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 0 | Crear Segmento: 1 | Base: 128                                                                                                                               | Tamaño: -1341985072 |
+[INFO] 19:38:56:495 memoria/(9274:9274): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 1 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: -1341985072 |
+[INFO] 19:38:56:495 memoria/(9274:9274): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 2 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: -1341985072 |
+[INFO] 19:38:56:495 memoria/(9274:9274): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 3 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: -1341985072 |
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 1 | Eliminar Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 1 |
+[INFO] 19:38:56:495 memoria/(9274:9274): El valor leido es: hola
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:56:495 memoria/(9274:9274): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:38:56:496 memoria/(9274:9274): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:56:496 memoria/(9274:9274): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:38:56:496 memoria/(9274:9274): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:38:56:496 memoria/(9274:9274): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:39:41:679 memoria/(9380:9380): Iniciando Memoria...
+[WARNING] 19:39:41:680 memoria/(9380:9380): Socket de servidor inicializado en puerto 8002
+[INFO] 19:39:41:680 memoria/(9380:9380): Memoria inicializada correctamente
+[INFO] 19:39:41:680 memoria/(9380:9380): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:39:41:680 memoria/(9380:9380): |PID: 0 | Crear Segmento: 1 | Base: 128                                                                                                                               | Tamaño: 1617366736 |
+[INFO] 19:39:41:680 memoria/(9380:9380): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:39:41:680 memoria/(9380:9380): |PID: 1 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 1617366736 |
+[INFO] 19:39:41:680 memoria/(9380:9380): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:39:41:680 memoria/(9380:9380): |PID: 2 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 1617366736 |
+[INFO] 19:39:41:680 memoria/(9380:9380): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:39:41:680 memoria/(9380:9380): |PID: 3 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 1617366736 |
+[INFO] 19:39:41:680 memoria/(9380:9380): |PID: 1 | Eliminar Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 1617357424 |
+[INFO] 19:39:41:681 memoria/(9380:9380): El valor leido es: hola
+[INFO] 19:39:41:681 memoria/(9380:9380): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:39:41:681 memoria/(9380:9380): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:39:41:681 memoria/(9380:9380): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:39:41:681 memoria/(9380:9380): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:39:41:681 memoria/(9380:9380): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:39:41:681 memoria/(9380:9380): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:39:41:681 memoria/(9380:9380): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:40:25:337 memoria/(9481:9481): Iniciando Memoria...
+[WARNING] 19:40:25:353 memoria/(9481:9481): Socket de servidor inicializado en puerto 8002
+[INFO] 19:40:25:354 memoria/(9481:9481): Memoria inicializada correctamente
+[INFO] 19:40:25:355 memoria/(9481:9481): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:40:25:355 memoria/(9481:9481): |PID: 0 | Crear Segmento: 1 | Base: 128                                                                                                                               | Tamaño: 678801104 |
+[INFO] 19:40:25:356 memoria/(9481:9481): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:40:25:356 memoria/(9481:9481): |PID: 1 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 678801104 |
+[INFO] 19:40:25:356 memoria/(9481:9481): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:40:25:356 memoria/(9481:9481): |PID: 2 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 678801104 |
+[INFO] 19:40:25:357 memoria/(9481:9481): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:40:25:357 memoria/(9481:9481): |PID: 3 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 678801104 |
+[INFO] 19:40:25:359 memoria/(9481:9481): |PID: 1 | Eliminar Segmento: 1 | Base: 256  | Tamaño: 128 |
+[INFO] 19:40:25:364 memoria/(9481:9481): El valor leido es: hola
+[INFO] 19:40:25:366 memoria/(9481:9481): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:40:25:367 memoria/(9481:9481): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:40:25:367 memoria/(9481:9481): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:40:25:367 memoria/(9481:9481): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:40:25:368 memoria/(9481:9481): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:40:25:369 memoria/(9481:9481): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:40:25:370 memoria/(9481:9481): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:42:45:212 memoria/(9606:9606): Iniciando Memoria...
+[WARNING] 19:42:45:213 memoria/(9606:9606): Socket de servidor inicializado en puerto 8002
+[INFO] 19:42:45:220 memoria/(9606:9606): Memoria inicializada correctamente
+[INFO] 19:42:45:223 memoria/(9606:9606): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:42:45:226 memoria/(9606:9606): |PID: 0 | Crear Segmento: 1 | Base: 128                                                                                                                               | Tamaño: -1623515440 |
+[INFO] 19:42:45:228 memoria/(9606:9606): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:42:45:231 memoria/(9606:9606): |PID: 1 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: -1623515440 |
+[INFO] 19:42:45:232 memoria/(9606:9606): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:42:45:234 memoria/(9606:9606): |PID: 2 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: -1623515440 |
+[INFO] 19:42:45:235 memoria/(9606:9606): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:42:45:235 memoria/(9606:9606): |PID: 3 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: -1623515440 |
+[INFO] 19:42:45:240 memoria/(9606:9606): |PID: 1 | Eliminar Segmento: 1 | Base: 256  | Tamaño: 128 |
+[INFO] 19:42:45:240 memoria/(9606:9606): El valor leido es: hola
+[INFO] 19:42:45:242 memoria/(9606:9606): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:42:45:246 memoria/(9606:9606): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:42:45:246 memoria/(9606:9606): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:42:45:246 memoria/(9606:9606): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:42:45:246 memoria/(9606:9606): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:42:45:246 memoria/(9606:9606): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:42:45:246 memoria/(9606:9606): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:44:48:770 memoria/(9829:9829): Iniciando Memoria...
+[WARNING] 19:44:48:770 memoria/(9829:9829): Socket de servidor inicializado en puerto 8002
+[INFO] 19:44:48:770 memoria/(9829:9829): Memoria inicializada correctamente
+[INFO] 19:44:48:770 memoria/(9829:9829): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:44:48:770 memoria/(9829:9829): |PID: 0 | Crear Segmento: 1 | Base: 128                                                                                                                               | Tamaño: 110341840 |
+[INFO] 19:44:48:770 memoria/(9829:9829): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:44:48:770 memoria/(9829:9829): |PID: 1 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 110341840 |
+[INFO] 19:44:48:770 memoria/(9829:9829): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:44:48:770 memoria/(9829:9829): |PID: 2 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 110341840 |
+[INFO] 19:44:48:770 memoria/(9829:9829): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:44:48:770 memoria/(9829:9829): |PID: 3 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 110341840 |
+[INFO] 19:44:48:770 memoria/(9829:9829): |PID: 1 | Eliminar Segmento: 1 | Base: 256  | Tamaño: 128 |
+[INFO] 19:44:48:770 memoria/(9829:9829): El valor leido es: hola
+[INFO] 19:44:48:771 memoria/(9829:9829): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:44:48:771 memoria/(9829:9829): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:44:48:771 memoria/(9829:9829): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:44:48:771 memoria/(9829:9829): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:44:48:771 memoria/(9829:9829): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:44:48:771 memoria/(9829:9829): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:44:48:771 memoria/(9829:9829): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:46:00:409 memoria/(9995:9995): Iniciando Memoria...
+[WARNING] 19:46:00:412 memoria/(9995:9995): Socket de servidor inicializado en puerto 8002
+[INFO] 19:46:00:412 memoria/(9995:9995): Memoria inicializada correctamente
+[INFO] 19:46:00:412 memoria/(9995:9995): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:46:00:412 memoria/(9995:9995): |PID: 0 | Crear Segmento: 1 | Base: 128                                                                                                                               | Tamaño: 1153081040 |
+[INFO] 19:46:00:412 memoria/(9995:9995): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:46:00:412 memoria/(9995:9995): |PID: 1 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                               | Tamaño: 1153081040 |
+[INFO] 19:46:00:412 memoria/(9995:9995): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:46:00:412 memoria/(9995:9995): |PID: 2 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 1153081040 |
+[INFO] 19:46:00:412 memoria/(9995:9995): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:46:00:412 memoria/(9995:9995): |PID: 3 | Crear Segmento: 1 | Base: 128                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Tamaño: 1153081040 |
+[INFO] 19:46:00:412 memoria/(9995:9995): |PID: 1 | Eliminar Segmento: 1 | Base: 256  | Tamaño: 128 |
+[INFO] 19:46:00:412 memoria/(9995:9995): El valor leido es: hola
+[INFO] 19:46:00:412 memoria/(9995:9995): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:00:412 memoria/(9995:9995): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:00:413 memoria/(9995:9995): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:46:00:413 memoria/(9995:9995): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:00:413 memoria/(9995:9995): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:46:00:413 memoria/(9995:9995): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:00:413 memoria/(9995:9995): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 19:46:21:919 memoria/(10101:10101): Iniciando Memoria...
+[WARNING] 19:46:21:921 memoria/(10101:10101): Socket de servidor inicializado en puerto 8002
+[INFO] 19:46:21:921 memoria/(10101:10101): Memoria inicializada correctamente
+[INFO] 19:46:21:921 memoria/(10101:10101): 
+Se creó la tabla de segmentos del PID 0
+[INFO] 19:46:21:921 memoria/(10101:10101): |PID: 0 | Crear Segmento: 1 | Base: 128 | Tamaño: 128 |
+[INFO] 19:46:21:921 memoria/(10101:10101): 
+Se creó la tabla de segmentos del PID 1
+[INFO] 19:46:21:922 memoria/(10101:10101): |PID: 1 | Crear Segmento: 1 | Base: 256 | Tamaño: 128 |
+[INFO] 19:46:21:923 memoria/(10101:10101): 
+Se creó la tabla de segmentos del PID 2
+[INFO] 19:46:21:923 memoria/(10101:10101): |PID: 2 | Crear Segmento: 1 | Base: 384 | Tamaño: 128 |
+[INFO] 19:46:21:923 memoria/(10101:10101): 
+Se creó la tabla de segmentos del PID 3
+[INFO] 19:46:21:923 memoria/(10101:10101): |PID: 3 | Crear Segmento: 1 | Base: 512 | Tamaño: 128 |
+[INFO] 19:46:21:924 memoria/(10101:10101): |PID: 1 | Eliminar Segmento: 1 | Base: 256  | Tamaño: 128 |
+[INFO] 19:46:21:924 memoria/(10101:10101): El valor leido es: hola
+[INFO] 19:46:21:925 memoria/(10101:10101): |PID: 1 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:21:926 memoria/(10101:10101): |PID: 2 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:21:926 memoria/(10101:10101): |PID: 2 |Segmento: 1 | base: 256   | tamaño: 128 |
+
+[INFO] 19:46:21:926 memoria/(10101:10101): |PID: 3 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:21:926 memoria/(10101:10101): |PID: 3 |Segmento: 1 | base: 384   | tamaño: 128 |
+
+[INFO] 19:46:21:926 memoria/(10101:10101): |PID: 0 |Segmento: 0 | base: 0     | tamaño: 128 |
+
+[INFO] 19:46:21:926 memoria/(10101:10101): |PID: 0 |Segmento: 1 | base: 128   | tamaño: 128 |
+
+[INFO] 20:00:49:638 memoria/(11167:11167): Iniciando Memoria...
+[WARNING] 20:00:49:641 memoria/(11167:11167): Socket de servidor inicializado en puerto 8002
+[INFO] 20:00:49:642 memoria/(11167:11167): Memoria inicializada correctamente
+[INFO] 20:01:39:662 memoria/(11359:11359): Iniciando Memoria...
+[WARNING] 20:01:39:662 memoria/(11359:11359): Socket de servidor inicializado en puerto 8002
+[INFO] 20:01:39:662 memoria/(11359:11359): Memoria inicializada correctamente
+[INFO] 20:01:57:432 memoria/(11471:11471): Iniciando Memoria...
+[WARNING] 20:01:57:433 memoria/(11471:11471): Socket de servidor inicializado en puerto 8002
+[INFO] 20:01:57:433 memoria/(11471:11471): Memoria inicializada correctamente
+[INFO] 20:02:51:635 memoria/(11628:11628): Iniciando Memoria...
+[WARNING] 20:02:51:636 memoria/(11628:11628): Socket de servidor inicializado en puerto 8002
+[INFO] 20:02:51:636 memoria/(11628:11628): Memoria inicializada correctamente
+[INFO] 20:04:50:650 memoria/(11832:11832): Iniciando Memoria...
+[WARNING] 20:04:50:651 memoria/(11832:11832): Socket de servidor inicializado en puerto 8002
+[INFO] 20:04:50:651 memoria/(11832:11832): Memoria inicializada correctamente
+[INFO] 20:06:20:055 memoria/(12029:12029): Iniciando Memoria...
+[WARNING] 20:06:20:055 memoria/(12029:12029): Socket de servidor inicializado en puerto 8002
+[INFO] 20:06:20:055 memoria/(12029:12029): Memoria inicializada correctamente
+[INFO] 20:07:43:003 memoria/(12186:12186): Iniciando Memoria...
+[WARNING] 20:07:43:004 memoria/(12186:12186): Socket de servidor inicializado en puerto 8002
+[INFO] 20:07:43:004 memoria/(12186:12186): Memoria inicializada correctamente
+[INFO] 20:12:08:877 memoria/(12579:12579): Iniciando Memoria...
+[WARNING] 20:12:08:966 memoria/(12579:12579): Socket de servidor inicializado en puerto 8002
+[INFO] 20:12:08:972 memoria/(12579:12579): Memoria inicializada correctamente
+[INFO] 20:16:54:296 memoria/(12987:12987): Iniciando Memoria...
+[WARNING] 20:16:54:395 memoria/(12987:12987): Socket de servidor inicializado en puerto 8002
+[INFO] 20:16:54:401 memoria/(12987:12987): Memoria inicializada correctamente
+[INFO] 20:17:01:877 memoria/(13093:13093): Iniciando Memoria...
+[WARNING] 20:17:01:878 memoria/(13093:13093): Socket de servidor inicializado en puerto 8002
+[INFO] 20:17:01:879 memoria/(13093:13093): Memoria inicializada correctamente
+[INFO] 20:21:27:761 memoria/(13493:13493): Iniciando Memoria...
+[WARNING] 20:21:27:865 memoria/(13493:13493): Socket de servidor inicializado en puerto 8002
+[INFO] 20:21:27:882 memoria/(13493:13493): Memoria inicializada correctamente
+[INFO] 20:23:39:745 memoria/(13717:13717): Iniciando Memoria...
+[WARNING] 20:23:39:847 memoria/(13717:13717): Socket de servidor inicializado en puerto 8002
+[INFO] 20:23:39:855 memoria/(13717:13717): Memoria inicializada correctamente
+[INFO] 20:24:27:280 memoria/(13855:13855): Iniciando Memoria...
+[WARNING] 20:24:27:392 memoria/(13855:13855): Socket de servidor inicializado en puerto 8002
+[INFO] 20:24:27:398 memoria/(13855:13855): Memoria inicializada correctamente
+[INFO] 20:24:57:502 memoria/(14013:14013): Iniciando Memoria...
+[WARNING] 20:24:57:503 memoria/(14013:14013): Socket de servidor inicializado en puerto 8002
+[INFO] 20:24:57:503 memoria/(14013:14013): Memoria inicializada correctamente

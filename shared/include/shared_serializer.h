@@ -52,4 +52,9 @@ uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset)
 // Serializa el paquete especificado reemplazando al original
 void serialize_package(t_package* package);
 
+//Deserializo el buffer de memoria
+memory_buffer* deserialize_memory_buffer(t_package* package);
+//Serializo el buffer de memoria
+t_package* serialize_memory_buffer(uint32_t pid ,char* buffer);
+
 #endif

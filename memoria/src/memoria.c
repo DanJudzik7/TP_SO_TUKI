@@ -44,8 +44,10 @@ void main() {
 	//listen_modules(socket_memory,memory_structure);
 	
  	//test_create_del_segm(memory_structure, memory);
-	test_compact(memory_structure, memory);
+	//test_compact(memory_structure, memory);
 	//test_rw(memory_structure, memory);
+
+	test_buffer_memory();
 
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);
@@ -107,4 +109,11 @@ void test_rw(memory_structure* memory_structure, void* memory_base){
 		log_info(memory_config.logger, "El valor leido es: %s", buffer);
 	}else 
 		log_info(memory_config.logger, "No se pudo escribir en memoria");
+}
+
+void test_buffer_memory(){ 
+	t_package* package_to_send = serialize_memory_buffer(3,"HolaMundo");
+	printf("Serializamos bien: %i", package_to_send->type);
+	memory_buffer* mem_buff = deserialize_memory_buffer(package_to_send);
+	printf("pid: %i -> buffer_read: %s", mem_buff ->pid ,mem_buff->buffer);
 }

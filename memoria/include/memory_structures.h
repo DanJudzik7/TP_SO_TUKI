@@ -22,11 +22,11 @@ typedef struct hole{
 // Estructura para la configuracion de memoria
 typedef struct memory {
 	size_t memory_size;
-    size_t sg_zero_size;
-    int sg_amount;
-    int mem_delay;
-    int com_delay;
-    char* algorithm; 
+	size_t sg_zero_size;
+	int sg_amount;
+	int mem_delay;
+	int com_delay;
+	char* algorithm; 
 	int remaining_memory;
 } memory;
 

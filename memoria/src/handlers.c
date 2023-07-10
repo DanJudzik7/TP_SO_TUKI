@@ -21,19 +21,19 @@ void handle_fs(int socket_fs,memory_structure* memory_structure){
             char* buffer = read_memory(segment_rw->s_id, segment_rw->offset, segment_rw->size, memory_structure, segment_rw->pid);
             if(buffer == NULL){
                 // devolver seg_fault
-                send(socket_fs,package_new(SEG_FAULT),sizeof(t_package),0);
+                socket_send(socket_fs,package_new(SEG_FAULT));
             } else {
                 // devolver buffer
-                send(socket_fs,buffer,sizeof(buffer),0);
+                socket_send(socket_fs,serialize_message(buffer,false));
             }
             break;
         case F_WRITE:       
             sleep(memory_shared.mem_delay);
             pthread_mutex_lock(&mutex_write);
             if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
-                send(socket_fs,package_new(OK_INSTRUCTION),sizeof(t_package),0);
+                socket_send(socket_fs,package_new(OK_INSTRUCTION));
             } else {
-                send(socket_fs,package_new(SEG_FAULT),sizeof(t_package),0);
+                socket_send(socket_fs,package_new(SEG_FAULT));
             }
             pthread_mutex_unlock(&mutex_write);
             break;   
@@ -64,10 +64,10 @@ void handle_cpu(int socket_cpu,memory_structure* memory_structure){
         char* buffer = read_memory(segment_rw->s_id, segment_rw->offset, segment_rw->size, memory_structure, segment_rw->pid);
         if(buffer == NULL){
             // devolver seg_fault
-            send(socket_cpu,package_new(SEG_FAULT),sizeof(t_package),0);
+            socket_send(socket_cpu,package_new(SEG_FAULT));
         } else {
             // devolver buffer
-            send(socket_cpu,buffer,sizeof(buffer),0);
+            socket_send(socket_cpu,serialize_message(buffer,false));
          }
         break;
     case F_WRITE:       
@@ -75,10 +75,10 @@ void handle_cpu(int socket_cpu,memory_structure* memory_structure){
         pthread_mutex_lock(&mutex_write);
         if(write_memory(segment_rw->s_id,segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
             // devolver ok
-            send(socket_cpu,package_new(OK_INSTRUCTION),sizeof(t_package),0);
+            socket_send(socket_cpu,package_new(OK_INSTRUCTION));
         } else {
             // devolver seg_fault
-            send(socket_cpu,package_new(SEG_FAULT),sizeof(t_package),0);
+            socket_send(socket_cpu,package_new(SEG_FAULT));
 
         }
         pthread_mutex_unlock(&mutex_write);
@@ -109,34 +109,35 @@ void handle_kernel(int socket_kernel,memory_structure* memory_structure){
     switch (package_kernel->type)
     {
     case CREATE_PROCESS_MEMORY:
-    // Creo la tabla de segmentos y la devuevlo al kernel cuando crea un proceso
-    t_list* segment_table = create_sg_table(memory_structure, sg->pid);
-    log_info(memory_config.logger,"Creación de Proceso PID: %s",process_id);
-    send(socket_kernel,segment_table,sizeof(segment_table),0); 
+        // Creo la tabla de segmentos y la devuevlo al kernel cuando crea un proceso
+        t_list* segment_table = create_sg_table(memory_structure, sg->pid);
+        log_info(memory_config.logger,"Creación de Proceso PID: %s",process_id);
+        // Envio la tabla de segmentos al kernel
+        socket_send(socket_kernel, serialize_segment_table(segment_table)); 
         break;
     case END_PROCCESS_MEMORY:
         remove_sg_table(memory_structure, sg->pid);
         log_info(memory_config.logger,"Eliminación de Proceso PID: %s",process_id);
         break;
-    case CREATE_SEGMENT:
+    case CREATE_SEGMENT_MEMORY:
         int flag = add_segment(memory_structure, sg->pid, sg->size_data_segment, sg->s_id);
         switch (flag)
         {
-        case 0:
-            // Devuelvo al kernel la base del segmento
-            break;
         case 1:
             // Devuelvo solicitud de compactacion
+            socket_send(socket_kernel, package_new(COMPACT_MEMORY));
             break;
         case 2:
             // Devuelvo no hay espacio suficiente
+            socket_send(socket_kernel, package_new(NO_SPACE_LEFT));
             break;
-        
         default:
+            // Devuelvo la base del segmento creado
+            socket_send(socket_kernel, serialize_message(flag,false));
             break;
         }
         break;
-    case DELETE_SEGMENT:
+    case DELETE_SEGMENT_MEMORY:
         delete_segment(memory_structure, sg->pid, sg->s_id);
         break;
     case COMPACT_MEMORY:

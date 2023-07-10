@@ -49,6 +49,17 @@ typedef struct cpu_register {
 	cpu_register_16 register_16;
 } cpu_register;
 
+typedef struct instruction_memory{
+	uint32_t pid;
+	uint32_t s_id;
+	uint32_t offset;
+} instruction_memory;
+
+typedef struct memory_buffer{
+	uint32_t pid;
+	char* buffer;
+} memory_buffer;
+
 typedef struct segment_table {
 	uint32_t pid;
 	uint32_t s_id;
@@ -124,11 +135,6 @@ typedef enum op_code {
 	DELETE_SEGMENT,	 // 13
 	EXIT,			 // 14
 	YIELD,		 // 15
-	CREATE_PROCESS_MEMORY,
-	END_PROCCESS_MEMORY,
-	COMPACT_MEMORY,
-	SEG_FAULT,
-	OK_INSTRUCTION
 } op_code;
 
 typedef struct t_instruction {
