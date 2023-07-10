@@ -78,7 +78,7 @@ segment* best_fit(memory_structure* memory_structure, int size, int pid,int s_id
 
         // Agregamos el nuevo segmento a la lista de todos los segmentos.
         t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
-        list_add(segment_table, new_segment->s_id);
+        list_add(segment_table, new_segment);
         list_add(memory_structure->ram, new_segment);
         
 
