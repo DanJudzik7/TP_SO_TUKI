@@ -10,6 +10,7 @@ int main(int argc, char** argv) {
 
 	log_warning(logger, "Iniciando la CPU");
 	config_cpu.logger = logger;
+	config_cpu.max_segment_size = config_get_int_value(config, "TAM_MAX_SEGMENTO");
 
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
 	int socket_cpu = socket_initialize_server(port);  // Inicializo el socket en el puerto cargado por la config
