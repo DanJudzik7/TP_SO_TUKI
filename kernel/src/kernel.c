@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
 				sem_post(&gck->flag_with_pcb);
 			} else {
 				switch (pcb->state) {
-					case YIELD:
+					/* case YIELD:
 						state_yield(pcb, gck);
 						break;
 					case SIGNAL:
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 						break;
 					case EXIT_PROCESS:
 						state_exit_process(pcb, gck);
-						break;
+						break; */
 					default:
 						queue_push(gck->active_pcbs, pcb);
 						log_warning(logger, "-----------------------Guardando PCB %d en cola de READY-----------------------", pcb->pid);
