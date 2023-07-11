@@ -63,8 +63,8 @@ void print_execution_context(execution_context* execution_context) {
     printf("    - RDX: %.*s\n", 16, registers->register_16.RDX);
     
     segment_table* segment_table = execution_context->segment_table;
-    printf(" - Segment Table:\n");
-    printf("    - ID: %u\n", segment_table->id);
+    printf(" - Segment Table %u : \n", segment_table->pid);
+    printf("    - ID: %u\n", segment_table->s_id);
     printf("    - Direction: %p\n", segment_table->segment_table_direction);
     printf("    - Size of Data Segment: %u\n", segment_table->size_data_segment);
 }
