@@ -110,6 +110,7 @@ typedef struct config_cpu {
 	t_log* logger;
 	sem_t flag_dislodge;
 	int connection_kernel;
+	int max_segment_size;
 } configuration_cpu;
 
 typedef struct memory_config {

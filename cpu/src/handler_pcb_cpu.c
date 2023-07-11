@@ -69,6 +69,30 @@ t_instruction* get_instruction(execution_context* ec) {
 	return list_get(ec->instructions->elements, ec->program_counter);
 }
 
+t_physical_address* MMU(int logic_address, int size, execution_context* ec){
+	t_physical_address* physical_address = malloc(sizeof(t_physical_address));
+	physical_address->segment = floor(logic_address / config_cpu.max_segment_size);
+	physical_address->offset = logic_address % config_cpu.max_segment_size; 
+	if (physical_address->offset + size > list_get_by_sid(ec->segment_table, physical_address->segment)->offset)
+	{
+		log_error(config_cpu.logger, "Segmentation Fault");
+		return NULL;
+	}
+	
+	return physical_address;
+}
+
+// TODO: Verificar el tipo segment_table porque lo tomo como una lista en memoria
+segment* list_get_by_sid(segment_table* list, int id) {
+	int i = 0;
+	while (i < list_size(list)) {
+		segment* segment = list_get(list, i);
+		if (segment->s_id == id) return segment;
+		i++;
+	}
+	return NULL;
+}
+
 void dislodge() {
 	log_warning(config_cpu.logger, "Desalojando el Context");
 	// Bloquear el semáforo
