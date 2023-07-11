@@ -22,6 +22,9 @@ execution_context* deserialize_execution_context(t_package* package);
 // Serializa una lista de instrucciones
 t_package* serialize_instructions(t_queue* instructions, bool is_ec);
 
+// Serializa una instrucción
+t_package* serialize_instruction(t_instruction* instruction);
+
 // Deserializa las instrucciones y las agrega a una queue
 void deserialize_instructions(t_package* package, t_queue* instructions);
 

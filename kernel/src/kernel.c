@@ -30,20 +30,20 @@ int main(int argc, char** argv) {
 	gck->logger = logger;
 	gck->new_pcbs = queue_create();		// Cola local de PCBs en NEW
 	gck->active_pcbs = queue_create();	// Cola global de PCBs en READY, EXEC y BLOCK
-	gck->connection_kernel = socket_kernel;  
-	//TODO: ESTO es realmente int no un string_value
+	gck->connection_kernel = socket_kernel;
+	// TODO: ESTO es realmente int no un string_value
 	gck->max_multiprogramming = *config_get_string_value(config, "GRADO_MAX_MULTIPROGRAMACION") - '0';
 	gck->default_burst_time = *config_get_string_value(config, "ESTIMACION_INICIAL") - '0';
 	gck->algorithm_is_hrrn = algorithm_is_hrrn;
 	gck->pcb_priority_helper = NULL;
 	// CREACION DE RECURSOS
 	// Diccionario de recursos -> [recurso,[instancias, [Cola de recursos] ] ]
-	t_dictionary *resources_dict = dictionary_create();
+	t_dictionary* resources_dict = dictionary_create();
 	char** resources_helper = config_get_array_value(config, "RECURSOS");
 	char** inst_resources_helper = config_get_array_value(config, "INSTANCIAS_RECURSOS");
 	for (int i = 0; resources_helper[i] != NULL; i++) {
-		printf("cargando de recurso un %s con valor -> %s",resources_helper[i], inst_resources_helper[i]);
-		resources_table* resource_table_handler = s_malloc(sizeof(resources_handler));
+		printf("cargando de recurso un %s con valor -> %s", resources_helper[i], inst_resources_helper[i]);
+		resources_table* resource_table_handler = s_malloc(sizeof(resources_table));
 		t_queue* queue_resource = queue_create();
 		resource_table_handler->instances = (int)atoi(inst_resources_helper[i]);
 		resource_table_handler->resource_queue = queue_resource;
@@ -57,75 +57,73 @@ int main(int argc, char** argv) {
 	pthread_create(&thread_consola, NULL, (void*)listen_consoles, gck);
 
 	int sem_pcb_value;
-	
+
 	// Manejo de CPU y Short Term Scheduler. Antes era listener_cpu.
 	while (1) {
-		//PARA QUE PUSE ESTA FLAG? NI DIOS SABE PORQUE pero recuerdo que era algo importante
-	sem_getvalue(&gck->flag_with_pcb, &sem_pcb_value);
-	if (sem_pcb_value==1) {
-		sem_wait(&gck->flag_with_pcb);
-		// Si no hay PCBs en la cola de activos, espero a que llegue uno
-		// Organizo según el tipo de planificador
-		t_pcb* pcb = short_term_scheduler(gck);
-		
-		if (pcb == NULL || pcb == 0) {
-			sem_post(&gck->flag_with_pcb);
-			continue;
-		};
-		log_warning(logger, "-----------------------Tenemos un nuevo PCB----------------------");
-		pcb->state = EXEC;
-		// Mando el PCB al CPU
-		log_warning(logger, "----------------------Enviando context al CPU-----------------------");
-		print_execution_context(pcb->execution_context);
-		t_package* ec_package = serialize_execution_context(pcb->execution_context);
-		// Recibe el nuevo execution context, que puede estar en EXIT o BLOCK
-		if (!socket_send(socket_cpu, ec_package)) {
-		sem_post(&gck->flag_with_pcb);
-			break;
-		};
+		// PARA QUE PUSE ESTA FLAG? NI DIOS SABE PORQUE pero recuerdo que era algo importante
+		sem_getvalue(&gck->flag_with_pcb, &sem_pcb_value);
+		if (sem_pcb_value == 1) {
+			sem_wait(&gck->flag_with_pcb);
+			// Si no hay PCBs en la cola de activos, espero a que llegue uno
+			// Organizo según el tipo de planificador
+			t_pcb* pcb = short_term_scheduler(gck);
 
-		// Recibe el nuevo execution context
-		t_package* package = socket_receive(socket_cpu);
-		if (package != NULL && package->type == EXECUTION_CONTEXT) {
-			pcb->execution_context = deserialize_execution_context(package);
-			log_warning(logger, "----------------------Recibiendo context %d al CPU----------------------", pcb->pid);
+			if (pcb == NULL || pcb == 0) {
+				sem_post(&gck->flag_with_pcb);
+				continue;
+			};
+			log_warning(logger, "-----------------------Tenemos un nuevo PCB----------------------");
+			pcb->state = EXEC;
+			// Mando el PCB al CPU
+			log_warning(logger, "----------------------Enviando context al CPU-----------------------");
 			print_execution_context(pcb->execution_context);
-		} else {
-			log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
-			sem_post(&gck->flag_with_pcb);
-		}
-		// Actualizo el estado del PCB según el nuevo execution context
-		pcb->state = pcb->execution_context->updated_state;
-
-		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
-		//TODO: RELEER t.u.k.i y ver si hay que hacer algo con el PCB 
-		if (no_more_instructions(pcb->execution_context) && pcb->state != EXIT_PROCESS){
-			log_warning(logger, "Bloqueando PCB, ya no posee mas instrucciones");
-			pcb->state = BLOCK;
-			sem_post(&gck->flag_with_pcb);
-		} 
-		else {
-			switch (pcb->state)
-			{
-			case YIELD:
-				state_yield(pcb,gck);
-				break;
-			case SIGNAL:
-			case WAIT:
-				state_signal_or_wait(pcb,gck);
-				break;
-			case EXIT_PROCESS: 
-				state_exit_process(pcb,gck);
-				break;
-			default:
-				queue_push(gck->active_pcbs, pcb);
-				log_warning(logger, "-----------------------Guardando PCB %d en cola de READY-----------------------", pcb->pid);
+			t_package* ec_package = serialize_execution_context(pcb->execution_context);
+			// Recibe el nuevo execution context, que puede estar en EXIT o BLOCK
+			if (!socket_send(socket_cpu, ec_package)) {
 				sem_post(&gck->flag_with_pcb);
 				break;
-			}	
-		}	
-	}
-	else continue;
+			};
+
+			// Recibe el nuevo execution context
+			t_package* package = socket_receive(socket_cpu);
+			if (package != NULL && package->type == EXECUTION_CONTEXT) {
+				pcb->execution_context = deserialize_execution_context(package);
+				log_warning(logger, "----------------------Recibiendo context %d al CPU----------------------", pcb->pid);
+				print_execution_context(pcb->execution_context);
+			} else {
+				log_warning(logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
+				sem_post(&gck->flag_with_pcb);
+			}
+			// Actualizo el estado del PCB según el nuevo execution context
+			pcb->state = pcb->execution_context->updated_state;
+
+			// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
+			// TODO: RELEER t.u.k.i y ver si hay que hacer algo con el PCB
+			if (no_more_instructions(pcb->execution_context) && pcb->state != EXIT_PROCESS) {
+				log_warning(logger, "Bloqueando PCB, ya no posee mas instrucciones");
+				pcb->state = BLOCK;
+				sem_post(&gck->flag_with_pcb);
+			} else {
+				switch (pcb->state) {
+					case YIELD:
+						state_yield(pcb, gck);
+						break;
+					case SIGNAL:
+					case WAIT:
+						state_signal_or_wait(pcb, gck);
+						break;
+					case EXIT_PROCESS:
+						state_exit_process(pcb, gck);
+						break;
+					default:
+						queue_push(gck->active_pcbs, pcb);
+						log_warning(logger, "-----------------------Guardando PCB %d en cola de READY-----------------------", pcb->pid);
+						sem_post(&gck->flag_with_pcb);
+						break;
+				}
+			}
+		} else
+			continue;
 	}
 
 	log_warning(logger, "Finalizando el kernel. Se desconectó un módulo esencial.");

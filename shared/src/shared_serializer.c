@@ -61,24 +61,25 @@ execution_context* deserialize_execution_context(t_package* package) {
 }
 
 uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset) {
-    uint64_t* pc_value_64 = s_malloc(sizeof(uint64_t));
-    package_decode_buffer(buffer, pc_value_64, offset);
-    uint32_t pc_value_32 = (uint32_t)(*pc_value_64);
-    free(pc_value_64);
-    *(uint32_t*)dest = pc_value_32;
-    return pc_value_32;
+	uint64_t* pc_value_64 = s_malloc(sizeof(uint64_t));
+	package_decode_buffer(buffer, pc_value_64, offset);
+	uint32_t pc_value_32 = (uint32_t)(*pc_value_64);
+	free(pc_value_64);
+	*(uint32_t*)dest = pc_value_32;
+	return pc_value_32;
 }
 
 t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
 	t_package* package = package_new(is_ec ? EC_INSTRUCTIONS : INSTRUCTIONS);
 	// Recorre la cola de instrucciones y las serializa
-	for (int i = 0; i < queue_size(instructions); i++) {
-		t_instruction* instruction = list_get(instructions->elements, i);
-		t_package* nested = package_new(instruction->op_code);
-		// Serializa los args de la instrucción
-		for (int j = 0; j < list_size(instruction->args); j++) package_write(nested, list_get(instruction->args, j));
-		package_nest(package, nested);
-	}
+	for (int i = 0; i < queue_size(instructions); i++)
+		package_nest(package, serialize_instruction(list_get(instructions->elements, i)));
+	return package;
+}
+
+t_package* serialize_instruction(t_instruction* instruction) {
+	t_package* package = package_new(instruction->op_code);
+	for (int j = 0; j < list_size(instruction->args); j++) package_write(package, list_get(instruction->args, j));
 	return package;
 }
 
@@ -158,16 +159,16 @@ segment_table* deserialize_segment_table(void* source) {
 }
 
 void serialize_package(t_package* package) {
-    uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;
-    void* stream = s_malloc(package_size);
-    uint64_t offset = 0;
-    memcpy(stream + offset, &(package->size), sizeof(uint64_t));
-    offset += sizeof(uint64_t);
-    memcpy(stream + offset, &(package->type), sizeof(int32_t));
-    offset += sizeof(int32_t);
-    memcpy(stream + offset, package->buffer, package->size);
-    package->type = SERIALIZED;
-    package->size = package_size;
-    free(package->buffer);
-    package->buffer = stream;
+	uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;
+	void* stream = s_malloc(package_size);
+	uint64_t offset = 0;
+	memcpy(stream + offset, &(package->size), sizeof(uint64_t));
+	offset += sizeof(uint64_t);
+	memcpy(stream + offset, &(package->type), sizeof(int32_t));
+	offset += sizeof(int32_t);
+	memcpy(stream + offset, package->buffer, package->size);
+	package->type = SERIALIZED;
+	package->size = package_size;
+	free(package->buffer);
+	package->buffer = stream;
 }
