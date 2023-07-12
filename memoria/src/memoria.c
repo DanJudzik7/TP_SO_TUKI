@@ -47,7 +47,7 @@ int main() {
 	test_compact(memory_structure, memory);
 	//test_rw(memory_structure, memory);
 
-	//test_buffer_memory();
+	test_buffer_memory();
 
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);
@@ -112,9 +112,16 @@ void test_rw(memory_structure* memory_structure, void* memory_base){
 		log_info(memory_config.logger, "No se pudo escribir en memoria");
 }
 
+// TODO: Revisar serializacion con kenel con maxi
 void test_buffer_memory(){ 
-	t_package* package_to_send = serialize_memory_buffer(3,"HolaMundo");
+	segment_table* sg_to_send = malloc(sizeof(segment_table));
+	sg_to_send->pid = 1;
+	sg_to_send->size_segment = 4;
+	sg_to_send->s_id = 2;
+	sg_to_send->segment_table_pcb = list_create();
+	t_package* package_to_send = serialize_segment_table(sg_to_send);
 	printf("Serializamos bien: %i", package_to_send->type);
-	memory_buffer* mem_buff = deserialize_memory_buffer(package_to_send);
-	printf("pid: %i -> buffer_read: %s", mem_buff ->pid ,mem_buff->buffer);
+	segment_table* seg_readed = deserialize_segment_table(package_to_send);
+	printf("pid: %i -> buffer_read: %i", seg_readed ->pid ,seg_readed->size_segment);
+	sleep(5);
 }

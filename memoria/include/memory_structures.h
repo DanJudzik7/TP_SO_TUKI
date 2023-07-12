@@ -6,13 +6,6 @@
 
 // ----------------------------- STRUCTS -----------------------------
 
-// Estructura de cada segmento
-typedef struct segment{
-	void* base;
-	int offset;
-	int s_id;
-} segment;
-
 // Estructura para cada agujero
 typedef struct hole{
 	void* base;

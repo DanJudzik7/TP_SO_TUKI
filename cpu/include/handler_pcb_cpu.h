@@ -31,7 +31,7 @@ void dislodge();
 t_physical_address* MMU(int logic_address, int size, execution_context* ec);
 
 // Obtener segmento por id del segmento
-segment* list_get_by_sid(segment_table* list, int id);
+segment* list_get_by_sid(t_list* list, int id);
 
 void print_instruction(t_instruction* instruction);
 

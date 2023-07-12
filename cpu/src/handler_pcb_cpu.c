@@ -82,8 +82,7 @@ t_physical_address* MMU(int logic_address, int size, execution_context* ec){
 	return physical_address;
 }
 
-// TODO: Verificar el tipo segment_table porque lo tomo como una lista en memoria
-segment* list_get_by_sid(segment_table* list, int id) {
+segment* list_get_by_sid(t_list* list, int id) {
 	int i = 0;
 	while (i < list_size(list)) {
 		segment* segment = list_get(list, i);

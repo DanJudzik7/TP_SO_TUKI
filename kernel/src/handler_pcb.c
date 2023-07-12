@@ -74,7 +74,8 @@ t_pcb* pcb_new(int pid, int burst_time) {
 	pcb->execution_context->updated_state = NEW;
 	pcb->execution_context->cpu_register = s_malloc(sizeof(cpu_register));
 	memset(pcb->execution_context->cpu_register, 0, sizeof(cpu_register));
-	pcb->execution_context->segment_table = s_malloc(sizeof(segment_table));
+	pcb->execution_context->segment_table = list_create();
+	pcb->execution_context->pid = pid;
 	memset(pcb->execution_context->segment_table, 0, sizeof(segment_table));
 	return pcb;
 }

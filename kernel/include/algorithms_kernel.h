@@ -1,5 +1,5 @@
-#ifndef ALGORITHMS_H
-#define ALGORITHMS_H
+#ifndef ALGORITHMS_KERNEL_H
+#define ALGORITHMS_KERNEL_H
 
 #include "shared_utils.h"
 #include "handler_pcb.h"

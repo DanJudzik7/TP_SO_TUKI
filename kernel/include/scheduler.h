@@ -1,7 +1,7 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include "algorithms.h"
+#include "algorithms_kernel.h"
 #include "handler_pcb.h"
 #include "shared_utils.h"
 

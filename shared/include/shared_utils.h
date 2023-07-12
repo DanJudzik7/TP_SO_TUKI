@@ -64,9 +64,16 @@ typedef struct memory_buffer{
 typedef struct segment_table {
 	uint32_t pid;
 	uint32_t s_id;
-	void* segment_table_direction;
-	uint8_t size_data_segment;
+	uint32_t size_segment;
+	t_list* segment_table_pcb;
 } segment_table;
+
+// Estructura de cada segmento
+typedef struct segment{
+	void* base;
+	int offset;
+	int s_id;
+} segment;
 
 typedef struct segment_read_write {
 	uint32_t s_id;
@@ -94,7 +101,8 @@ typedef struct execution_context {
 	uint32_t program_counter;
 	process_state updated_state;
 	cpu_register* cpu_register;
-	segment_table* segment_table;
+	t_list* segment_table;
+	uint32_t pid;
 } execution_context;
 
 typedef enum execution_context_index {

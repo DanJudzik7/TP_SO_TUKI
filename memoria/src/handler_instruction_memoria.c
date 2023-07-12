@@ -13,7 +13,15 @@ t_list* create_sg_table(memory_structure* memory_structure,int process_id){
 void remove_sg_table(memory_structure* memory_structure,int process_id){
     char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
     sprintf(pid_str, "%d", process_id);
-    dictionary_remove(memory_structure->table_pid_segments, pid_str); 
+	t_list* segment_table_delete = dictionary_get(memory_structure->table_pid_segments, pid_str);
+	for (int i = 1; i < list_size(segment_table_delete); i++)
+	{
+		segment* segment = list_get(segment_table_delete, i);
+		delete_segment(memory_structure,process_id,segment->s_id);
+	}
+	
+    dictionary_remove(memory_structure->table_pid_segments, pid_str);
+
 }
 
 int add_segment(memory_structure* memory_structure,int process_id, int size,int s_id){	

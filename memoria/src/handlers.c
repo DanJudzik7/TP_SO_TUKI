@@ -106,7 +106,7 @@ void handle_kernel(int socket_kernel, memory_structure* memory_structure) {
 				t_list* segment_table = create_sg_table(memory_structure, sg->pid);
 				log_info(memory_config.logger, "Creación de Proceso PID: %s", process_id);
 				// Envio la tabla de segmentos al kernel
-				socket_send(socket_kernel, serialize_segment_table(segment_table));	 // TODO: ver serializacion
+				//socket_send(socket_kernel, serialize_segment_table(segment_table));	 // TODO: ver serializacion
 				break;
 			}
 			case END_PROCCESS_MEMORY: {
@@ -115,7 +115,7 @@ void handle_kernel(int socket_kernel, memory_structure* memory_structure) {
 				break;
 			}
 			case CREATE_SEGMENT_MEMORY: {
-				int flag = add_segment(memory_structure, sg->pid, sg->size_data_segment, sg->s_id);
+				int flag = add_segment(memory_structure, sg->pid, sg->size_segment, sg->s_id);
 				switch (flag) {
 					case 1:
 						// Devuelvo solicitud de compactacion

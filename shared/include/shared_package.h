@@ -9,22 +9,23 @@
 // Permite interpretar tipos recursivos con facilidad
 
 typedef enum t_package_type {
-	SERIALIZED,			// 0
-	MESSAGE_OK,			// 1
-	MESSAGE_FLAW,			// 2
-	MESSAGE_BUSY,			// 3
-	INSTRUCTIONS,			// 4
-	EXECUTION_CONTEXT,		// 5
-	INSTRUCTION,			// 6
-	CREATE_PROCESS_MEMORY,	// 7
-	END_PROCCESS_MEMORY,		// 8
-	COMPACT_MEMORY,		// 9
-	SEG_FAULT,			// 10
-	OK_INSTRUCTION,		// 11
-	CREATE_SEGMENT_MEMORY,	// 12
-	DELETE_SEGMENT_MEMORY, 	// 13
-	NO_SPACE_LEFT,	 	// 14
-	MEMORY_BUFFER_R		// 15
+    SERIALIZED,             // 0
+    MESSAGE_OK,             // 1
+    MESSAGE_FLAW,           // 2
+    MESSAGE_PCB_FINISHED,   // 3
+    MESSAGE_BUSY,           // 4
+    INSTRUCTIONS,           // 5
+    EXECUTION_CONTEXT,      // 6
+    INSTRUCTION,            // 7
+    CREATE_PROCESS_MEMORY,  // 8
+    END_PROCCESS_MEMORY,    // 9
+    COMPACT_MEMORY,         // 10
+    SEG_FAULT,              // 11
+    OK_INSTRUCTION,         // 12
+    CREATE_SEGMENT_MEMORY,  // 13
+    DELETE_SEGMENT_MEMORY,  // 14
+    NO_SPACE_LEFT,          // 15
+    MEMORY_BUFFER_R         // 16
 } t_package_type;
 
 // Crea y retorna un paquete con el código de operación especificado.
