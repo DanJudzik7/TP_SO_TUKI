@@ -43,7 +43,7 @@ int instruction_handler_filesystem() {
         list_add(instruction->args, argument2);*/
         char* argument4 = strdup("20");//TAMANIO LEER/ESCRIBIR
         list_add(instruction->args, argument4);
-        char* argument5 = strdup("12");//POSICION
+        char* argument5 = strdup("15");//POSICION
         list_add(instruction->args, argument5);//POSICION
         printf("El código de operación es: %i\n", instruction->op_code);
         switch (instruction->op_code) {
@@ -112,8 +112,8 @@ char read_file(t_instruction* instruction){
     int size_read;
     char* str_read;
     if(instruction->op_code==F_READ){
-        char* size_read_char = list_get(instruction->args, 1); // obtenemos la cadena que representa el tamaño
-        size_read = atoi(size_read_char); // convertimos esa cadena a un entero
+        char* size_read_char = list_get(instruction->args, 1);
+        size_read = atoi(size_read_char);
         str_read = calloc(size_read + 1, sizeof(char)); 
         for(int i = 0; i < 240; i++) {
             char c = config_fs.block_file[i];
@@ -125,28 +125,23 @@ char read_file(t_instruction* instruction){
     }
     char* file_name = list_get(instruction->args, 0);
     char* position_read_char = list_get(instruction->args, 2);
-
-    // Convirtiéndolos a int
     int position_read = atoi(position_read_char);
-
     char* directorio = getcwd(NULL, 0);
-	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio,config_fs.PATH_FCB, file_name);
+    char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio,config_fs.PATH_FCB, file_name);
     t_config* fcb_data = config_create(full_file_path);
-
     int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
     int* PUNTERO_DIRECTO = malloc(sizeof(int));
     *PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
     t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
     list_add_in_index(pi_list, 0, PUNTERO_DIRECTO);
-
     int position_initial_block = (position_read / config_fs.block_size);
     int blocks_need = (size_read + config_fs.block_size - 1) / config_fs.block_size;
     int positions_to_read=position_read;
     int positions_readed=0;
     for (int i = position_initial_block; i <= position_initial_block + blocks_need ; i++) {
-        int block_number = *(int*) list_get(pi_list, i);  // obtener el número del bloque
-        int start_position_in_block = block_number * config_fs.block_size;  // posición inicial en el bloque //16
-        int end_position_in_block = start_position_in_block + config_fs.block_size;  // posición final en el bloque //32
+        int block_number = *(int*) list_get(pi_list, i);
+        int start_position_in_block = block_number * config_fs.block_size;  
+        int end_position_in_block = start_position_in_block + config_fs.block_size;
         int start_position_to_read=(positions_to_read-(i*config_fs.block_size))+start_position_in_block;
         for(int j=0; j<(end_position_in_block-start_position_to_read);j++){
             if(instruction->op_code==F_READ){
@@ -177,6 +172,13 @@ char read_file(t_instruction* instruction){
             char c = config_fs.block_file[i];
             printf("Valor en la posición %d: %c\n", i, c);
         }
+    }
+    free(directorio);
+    free(full_file_path);
+    config_destroy(fcb_data);
+    list_destroy_and_destroy_elements(pi_list, free);
+    if(instruction->op_code==F_READ){
+        free(str_read);
     }
     return *str_read;
 }
