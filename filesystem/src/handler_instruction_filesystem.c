@@ -37,16 +37,15 @@ int instruction_handler_filesystem() {
         //instruction->op_code = F_WRITE;
 
         instruction->args = list_create();
-        char* argument = strdup("prueba2");
+        char* argument = strdup("prueba1");
         list_add(instruction->args, argument);
         /*char* argument2 = strdup("64");//TAMANIO TRUNCATE
         list_add(instruction->args, argument2);*/
-        char* argument4 = strdup("18");//TAMANIO LEER/ESCRIBIR
+        char* argument4 = strdup("20");//TAMANIO LEER/ESCRIBIR
         list_add(instruction->args, argument4);
-        char* argument5 = strdup("15");//POSICION
+        char* argument5 = strdup("12");//POSICION
         list_add(instruction->args, argument5);//POSICION
         printf("El código de operación es: %i\n", instruction->op_code);
-
         switch (instruction->op_code) {
             case F_READ:
                 printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
@@ -106,37 +105,6 @@ int instruction_handler_filesystem() {
 }
 
 char read_file(t_instruction* instruction){
-    /*config_fs.block_file[156] = 'a';
-    config_fs.block_file[157] = 'b';
-    config_fs.block_file[158] = 'c';
-    config_fs.block_file[159] = 'd';
-    config_fs.block_file[128] = 'e';
-    config_fs.block_file[129] = 'f';
-    config_fs.block_file[130] = 'g';
-    config_fs.block_file[131] = 'h';
-    config_fs.block_file[132] = 'i';
-    config_fs.block_file[133] = 'j';
-    config_fs.block_file[134] = 'k';
-    config_fs.block_file[135] = 'l';
-    config_fs.block_file[136] = 'm';
-    config_fs.block_file[137] = 'n';
-    config_fs.block_file[138] = 'o';
-    config_fs.block_file[139] = 'p';
-    config_fs.block_file[140] = 'q';
-    config_fs.block_file[141] = 'r';
-    config_fs.block_file[142] = 's';
-    config_fs.block_file[143] = 't';
-    config_fs.block_file[160] = 'u';
-    config_fs.block_file[161] = 'v';
-    config_fs.block_file[162] = 'w';
-    config_fs.block_file[163] = 'x';
-    config_fs.block_file[164] = 'y';
-    config_fs.block_file[165] = 'z';*/
-    
-    for(int i = 0; i < 240; i++) {
-        char c = config_fs.block_file[i];
-        printf("Valor en la posición %d: %c\n", i, c);
-    }
     if (list_size(instruction->args) < 1) {
         log_error(config_fs.logger, "Instrucción sin argumentos, se esperaba al menos uno");
         abort();
@@ -144,11 +112,15 @@ char read_file(t_instruction* instruction){
     int size_read;
     char* str_read;
     if(instruction->op_code==F_READ){
-        str_read = calloc(size_read + 1, sizeof(char));
-        char* size_read_char = list_get(instruction->args, 1);
-        size_read = atoi(size_read_char);
+        char* size_read_char = list_get(instruction->args, 1); // obtenemos la cadena que representa el tamaño
+        size_read = atoi(size_read_char); // convertimos esa cadena a un entero
+        str_read = calloc(size_read + 1, sizeof(char)); 
+        for(int i = 0; i < 240; i++) {
+            char c = config_fs.block_file[i];
+            printf("Valor en la posición %d: %c\n", i, c);
+        }
     }else{
-        str_read = "ProbandoEsto131417";
+        str_read = "SonyPlaystation5";
         size_read = (int) strlen(str_read);
     }
     char* file_name = list_get(instruction->args, 0);
@@ -161,29 +133,29 @@ char read_file(t_instruction* instruction){
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio,config_fs.PATH_FCB, file_name);
     t_config* fcb_data = config_create(full_file_path);
 
-    int PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
     int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
+    int* PUNTERO_DIRECTO = malloc(sizeof(int));
+    *PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
     t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
     list_add_in_index(pi_list, 0, PUNTERO_DIRECTO);
-    int list_length = list_size(pi_list);
+
     int position_initial_block = (position_read / config_fs.block_size);
     int blocks_need = (size_read + config_fs.block_size - 1) / config_fs.block_size;
     int positions_to_read=position_read;
     int positions_readed=0;
-    for (int i = 0; i < list_length; i++) {
-        int current_element = list_get(pi_list, i);  // obtén el elemento en el índice actual
-        // ahora puedes hacer algo con current_element, como imprimirlo
-        printf("%d\n", current_element);
-    }
     for (int i = position_initial_block; i <= position_initial_block + blocks_need ; i++) {
-        int block_number = (int) list_get(pi_list, i);  // obtener el número del bloque
+        int block_number = *(int*) list_get(pi_list, i);  // obtener el número del bloque
         int start_position_in_block = block_number * config_fs.block_size;  // posición inicial en el bloque //16
         int end_position_in_block = start_position_in_block + config_fs.block_size;  // posición final en el bloque //32
         int start_position_to_read=(positions_to_read-(i*config_fs.block_size))+start_position_in_block;
         for(int j=0; j<(end_position_in_block-start_position_to_read);j++){
             if(instruction->op_code==F_READ){
                 char data = config_fs.block_file[start_position_to_read+j];
-                str_read[positions_readed] = data;
+                if (data == '\0') {
+                    str_read[positions_readed] = ' ';  
+                } else {
+                    str_read[positions_readed] = data;
+                }
             }else{
                 config_fs.block_file[start_position_to_read+j]=str_read[positions_readed];
             }
@@ -247,14 +219,14 @@ void resize_block(t_config* fcb_data,  int* file_size){
             pi_position = next_bit_position();
             int* pi_pos_ptr = malloc(sizeof(int));
             *pi_pos_ptr = pi_position;
-            list_add(pi_list, *pi_pos_ptr);
+            list_add(pi_list, pi_pos_ptr);
         }
         set_bf_ip(PUNTERO_INDIRECTO,pi_list);
     } else if ((count_pi_need) < list_length) {
         diferencia = list_length-count_pi_need ;
         for(int i = 0; i < diferencia; i++) {
             int index = (list_size_value - i - 1);
-            int ip_eliminar = (int) list_get(pi_list, index);
+            int ip_eliminar = *((int*) list_get(pi_list, index));
             bitarray_clean_bit(config_fs.bitmap, ip_eliminar);
             for(int i = (ip_eliminar)*config_fs.block_size; i < ((ip_eliminar)*config_fs.block_size) + config_fs.block_size; i++) {
                 config_fs.block_file[i] = '\0';
@@ -272,8 +244,8 @@ void resize_block(t_config* fcb_data,  int* file_size){
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list){
     int list_length = list_size(pi_list);
     for(int i = 0; i < list_length; i++) {
-        int pi = list_get(pi_list, i);
-        uint32_t converted_pi = (uint32_t) pi;
+        int* pi_ptr = list_get(pi_list, i);
+        uint32_t converted_pi = (uint32_t) *pi_ptr; // Aquí se desreferencia el puntero y se convierte el valor a uint32_t.
         memcpy(config_fs.block_file + (PUNTERO_INDIRECTO*config_fs.block_size) + i * sizeof(uint32_t), &converted_pi, sizeof(uint32_t));
     }
 }
@@ -285,7 +257,7 @@ t_list* get_bf_ip(int PUNTERO_INDIRECTO){
         memcpy(number, config_fs.block_file + i, sizeof(uint32_t));
         //printf("Valor en la posición %d: %u\n", i, *number);
         if(*number!=0){
-            list_add(pi_list, *number);
+            list_add(pi_list, number);
         }
     }
     return pi_list;
