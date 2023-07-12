@@ -76,6 +76,12 @@ typedef struct segment{
 	int s_id;
 } segment;
 
+//Direccion fisica
+typedef struct physical_address {
+    int segment;
+    int offset;
+} t_physical_address;
+
 typedef struct segment_read_write {
 	uint32_t s_id;
     uint32_t offset;

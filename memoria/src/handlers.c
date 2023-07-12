@@ -12,12 +12,30 @@ void handle_fs(int socket_fs, memory_structure* memory_structure) {
 			break;
 		}
 
-		segment_read_write* segment_rw = deserialize_segment_read_write(package_fs);
-
 		switch (package_fs->type) {
-			case F_READ:
+			case F_WRITE:
+
+				//Deserializar 
+				t_instruction* instructions = s_malloc(sizeof(t_instruction));
+				deserialize_single_instruction(package_fs,instructions);
+				// ->NOMBRE ARCHIVO -> PID -> TAMAÑO -> OFFSET -> S_ID
+				fs_package* fs_received = s_malloc(sizeof(fs_package));
+				fs_received->name = list_get(instructions,0);
+				fs_received->pid = list_get(instructions,1);
+				fs_received->size = list_get(instructions,2);
+				fs_received->offset = list_get(instructions,3);
+				fs_received->s_id = list_get(instructions,4);
+				
+				// Imprimir los valores deserializados
+				printf("Nombre de archivo: %s\n", fs_received->name);
+				printf("Tamaño: %d\n", fs_received->size);
+				printf("Posición: %d\n", fs_received->offset);
+				printf("s_id: %d\n", fs_received->s_id);
+
+				//segment_read_write* segment_rw = deserialize_segment_read_write(package_fs);
+
 				sleep(memory_shared.mem_delay);
-				char* buffer = read_memory(segment_rw->s_id, segment_rw->offset, segment_rw->size, memory_structure, segment_rw->pid);
+				char* buffer = read_memory(fs_received->s_id, fs_received->offset, fs_received->size, memory_structure, fs_received->pid);
 				if (buffer == NULL) {
 					// devolver seg_fault
 					socket_send(socket_fs, package_new(SEG_FAULT));
@@ -26,7 +44,7 @@ void handle_fs(int socket_fs, memory_structure* memory_structure) {
 					socket_send(socket_fs, serialize_message(buffer, false));
 				}
 				break;
-			case F_WRITE:
+			/*case F_READ:
 				sleep(memory_shared.mem_delay);
 				pthread_mutex_lock(&mutex_write);
 				if (write_memory(segment_rw->s_id, segment_rw->offset, segment_rw->size, segment_rw->buffer, memory_structure, segment_rw->pid)) {
@@ -36,7 +54,7 @@ void handle_fs(int socket_fs, memory_structure* memory_structure) {
 				}
 				pthread_mutex_unlock(&mutex_write);
 				break;
-
+			*/
 			default:
 				log_error(memory_config.logger, "El proceso recibió algo indebido, finalizando modulo");
 				exit(1);

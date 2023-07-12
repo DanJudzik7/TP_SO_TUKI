@@ -7,19 +7,19 @@ int main(int argc, char** argv) {
 	config_fs.config = start_config("filesystem");
 	log_warning(config_fs.logger, "Iniciando el filesystem");
 
-	char* port = config_get_string_value(config_fs.config, "PUERTO_ESCUCHA");	
+    char* port = config_get_string_value(config_fs.config, "PUERTO_ESCUCHA");
     config_fs.PATH_SUPERBLOQUE = config_get_string_value(config_fs.config, "PATH_SUPERBLOQUE");
     config_fs.PATH_BITMAP = config_get_string_value(config_fs.config, "PATH_BITMAP");
     config_fs.PATH_BLOQUES = config_get_string_value(config_fs.config, "PATH_BLOQUES");
     config_fs.PATH_FCB = config_get_string_value(config_fs.config, "PATH_FCB");
-    /*char* ip = config_get_string_value(config_fs.config, "IP_MEMORIA");
-	char* port = config_get_string_value(config_fs.config, "PUERTO_MEMORIA");
-	config_fs.socket_memoria = socket_initialize(ip, port);
+    /*char* ip_memory = config_get_string_value(config_fs.config, "IP_MEMORIA");
+	char* port_memory = config_get_string_value(config_fs.config, "PUERTO_MEMORIA");
+	config_fs.socket_memoria = socket_initialize(ip_memory, port_memory);
 	if (config_fs.socket_memoria == -1) {
-		log_error(config_fs.logger, "No se pudo conectar a memoria con %s:%s", ip, port);
+		log_error(config_fs.logger, "No se pudo conectar a memoria con %s:%s", ip_memory, port_memory);
 		exit(EXIT_FAILURE);
-	}
-	log_warning(config_fs.logger, "Conectado a kernel en %s:%s", ip, port);*/
+	}*/
+	//log_warning(config_fs.logger, "Conectado a memoria en %s:%s", ip_memory, port_memory);
 	
     int socket_fs = socket_initialize_server(port); // Inicializo el socket en el puerto cargado por la config
 	log_warning(config_fs.logger, "Socket %d de servidor inicializado en puerto %s", socket_fs, port);

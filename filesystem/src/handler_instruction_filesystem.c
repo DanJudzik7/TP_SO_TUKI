@@ -29,22 +29,26 @@ int instruction_handler_filesystem() {
 
         //t_instruction* instruction = s_malloc(sizeof(t_instruction));
         //deserialize_single_instruction(package, instruction);
-        t_instruction* instruction = malloc(sizeof(t_instruction));
-        //instruction->op_code = F_OPEN;
-        //instruction->op_code = F_CLOSE;
-        //instruction->op_code = F_TRUNCATE;
-        instruction->op_code = F_READ;
-        //instruction->op_code = F_WRITE;
+        t_instruction* instruction_new = malloc(sizeof(t_instruction));
+        instruction_new->op_code = F_OPEN;
+        //instruction_new->op_code = F_CLOSE;
+        //instruction_new->op_code = F_TRUNCATE;
+        //instruction_new->op_code = F_READ;
+        //instruction_new->op_code = F_WRITE;
 
-        instruction->args = list_create();
-        char* argument = strdup("prueba");
-        list_add(instruction->args, argument);
+        instruction_new->args = list_create();
+        char* argument = strdup("prueba3");
+        list_add(instruction_new->args, argument);
         /*char* argument2 = strdup("64");//TAMANIO TRUNCATE
-        list_add(instruction->args, argument2);*/
+        list_add(instruction->args, argument2); 
         char* argument4 = strdup("32");//TAMANIO LEER/ESCRIBIR
         list_add(instruction->args, argument4);
         char* argument5 = strdup("15");//POSICION
-        list_add(instruction->args, argument5);//POSICION
+        list_add(instruction->args, argument5);//POSICION*/  
+
+        t_package* packaged_send = serialize_instruction_test(instruction_new);
+        t_instruction* instruction = deserialize_instruction_test(packaged_send);
+        
         printf("El código de operación es: %i\n", instruction->op_code);
         switch (instruction->op_code) {
             case F_READ:

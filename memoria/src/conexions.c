@@ -4,13 +4,14 @@
 void listen_modules(int socket_memory,memory_structure* memory_structure){
 
     int fs = listen_fs(socket_memory);
-    int cpu = listen_cpu(socket_memory);
-    int kernel = listen_kernel(socket_memory);
+    //int cpu = listen_cpu(socket_memory);
+    //int kernel = listen_kernel(socket_memory);
 
     pthread_t thread_filesystem;
     pthread_create(&thread_filesystem, NULL, (void*)handle_fs, &fs);
 	pthread_detach(thread_filesystem);
 
+   /*
     pthread_t thread_cpu;
     pthread_create(&thread_cpu, NULL, (void*)handle_cpu,  &cpu);
 	pthread_detach(thread_cpu);
@@ -18,7 +19,7 @@ void listen_modules(int socket_memory,memory_structure* memory_structure){
     pthread_t thread_k;
     pthread_create(&thread_k, NULL, (void*)handle_kernel, &kernel);
 	pthread_detach(thread_k);
-   
+   */
 }
 
 int listen_fs(int socket_memory){

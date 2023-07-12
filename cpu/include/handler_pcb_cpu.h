@@ -7,10 +7,7 @@
 #include "shared_package.h"
 #include <math.h>
 
-typedef struct physical_address {
-    int segment;
-    int offset;
-} t_physical_address;
+
 typedef struct segment{
 	void* base;
 	int offset;

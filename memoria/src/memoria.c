@@ -41,13 +41,14 @@ int main() {
 	log_info(memory_config.logger, "Memoria inicializada correctamente");
 	printf("\nNuestro Heap de memoria ram arranca en: %p\n\n",  memory_structure->segment_zero->base);
 	// Creo los hilos 
-	//listen_modules(socket_memory,memory_structure);
+	listen_modules(socket_memory,memory_structure);
 	
  	//test_create_del_segm(memory_structure, memory);
-	test_compact(memory_structure, memory);
+	//test_compact(memory_structure, memory);
 	//test_rw(memory_structure, memory);
 
 	//test_buffer_memory();
+	
 
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);
