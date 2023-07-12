@@ -18,5 +18,6 @@ void set_bit_position(t_config* fcb_data, int* file_size);
 void resize_block(t_config* fcb_data, int* file_size);
 t_list* get_bf_ip(int PUNTERO_INDIRECTO);
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list);
+char read_file(t_instruction* instruction);
 
 #endif
