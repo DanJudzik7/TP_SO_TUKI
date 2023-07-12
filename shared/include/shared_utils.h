@@ -117,10 +117,6 @@ typedef enum execution_context_index {
 
 typedef struct config_cpu {
 	t_log* logger;
-<<<<<<< HEAD
-	sem_t flag_dislodge;
-=======
->>>>>>> filesystem
 	int connection_kernel;
 	int max_segment_size;
 } configuration_cpu;

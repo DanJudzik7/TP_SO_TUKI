@@ -47,7 +47,7 @@ int main() {
 	test_compact(memory_structure, memory);
 	//test_rw(memory_structure, memory);
 
-	test_buffer_memory();
+	//test_buffer_memory();
 
 	log_destroy(memory_config.logger);
 	config_destroy(memory_config.config);

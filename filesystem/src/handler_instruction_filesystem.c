@@ -37,11 +37,11 @@ int instruction_handler_filesystem() {
         //instruction->op_code = F_WRITE;
 
         instruction->args = list_create();
-        char* argument = strdup("prueba1");
+        char* argument = strdup("prueba");
         list_add(instruction->args, argument);
         /*char* argument2 = strdup("64");//TAMANIO TRUNCATE
         list_add(instruction->args, argument2);*/
-        char* argument4 = strdup("20");//TAMANIO LEER/ESCRIBIR
+        char* argument4 = strdup("32");//TAMANIO LEER/ESCRIBIR
         list_add(instruction->args, argument4);
         char* argument5 = strdup("15");//POSICION
         list_add(instruction->args, argument5);//POSICION
@@ -120,7 +120,7 @@ char read_file(t_instruction* instruction){
             printf("Valor en la posición %d: %c\n", i, c);
         }
     }else{
-        str_read = "SonyPlaystation5";
+        str_read = "SonyPlaystation5SonyPlaystation4";
         size_read = (int) strlen(str_read);
     }
     char* file_name = list_get(instruction->args, 0);

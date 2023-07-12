@@ -2,6 +2,11 @@
 
 configuration_filesystem config_fs;
 
+int main(int argc, char** argv) {
+    config_fs.logger = start_logger("filesystem");
+	config_fs.config = start_config("filesystem");
+	log_warning(config_fs.logger, "Iniciando el filesystem");
+
 	char* port = config_get_string_value(config_fs.config, "PUERTO_ESCUCHA");	
     config_fs.PATH_SUPERBLOQUE = config_get_string_value(config_fs.config, "PATH_SUPERBLOQUE");
     config_fs.PATH_BITMAP = config_get_string_value(config_fs.config, "PATH_BITMAP");
