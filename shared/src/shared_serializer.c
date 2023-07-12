@@ -72,6 +72,7 @@ uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset)
 	return pc_value_32;
 }
 
+
 t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
 	t_package* package = package_new(is_ec ? EC_INSTRUCTIONS : INSTRUCTIONS);
 	// Recorre la cola de instrucciones y las serializa
@@ -102,22 +103,18 @@ void deserialize_instructions(t_package* package, t_queue* instructions) {
 	}
 }
 
-t_package* serialize_memory_buffer(uint32_t pid ,char* buffer) {
-	uint64_t size4 = 4;
-	t_package* package = package_new(MEMORY_BUFFER_R);
-	package_add(package, (void*)&pid, &size4);
-	package_write(package, buffer);
-
-	return package;
-}
-
-memory_buffer* deserialize_memory_buffer(t_package* package) {
-	memory_buffer *mem_buffer = s_malloc(sizeof(memory_buffer));
+void deserialize_single_instruction(t_package* package, t_instruction* instruction) {
 	uint64_t offset = 0;
-	package_decode_buffer(package->buffer, mem_buffer->pid, sizeof(uint32_t));
-	mem_buffer->buffer = package_decode_string(package->buffer, &offset);
-
-	return mem_buffer;
+	// Va buscando todas las instrucciones
+	while (package_decode_isset(package, offset)) {
+		t_package* instruction_package = package_decode(package->buffer, &offset);
+		instruction->op_code = instruction_package->type;
+		instruction->args = list_create();
+		uint64_t offset_list = 0;
+		// Carga los args de package_add
+		while (package_decode_isset(instruction_package, offset_list)) list_add(instruction->args, package_decode_string(instruction_package->buffer, &offset_list));
+		package_destroy(instruction_package);
+	}
 }
 
 t_package* serialize_cpu_registers(cpu_register* registers) {

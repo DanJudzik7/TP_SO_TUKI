@@ -21,7 +21,16 @@ t_log* start_logger(char* module) {
 	free(path_log);
 	return logger;
 }
-
+char* get_full_path(char* path) {
+	char* directorio = getcwd(NULL, 0);
+	if (directorio == NULL) {
+		printf("Error al obtener el directorio actual\n");
+		abort();
+	}
+	char* ruta_file = string_from_format("%s/%s", directorio, path);
+	free(directorio);
+	return ruta_file;
+}
 char* get_config_type(char* module, char* file_type) {
 	char* directorio = getcwd(NULL, 0);
 	if (directorio == NULL) {

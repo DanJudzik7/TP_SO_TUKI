@@ -8,6 +8,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/string.h>
+#include <commons/bitarray.h>
 #include <semaphore.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -116,12 +117,30 @@ typedef enum execution_context_index {
 
 typedef struct config_cpu {
 	t_log* logger;
+<<<<<<< HEAD
 	sem_t flag_dislodge;
+=======
+>>>>>>> filesystem
 	int connection_kernel;
 	int max_segment_size;
 } configuration_cpu;
 
-typedef struct memory_config {
+typedef struct config_filesystem {
+	t_log* logger;
+	t_config* config;
+	t_bitarray* bitmap;
+	char* block_file;
+	int connection_kernel;
+	int socket_memoria;
+	int block_size;
+	int block_count;
+	char* PATH_SUPERBLOQUE;
+	char* PATH_BITMAP;
+	char* PATH_BLOQUES;
+	char* PATH_FCB;
+} configuration_filesystem;
+
+typedef struct config_memory {
 	t_log* logger;
 	t_config* config;
 	char* port;
@@ -159,6 +178,9 @@ t_log* start_logger(char* module);
 
 // Retorna el valor de una key de un archivo de configuración
 char* get_config_type(char* module, char* file_type);
+
+// Retorna el valor del path completo a un archivo
+char* get_full_path(char* path);
 
 // Safe Memory Allocation. Crashea si no hay más memoria.
 void* s_malloc(size_t size);
