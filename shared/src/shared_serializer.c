@@ -288,46 +288,30 @@ void serialize_package(t_package* package) {
 						//////////////////////////// 	ZONA TEST 	///////////////////////////
 t_package* serialize_instruction_test(t_instruction* instruction) {
     t_package* package = malloc(sizeof(t_package));
-    
-    // Primero vamos a serializar los argumentos, porque su tamaño es variable
-    // Primero vamos a poner en el buffer el tamaño de la lista de argumentos
     int args_count = list_size(instruction->args);
-    int total_size = sizeof(int) + sizeof(op_code) + args_count * sizeof(int);  // tamaño total del buffer
+    int total_size = sizeof(int) + sizeof(op_code) + args_count * sizeof(int); 
 
     for (int i = 0; i < args_count; i++) {
         char* arg = list_get(instruction->args, i);
-        total_size += strlen(arg) + 1;  // sumamos el tamaño del argumento al tamaño total
+        total_size += strlen(arg) + 1; 
     }
-
-    // Creamos el buffer y empezamos a llenarlo
     void* buffer = malloc(total_size);
-    int offset = 0;  // usamos esto para saber dónde escribir en el buffer
+    int offset = 0;
 
-    // Copiamos el op_code en el buffer
     memcpy(buffer + offset, &(instruction->op_code), sizeof(op_code));
     offset += sizeof(op_code);
-
-    // Copiamos la cantidad de argumentos en el buffer
     memcpy(buffer + offset, &args_count, sizeof(int));
     offset += sizeof(int);
-
-    // Copiamos cada argumento en el buffer
     for (int i = 0; i < args_count; i++) {
         char* arg = list_get(instruction->args, i);
         int arg_size = strlen(arg) + 1;
-
-        // Copiamos el tamaño del argumento en el buffer
         memcpy(buffer + offset, &arg_size, sizeof(int));
         offset += sizeof(int);
-
-        // Copiamos el argumento en sí en el buffer
         memcpy(buffer + offset, arg, arg_size);
         offset += arg_size;
     }
-
-    // Ahora que el buffer está lleno, podemos crear el paquete
     package->size = total_size;
-    package->type = instruction->op_code;  // Asumo que el op_code sirve como un tipo de paquete
+    package->type = instruction->op_code;
     package->buffer = buffer;
 
     return package;
@@ -335,37 +319,20 @@ t_package* serialize_instruction_test(t_instruction* instruction) {
 
 t_instruction* deserialize_instruction_test(t_package* package) {
     t_instruction* instruction = malloc(sizeof(t_instruction));
-    
-    // Creamos un offset para saber dónde leer en el buffer
     int offset = 0;
-
-    // Recuperamos el op_code del buffer
     memcpy(&(instruction->op_code), package->buffer + offset, sizeof(op_code));
     offset += sizeof(op_code);
-
-    // Recuperamos la cantidad de argumentos del buffer
     int args_count;
     memcpy(&args_count, package->buffer + offset, sizeof(int));
     offset += sizeof(int);
-
-    // Creamos la lista de argumentos
     instruction->args = list_create();
-
-    // Recuperamos cada argumento del buffer
     for (int i = 0; i < args_count; i++) {
-        // Recuperamos el tamaño del argumento
         int arg_size;
         memcpy(&arg_size, package->buffer + offset, sizeof(int));
         offset += sizeof(int);
-
-        // Creamos espacio para el argumento
         char* arg = malloc(arg_size);
-
-        // Recuperamos el argumento
         memcpy(arg, package->buffer + offset, arg_size);
         offset += arg_size;
-
-        // Añadimos el argumento a la lista de argumentos
         list_add(instruction->args, arg);
     }
 

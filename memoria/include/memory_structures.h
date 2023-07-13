@@ -5,7 +5,6 @@
 #include "shared_socket.h"
 
 // ----------------------------- STRUCTS -----------------------------
-
 // Estructura para cada agujero
 typedef struct hole{
 	void* base;
@@ -31,6 +30,10 @@ typedef struct memory_structure{
 	t_list* ram; // La memoria en si  
 } memory_structure;
 
+typedef struct thread{
+	int socket;
+	memory_structure* mem_structure;
+} thread;
 
 
 #endif

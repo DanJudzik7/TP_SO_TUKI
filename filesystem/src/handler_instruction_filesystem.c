@@ -30,15 +30,19 @@ int instruction_handler_filesystem() {
         //t_instruction* instruction = s_malloc(sizeof(t_instruction));
         //deserialize_single_instruction(package, instruction);
         t_instruction* instruction_new = malloc(sizeof(t_instruction));
-        instruction_new->op_code = F_OPEN;
+        //instruction_new->op_code = F_OPEN;
         //instruction_new->op_code = F_CLOSE;
         //instruction_new->op_code = F_TRUNCATE;
         //instruction_new->op_code = F_READ;
-        //instruction_new->op_code = F_WRITE;
+        instruction_new->op_code = F_WRITE;
 
         instruction_new->args = list_create();
-        char* argument = strdup("prueba3");
-        list_add(instruction_new->args, argument);
+        /*char* argument = strdup("prueba3");
+        list_add(instruction_new->args, argument);*/
+        char* argument1 = strdup("123");
+        list_add(instruction_new->args, argument1);
+        char* argument2 = strdup("456");
+        list_add(instruction_new->args, argument2);
         /*char* argument2 = strdup("64");//TAMANIO TRUNCATE
         list_add(instruction->args, argument2); 
         char* argument4 = strdup("32");//TAMANIO LEER/ESCRIBIR
@@ -47,32 +51,78 @@ int instruction_handler_filesystem() {
         list_add(instruction->args, argument5);//POSICION*/  
 
         t_package* packaged_send = serialize_instruction_test(instruction_new);
-        t_instruction* instruction = deserialize_instruction_test(packaged_send);
+
+        if (!socket_send(config_fs.socket_memoria, serialize_instruction_test(instruction_new))) {
+            log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
+        }else{
+            log_warning(config_fs.logger, "OK instrucciones al memoria");
+        }
+        t_package* package_recibe_memory = socket_receive(config_fs.socket_memoria);
+        char* str_write=deserialize_message(package_recibe_memory);
+
+        log_info(config_fs.logger, "El valor de la cadena de memoria es: %s", str_write);
+
+
+
+        /*t_instruction* instruction = deserialize_instruction_test(packaged_send);
         
         printf("El código de operación es: %i\n", instruction->op_code);
         switch (instruction->op_code) {
             case F_READ:
                 printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
+                /*
+                    leer recibo: NAME(0) tamaño_leer(1) PID(2) S_ID(3) OFFSET(4) info_escribir(5)
+                    miCharPuntero_r=read_file(posicion, tamanio)
+                    envio_memoria(S_ID(2) OFFSET(3)info_escribir(4) )
+                
                 char* miCharPuntero_r = malloc(sizeof(char));
                 *miCharPuntero_r = read_file(instruction);
-                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPEN_FILE", false))) {
-                    printf("Error al enviar el paquete\n");
-                    return -1;
+                list_add(instruction->args, miCharPuntero_r);
+                if (!socket_send(config_fs.socket_memoria, serialize_instruction_test(instruction))) {
+                    log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
                 }
+                t_package* package_recive_memory = socket_receive(config_fs.socket_memoria);
+                char* str_write=deserialize_message(package_recibe_memory);
+                if(*str_write=="OK_OPERATION"){
+                    if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPERATION", false))) {
+                        printf("Error al enviar el paquete\n");
+                        abort();
+                    }
+                }else{
+                    abort();
+                }
+                
+                list_destroy(instruction);
+                free(instruction);
+                free(miCharPuntero_r);
                 break;
             case F_WRITE:
                 printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
-                char* miCharPuntero_w = malloc(sizeof(char));
-                *miCharPuntero_w = read_file(instruction);
-                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPEN_FILE", false))) {
+                /*
+                    escribir recibo: NAME(0) posicion(1) PID(2) tamaño_leer(3) S_ID(4) OFFSET(5)
+                    miCharPuntero_w=consulto_memoria(tamaño_leer(2) S_ID(3) OFFSET(4))
+                    escribir_info(posicion, info)
+                    y voy a escribir info en la posicion que recibi
+                
+                if (!socket_send(config_fs.socket_memoria, serialize_instruction_test(instruction))) {
+                    log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
+                }
+                t_package* package_recive_memory = socket_receive(config_fs.socket_memoria);
+                char* str_write=deserialize_message(package_recive_memory);
+                list_add(instruction->args, str_write);
+                char result_write = read_file(instruction);
+                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPERATION", false))) {
                     printf("Error al enviar el paquete\n");
                     return -1;
                 }
+                list_destroy(instruction);
+                free(instruction);
+                free(result_write);
                 break;
             case F_OPEN:
                 printf("RECIBIMOS UNA INSTRUCCIÓN DE ABRIR ARCHIVO\n");
                 open_file(instruction);
-                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPEN_FILE", false))) {
+                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPERATION", false))) {
                     printf("Error al enviar el paquete\n");
                     return -1;
                 }
@@ -80,7 +130,7 @@ int instruction_handler_filesystem() {
             case F_CLOSE:
                 printf("RECIBIMOS UNA INSTRUCCIÓN DE CERRAR UN ARCHIVO\n");
                 close_file(instruction);
-                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_CLOSE_FILE", false))) {
+                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPERATION", false))) {
                     printf("Error al enviar el paquete\n");
                     return -1;
                 }
@@ -93,7 +143,7 @@ int instruction_handler_filesystem() {
                     memcpy(number, config_fs.block_file + i, sizeof(uint32_t));  // remove '*'
                     printf("Valor en la posición %d: %u\n", i, *number);
                 }
-                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_TRUNCATE_FILE", false))) {
+                if (!socket_send(config_fs.connection_kernel, serialize_message("OK_OPERATION", false))) {
                     printf("Error al enviar el paquete\n");
                     return -1;
                 }
@@ -103,7 +153,7 @@ int instruction_handler_filesystem() {
                 return -1;
         }
         //free(package);
-        free(instruction);
+        free(instruction);*/
     //}
     return 0;
 }
@@ -116,8 +166,7 @@ char read_file(t_instruction* instruction){
     int size_read;
     char* str_read;
     if(instruction->op_code==F_READ){
-        char* size_read_char = list_get(instruction->args, 1);
-        size_read = atoi(size_read_char);
+        size_read = atoi(list_get(instruction->args, 1));
         str_read = calloc(size_read + 1, sizeof(char)); 
         for(int i = 0; i < 240; i++) {
             char c = config_fs.block_file[i];
@@ -128,8 +177,7 @@ char read_file(t_instruction* instruction){
         size_read = (int) strlen(str_read);
     }
     char* file_name = list_get(instruction->args, 0);
-    char* position_read_char = list_get(instruction->args, 2);
-    int position_read = atoi(position_read_char);
+    int position_read = atoi(list_get(instruction->args, 2));
     char* directorio = getcwd(NULL, 0);
     char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio,config_fs.PATH_FCB, file_name);
     t_config* fcb_data = config_create(full_file_path);

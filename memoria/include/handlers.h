@@ -14,7 +14,7 @@ typedef struct fs_package{
        uint32_t offset;
 } fs_package;	
 
-void handle_fs(int socket_fs,memory_structure* structures);
-void handle_cpu(int socket_cpu,memory_structure* structures);
-void handle_kernel(int socket_kernel,memory_structure* structures);
+void handle_fs(thread* thread);
+void handle_cpu(thread* thread);
+void handle_kernel(thread* thread);
 #endif

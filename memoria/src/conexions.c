@@ -3,21 +3,31 @@
 
 void listen_modules(int socket_memory,memory_structure* memory_structure){
 
-    int fs = listen_fs(socket_memory);
+    //int fs = listen_fs(socket_memory);
     //int cpu = listen_cpu(socket_memory);
     //int kernel = listen_kernel(socket_memory);
-
+    
+    thread* fs_thread = s_malloc(sizeof(thread));
+    fs_thread->socket = listen_fs(socket_memory);
+    printf("socket fs: %d\n",fs_thread->socket);
+    fs_thread->mem_structure = memory_structure;
     pthread_t thread_filesystem;
-    pthread_create(&thread_filesystem, NULL, (void*)handle_fs, &fs);
-	pthread_detach(thread_filesystem);
-
+    pthread_create(&thread_filesystem, NULL, (void*)handle_fs, fs_thread);
+	pthread_join(thread_filesystem,NULL);
+   
    /*
+    thread* cpu_thread = s_malloc(sizeof(thread));
+    cpu_thread->socket = cpu;
+    cpu_thread->memory_structure = memory_structure;
     pthread_t thread_cpu;
-    pthread_create(&thread_cpu, NULL, (void*)handle_cpu,  &cpu);
+    pthread_create(&thread_cpu, NULL, (void*)handle_cpu,  cpu_thread);
 	pthread_detach(thread_cpu);
     
+    thread* kernel_thread = s_malloc(sizeof(thread));
+    kernel_thread->socket = kernel;
+    kernel_thread->memory_structure = memory_structure;
     pthread_t thread_k;
-    pthread_create(&thread_k, NULL, (void*)handle_kernel, &kernel);
+    pthread_create(&thread_k, NULL, (void*)handle_kernel, kernel);
 	pthread_detach(thread_k);
    */
 }
