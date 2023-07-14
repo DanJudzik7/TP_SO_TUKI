@@ -3,12 +3,15 @@
 
 #include "shared_serializer.h"
 #include "shared_socket.h"
-#include <commons/config.h>
+#include "utils_filesystem.h"
 #include <math.h>
 
-extern configuration_filesystem config_fs;
+extern config_filesystem config_fs;
 
-int instruction_handler_filesystem();
+int handle_kernel();
+
+bool process_instruction(t_instruction* instruction);
+
 int next_bit_position();
 void open_file(t_instruction* instruction);
 void close_file(t_instruction* instruction);
@@ -18,6 +21,6 @@ void resize_block(t_config* fcb_data, int* file_size);
 t_list* get_bf_ip(int PUNTERO_INDIRECTO);
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list);
 void truncate_file(t_instruction* instruction);
-char read_file(t_instruction* instruction);
+char* read_file(t_instruction* instruction);
 
 #endif

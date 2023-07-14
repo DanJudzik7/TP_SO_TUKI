@@ -20,10 +20,10 @@ t_package* serialize_execution_context(execution_context* ec) {
 	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(ec->program_counter), &size4));
 	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), &size4));
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
-	segment_table* sg_help = s_malloc(sizeof(segment_table));
+	/* segment_table* sg_help = s_malloc(sizeof(segment_table));
 	sg_help->pid = ec->pid;
 	sg_help->segment_table_pcb = ec->segment_table;
-	package_nest(package, serialize_segment_table(ec->segment_table));
+	package_nest(package, serialize_segment_table(ec->segment_table)); */
 
 	printf("\nTamaño TOTAL serializado del paquete: %lu bytes\n", package->size);
 	return package;
@@ -51,7 +51,7 @@ execution_context* deserialize_execution_context(t_package* package) {
 				ec->cpu_register = deserialize_cpu_registers(nested_package->buffer);
 				break;
 			case SEGMENT_TABLE:
-				ec->segment_table = deserialize_segment_table(nested_package);
+				//ec->segment_table = deserialize_segment_table(nested_package);
 				break;
 			default:
 				printf("Error: Tipo de paquete desconocido.\n");
@@ -82,12 +82,8 @@ t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
 }
 
 t_package* serialize_instruction(t_instruction* instruction) {
-
-	t_package* package = package_new(INSTRUCTION);
-	package_write(package, &(instruction->op_code));
-	t_package* args_package = serialize_instructions(instruction->args, false);
-	package_nest(package, args_package);
-
+	t_package* package = package_new(instruction->op_code);
+	for (int j = 0; j < list_size(instruction->args); j++) package_write(package, list_get(instruction->args, j));
 	return package;
 }
 
@@ -216,11 +212,11 @@ segment_table* deserialize_segment_table(t_package* package) {
 /*
 	for (int i = 0; i < (package->size - sizeof(int)) / sizeof(segment); i++) {
        	// Deserializamos el segmento
-       	segment* new_segment = deserialize_segment(temp_buffer);
+		segment* new_segment = deserialize_segment(temp_buffer);
        	// Añadimos el segmento a la lista
-       	list_add(sg_list_help->segment_table_pcb, new_segment);
+		list_add(sg_list_help->segment_table_pcb, new_segment);
        	// Avanzamos el buffer temporal
-       	temp_buffer += sizeof(segment);
+		temp_buffer += sizeof(segment);
     }
 */
 	// Devolvemos el resultado
@@ -239,11 +235,11 @@ segment* deserialize_segment(char* buffer) {
 	return new_segment;
 }
 
-t_package* serialize_segment_read_write(segment_read_write* seg_rw) {
+/* t_package* serialize_segment_read_write(segment_read_write* seg_rw) {
 	t_package* package = package_new(F_WRITE_READ);
 
 	uint64_t size = sizeof(uint64_t);
-	char* buffer_size = sizeof(seg_rw->buffer);
+	uint64_t buffer_size = sizeof(seg_rw->buffer);
 	
 	package_add(package, &(seg_rw->pid),	&size);
 	package_add(package, &(seg_rw->buffer),	&buffer_size);
@@ -265,7 +261,7 @@ segment_read_write* deserialize_segment_read_write(void* source) {
 	package_decode_buffer(source, &(seg_rw->s_id), &offset);
 
 	return seg_rw;
-}
+} */
 
 void serialize_package(t_package* package) {
 	uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;

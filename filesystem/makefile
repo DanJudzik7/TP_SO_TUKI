@@ -27,7 +27,10 @@ SHARED_DEPS = $(wildcard $(SHARED_IDIR)/*.h)
 SHARED_SRC = $(wildcard $(SHARED_SRCDIR)/*.c)
 SHARED_OBJ = $(patsubst $(SHARED_SRCDIR)/%.c,$(SHARED_ODIR)/%.o,$(SHARED_SRC))
 
-$(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
+$(PROCESS_NAME): $(filter-out $(ODIR)/tests_$(PROCESS_NAME).o, $(OBJ)) $(SHARED_OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+test: $(filter-out $(ODIR)/$(PROCESS_NAME).o, $(OBJ)) $(SHARED_OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean

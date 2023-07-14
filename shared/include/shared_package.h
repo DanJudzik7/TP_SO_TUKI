@@ -17,16 +17,21 @@ typedef enum t_package_type {
     INSTRUCTIONS,           // 5
     EXECUTION_CONTEXT,      // 6
     INSTRUCTION,            // 7
-    CREATE_PROCESS_MEMORY,  // 8
-    END_PROCCESS_MEMORY,    // 9
-    COMPACT_MEMORY,         // 10
     SEG_FAULT,              // 11
     OK_INSTRUCTION,         // 12
-    CREATE_SEGMENT_MEMORY,  // 13
-    DELETE_SEGMENT_MEMORY,  // 14
     NO_SPACE_LEFT,          // 15
     MEMORY_BUFFER_R         // 16
 } t_package_type;
+
+typedef enum t_memory_op {
+    MEM_INIT_PROCESS,
+    MEM_END_PROCCESS,
+    MEM_READ_ADDRESS,
+    MEM_WRITE_ADDRESS,
+    MEM_CREATE_SEGMENT,
+    MEM_DELETE_SEGMENT,
+    COMPACT_ALL
+} t_memory_op;
 
 // Crea y retorna un paquete con el código de operación especificado.
 t_package* package_new(int32_t type);

@@ -1,7 +1,7 @@
-#ifndef TESTS_H
-#define TESTS_H
+#ifndef TESTS_CPU_H
+#define TESTS_CPU_H
 #include <CUnit/Basic.h>
-int run_tests();
+int main();
 void suma_cpu();
 
 #endif

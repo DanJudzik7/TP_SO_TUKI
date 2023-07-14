@@ -47,7 +47,12 @@
         "utils_memoria.h": "c",
         "conexions.h": "c",
         "handlers.h": "c",
-        "memory_structures.h": "c"
+        "memory_structures.h": "c",
+        "handler_instruction_filesystem.h": "c",
+        "utils_filesystem.h": "c",
+        "dirent.h": "c",
+        "tests_memoria.h": "c",
+        "tests_filesystem.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false

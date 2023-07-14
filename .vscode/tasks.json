@@ -90,9 +90,39 @@
             }
         },
         {
+            "label": "Make Test Filesystem",
+            "type": "shell",
+            "command": "make test",
+            "options": {
+                "cwd": "${workspaceFolder}/filesystem"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
             "label": "Make Memory",
             "type": "shell",
             "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/memoria"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "Make Test Memory",
+            "type": "shell",
+            "command": "make test",
             "options": {
                 "cwd": "${workspaceFolder}/memoria"
             },

@@ -168,11 +168,55 @@
 			]
 		},
 		{
+			"name": "Filesystem Test",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/filesystem/test",
+			"preLaunchTask": "Make Test Filesystem",
+			"cwd": "${workspaceFolder}/filesystem",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
 			"name": "Memory",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/memoria/memoria",
 			"preLaunchTask": "Make Memory",
+			"cwd": "${workspaceFolder}/memoria",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Memory Test",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/memoria/test",
+			"preLaunchTask": "Make Test Memory",
 			"cwd": "${workspaceFolder}/memoria",
 			"externalConsole": false,
 			"MIMode": "gdb",

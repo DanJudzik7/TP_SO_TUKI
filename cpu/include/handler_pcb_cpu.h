@@ -7,13 +7,6 @@
 #include "shared_package.h"
 #include <math.h>
 
-
-typedef struct segment{
-	void* base;
-	int offset;
-	int s_id;
-} segment;
-
 extern configuration_cpu config_cpu;
 
 void fetch(execution_context* execution_context);

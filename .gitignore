@@ -4,7 +4,10 @@ consola/consola
 cpu/cpu
 memoria/memoria
 filesystem/filesystem
+filesystem/cfg/fcb/*
+!filesystem/cfg/fcb/.gitkeep
 *.log
+*/test
 
 # Prerequisites
 *.d

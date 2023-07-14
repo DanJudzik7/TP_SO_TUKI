@@ -1,7 +1,7 @@
 #include "handler_instruction_memoria.h"
 
 
-t_list* create_sg_table(memory_structure* memory_structure,int process_id){
+t_list* create_sg_table(t_memory_structure* memory_structure,int process_id){
     t_list* segment_table = list_create();
     list_add(segment_table, memory_structure->segment_zero);
     char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
@@ -10,7 +10,7 @@ t_list* create_sg_table(memory_structure* memory_structure,int process_id){
 	return segment_table;
 }
 
-void remove_sg_table(memory_structure* memory_structure,int process_id){
+void remove_sg_table(t_memory_structure* memory_structure,int process_id){
     char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
     sprintf(pid_str, "%d", process_id);
 	t_list* segment_table_delete = dictionary_get(memory_structure->table_pid_segments, pid_str);
@@ -24,27 +24,27 @@ void remove_sg_table(memory_structure* memory_structure,int process_id){
 
 }
 
-int add_segment(memory_structure* memory_structure,int process_id, int size,int s_id){	
+int add_segment(t_memory_structure* memory_structure,int process_id, int size,int s_id){	
 	segment* segment;
 	
-	if (memory_shared.remaining_memory > size)
+	if (config_memory.remaining_memory > size)
     {
        // Recorro la ram para asignar el segmento segun el algoritmo
-       if (strcmp(memory_shared.algorithm,"BEST") == 0){
+       if (strcmp(config_memory.algorithm,"BEST") == 0){
         	segment = best_fit(memory_structure,size,process_id ,s_id);
-       } else if (strcmp(memory_shared.algorithm,"FIRST") == 0){
+       } else if (strcmp(config_memory.algorithm,"FIRST") == 0){
         	segment = first_fit(memory_structure,size,process_id,s_id);
-       } else if (strcmp(memory_shared.algorithm,"WORST") == 0){
+       } else if (strcmp(config_memory.algorithm,"WORST") == 0){
         	segment = worst_fit(memory_structure,size,process_id,s_id);
        } else{
-           log_error(memory_config.logger,"No se reconoce el algoritmo de planificacion");
+           log_error(config_memory.logger,"No se reconoce el algoritmo de planificacion");
            exit(1);
        }
 	   // Si el segmento es nulo pero tengo espacio, debo compactar
 		if(segment != NULL){
 			int dir_base = transform_base_to_decimal(segment->base ,memory_structure->segment_zero->base);
-			memory_shared.remaining_memory -= size;
-			log_info(memory_config.logger,"|PID: %i | Crear Segmento: %i | Base: %i | Tamaño: %i |", process_id, segment->s_id, dir_base,size);
+			config_memory.remaining_memory -= size;
+			log_info(config_memory.logger,"|PID: %i | Crear Segmento: %i | Base: %i | Tamaño: %i |", process_id, segment->s_id, dir_base,size);
        		return dir_base; // Segmento creado
 		}
 		//Si el segmento es nulo pero tengo espacio, debo compactar
@@ -53,13 +53,13 @@ int add_segment(memory_structure* memory_structure,int process_id, int size,int 
 		}
    }          
 	else{
-        log_error(memory_config.logger,"No hay espacio suficiente para crear el segmento");
+        log_error(config_memory.logger,"No hay espacio suficiente para crear el segmento");
         // Manejo el error devolviendo a kernel no hay espacio suficiente
 		return 2; // No hay espacio
     
 	}
 }
-void delete_segment(memory_structure* memory_structure, int process_id, int s_id_to_delete) {
+void delete_segment(t_memory_structure* memory_structure, int process_id, int s_id_to_delete) {
 
 	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
     sprintf(pid_str, "%d", process_id);
@@ -75,7 +75,7 @@ void delete_segment(memory_structure* memory_structure, int process_id, int s_id
 			// Asigno para tener el segmento más a mano
 			segment_to_delete = segment_pid;
 			segment_to_delete->offset = segment_pid->offset;
-			memory_shared.remaining_memory += segment_pid->offset;
+			config_memory.remaining_memory += segment_pid->offset;
 			list_add(memory_structure->hole_list, segment_pid);
 			list_remove(segment_table, i);
 			break;
@@ -93,13 +93,13 @@ void delete_segment(memory_structure* memory_structure, int process_id, int s_id
 		}
 	}
 	int dir_base = transform_base_to_decimal( segment_to_delete->base, memory_structure->segment_zero->base);
-	log_info(memory_config.logger,"|PID: %i | Eliminar Segmento: %i | Base: %i  | Tamaño: %i |", process_id , s_id_to_delete, dir_base, segment_to_delete->offset);
+	log_info(config_memory.logger,"|PID: %i | Eliminar Segmento: %i | Base: %i  | Tamaño: %i |", process_id , s_id_to_delete, dir_base, segment_to_delete->offset);
 
 	// Caso de que tenga huecos libres aledaños, los deberá consolidar actualizando sus estructuras administrativas.
 	compact_hole_list(memory_structure);
 }
 
-void compact_hole_list(memory_structure* memory_structure){
+void compact_hole_list(t_memory_structure* memory_structure){
 	if(list_size(memory_structure->hole_list) != 1)
 	{
 		for (int i = 0; i < list_size(memory_structure->hole_list) ; i++)
@@ -134,7 +134,7 @@ bool more_close_to_heap(void *segment1, void *segment2) {
     return seg1->base < seg2->base;
 }
 
-void compact_memory(memory_structure* memory_structure){
+void compact_memory(t_memory_structure* memory_structure){
 	int size_of_hole = list_size(memory_structure->hole_list);
 	if(size_of_hole > 1){ 
 	// Ordeno la lista de hole para tener siempre a mano el mas cercano al heap
@@ -162,12 +162,12 @@ void compact_memory(memory_structure* memory_structure){
 	compact_hole_list(memory_structure);
 }
 
-char* read_memory(int s_id,int offset, int size,memory_structure* structures,int pid){
+char* read_memory(int s_id,int offset, int size,t_memory_structure* structures,int pid){
 	char* buffer = malloc(size + 1);;
 	segment* segment = get_segment_by_id(s_id,structures,pid);
 	if (segment != NULL){
 		if(segment-> base + offset + size > segment->base + segment->offset){
-			log_error(memory_config.logger,"Segmentation fault, no se puede leer mas alla del segment");
+			log_error(config_memory.logger,"Segmentation fault, no se puede leer mas alla del segment");
 			return NULL;
 		}else {
 			memcpy(buffer, segment->base + offset, sizeof(size));
@@ -175,16 +175,16 @@ char* read_memory(int s_id,int offset, int size,memory_structure* structures,int
 			return buffer;
 		}
 	} else {
-		log_error(memory_config.logger,"No se encontro el segmento solicitado");
+		log_error(config_memory.logger,"No se encontro el segmento solicitado");
 		return NULL;
 	}
 }
 
-bool write_memory(int s_id,int offset,int size,char* buffer,memory_structure* structures,int pid){
+bool write_memory(int s_id,int offset,int size,char* buffer,t_memory_structure* structures,int pid){
 	segment* segment = get_segment_by_id(s_id,structures,pid);
 	if (segment != NULL) {
 		if(segment-> base + offset + size > segment->base + segment->offset){
-			log_error(memory_config.logger,"Segmentation fault, no se puede escribir mas alla del segment");
+			log_error(config_memory.logger,"Segmentation fault, no se puede escribir mas alla del segment");
 			return false;
 		}else {
 			
@@ -192,12 +192,12 @@ bool write_memory(int s_id,int offset,int size,char* buffer,memory_structure* st
 			return true;
 		}
 	} else {
-		log_error(memory_config.logger,"No se encontro el segmento solicitado");
+		log_error(config_memory.logger,"No se encontro el segmento solicitado");
 		return false;
 	}
 }
 
-segment* get_segment_by_id(int s_id,memory_structure* structures,int pid){
+segment* get_segment_by_id(int s_id,t_memory_structure* structures,int pid){
 	
 	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
     sprintf(pid_str, "%d", pid);
@@ -213,3 +213,8 @@ segment* get_segment_by_id(int s_id,memory_structure* structures,int pid){
 	return NULL;
 }
 
+uint32_t transform_base_to_decimal(void* address, void* memory_base) {
+	uintptr_t base = (uintptr_t)memory_base;
+	uintptr_t transformed_value = (uintptr_t)address;
+	return transformed_value - base;
+}

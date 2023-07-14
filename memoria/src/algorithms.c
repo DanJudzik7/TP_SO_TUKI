@@ -1,6 +1,6 @@
 #include "algorithms.h"
 
-segment* first_fit(memory_structure* memory_structure, int size, int pid, int s_id) {
+segment* first_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
     t_list_iterator* iterator = list_iterator_create(memory_structure->hole_list);
     hole* current_hole;
     while (list_iterator_has_next(iterator)) {
@@ -18,7 +18,7 @@ segment* first_fit(memory_structure* memory_structure, int size, int pid, int s_
             if (dictionary_has_key(memory_structure->table_pid_segments, pid_str)) {
             t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
             if (segment_table != NULL) {
-                list_add_in_index(segment_table, new_segment->s_id, new_segment);
+                list_add(segment_table, new_segment);
                 list_add(memory_structure->ram, new_segment);
             } else {
                     printf("La tabla de segmentos para el proceso con ID %i es nula.\n", pid);
@@ -50,7 +50,7 @@ bool is_hole_empty(hole* h) {
 }
 
     
-segment* best_fit(memory_structure* memory_structure, int size, int pid,int s_id) {
+segment* best_fit(t_memory_structure* memory_structure, int size, int pid,int s_id) {
     //TODO: Transformar a una funcion en utility
     char pid_str[10];  
     sprintf(pid_str, "%i", pid);
@@ -99,7 +99,7 @@ segment* best_fit(memory_structure* memory_structure, int size, int pid,int s_id
 }
 
 
-segment* worst_fit(memory_structure* memory_structure, int size, int pid,int s_id) {
+segment* worst_fit(t_memory_structure* memory_structure, int size, int pid,int s_id) {
     //TODO: Transformar a una funcion en utility
     char pid_str[10];  
     sprintf(pid_str, "%i", pid);
@@ -128,7 +128,7 @@ segment* worst_fit(memory_structure* memory_structure, int size, int pid,int s_i
 
         // Agregamos el nuevo segmento a la lista de todos los segmentos.
         t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
-        list_add_in_index(segment_table, new_segment->s_id,new_segment);
+        list_add(segment_table, new_segment);
         list_add(memory_structure->ram, new_segment);
 
         // Actualizamos la información del hueco.

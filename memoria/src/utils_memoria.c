@@ -1,100 +1,42 @@
 #include "utils_memoria.h"
 
-configuration_memory memory_config;
-memory memory_shared;
-extern pthread_mutex_t mutex_compact;
-extern pthread_mutex_t mutex_write;
-
-void initialize(){
-    memory_config.logger = start_logger("memoria");
-    memory_config.config = start_config("memoria");
-    memory_config.port = config_get_string_value(memory_config.config, "PUERTO_ESCUCHA");
-    memory_shared.memory_size = config_get_int_value(memory_config.config, "TAM_MEMORIA");
-    memory_shared.sg_zero_size = config_get_int_value(memory_config.config, "TAM_SEGMENTO_0");
-    memory_shared.sg_amount = config_get_int_value(memory_config.config, "CANT_SEGMENTOS");
-    memory_shared.mem_delay = config_get_int_value(memory_config.config, "RETARDO_MEMORIA");
-    memory_shared.com_delay = config_get_int_value(memory_config.config, "RETARDO_COMPACTACION");
-    memory_shared.algorithm = config_get_string_value(memory_config.config, "ALGORITMO_ASIGNACION");
-    memory_shared.remaining_memory = memory_shared.memory_size;
-    pthread_mutex_init(&mutex_compact, NULL);
-    pthread_mutex_init(&mutex_write, NULL);
+void setup_config() {
+    config_memory.logger = start_logger("memoria");
+    config_memory.config = start_config("memoria");
+    config_memory.port = config_get_string_value(config_memory.config, "PUERTO_ESCUCHA");
+    config_memory.memory_size = config_get_int_value(config_memory.config, "TAM_MEMORIA");
+    config_memory.sg_zero_size = config_get_int_value(config_memory.config, "TAM_SEGMENTO_0");
+    config_memory.sg_amount = config_get_int_value(config_memory.config, "CANT_SEGMENTOS");
+    config_memory.mem_delay = config_get_int_value(config_memory.config, "RETARDO_MEMORIA");
+    config_memory.com_delay = config_get_int_value(config_memory.config, "RETARDO_COMPACTACION");
+    config_memory.algorithm = config_get_string_value(config_memory.config, "ALGORITMO_ASIGNACION");
+    config_memory.remaining_memory = config_memory.memory_size;
 }
 
-// Función para graficar la RAM
-void graph_ram(memory_structure* memory_structure, void* memory_base) {
+t_memory_structure* new_memory_structure(void* memory) {
+	// Inicializo las estructuras de memoria
+	t_memory_structure* memory_structure = s_malloc(sizeof(memory_structure));
+	memory_structure->hole_list = list_create();
+	memory_structure->table_pid_segments = dictionary_create();
+	memory_structure->segment_zero = s_malloc(sizeof(segment));
+	// Recordemos que la ram es una t_list unicamente de ayuda, que apunta a las direcciones de memoria [dir_segment_zer, sig dirección, etc ]
+	memory_structure->ram = list_create();
 
-    t_list* ram = memory_structure->ram;
-    t_list* hole_list = memory_structure->hole_list;
+	// Creo el segmento 0 y lo agrego al diccionario y a la memoria auxiliar ram
+	memory_structure->segment_zero->base = memory;
+	memory_structure->segment_zero->offset = config_memory.sg_zero_size;
+	memory_structure->segment_zero->s_id = 0;
+	dictionary_put(memory_structure->table_pid_segments, (char*)&memory_structure->segment_zero->s_id, memory_structure->segment_zero);
+	list_add(memory_structure->ram, memory_structure->segment_zero);
+	config_memory.remaining_memory -= config_memory.sg_zero_size;
 
-    printf("|RAM: \n");
-
-    int ram_size = list_size(ram);
-    int hole_list_size = list_size(hole_list);
-    int ram_index = 0;
-    int hole_index = 0;
-
-    //uintptr_t prev_base = 0;
-
-    // Recorrer tanto los segmentos en RAM como los huecos en hole_list
-    while (ram_index < ram_size || hole_index < hole_list_size) {
-        uintptr_t ram_base = (ram_index < ram_size) ? ((segment*)list_get(ram, ram_index))->base : UINTPTR_MAX;
-        uintptr_t hole_base = (hole_index < hole_list_size) ? ((segment*)list_get(hole_list, hole_index))->base : UINTPTR_MAX;
-
-        if (ram_base <= hole_base) {
-            segment* seg = list_get(ram, ram_index);
-            printf("| Segmento: %i | base: %u | tamaño: %i |\n", seg->s_id, transform_base_to_decimal(seg->base, memory_base),seg->offset);
-            ram_index++;
-        } else {
-            segment* hole_seg = list_get(hole_list, hole_index);
-            printf("|Segmento Hueco | base: %u  | tamaño: %i |\n", transform_base_to_decimal(hole_seg->base, memory_base),hole_seg->offset);
-            hole_index++;
-        }
-
-        //prev_base = (ram_base <= hole_base) ? ram_base : hole_base;
-    }
-    
-    printf("\n");
+	// Creo el agujero inicial
+	hole* hole = malloc(sizeof(hole));
+	hole->base = memory + config_memory.sg_zero_size;
+	hole->size = config_memory.memory_size - config_memory.sg_zero_size;
+	list_add(memory_structure->hole_list, hole);
+	// No es necesario cargar el hole en la ram,
+	// Cargamos procesos y si eliminamos uno lo mandamos a hole_list pero sigue en la ram hasta que borremos y compactemos
+	// list_add(memory_structure->ram,hole);
+	return memory_structure;
 }
-
-// Función para graficar la tabla table_pid_segments
-void graph_table_pid_segments(t_dictionary* table_pid_segments, void* memory_base) {
-    t_list* keys = dictionary_keys(table_pid_segments);
-    for (int i = 1; i < list_size(keys); i++) {
-        char* key = string_duplicate(list_get(keys, i));
-        int process_id = atoi(key);
-        printf("\nObteniendo la tabla de segmentos del PID: %s... ", key );
-        t_list* segment_table = dictionary_get(table_pid_segments, key);
-        if (segment_table == NULL) {
-            free(key); // Liberar la memoria asignada por string_duplicate
-            continue; // Pasar a la siguiente clave si no se encuentra la tabla de segmentos
-        }
-        graph_specific_table_pid_segments(segment_table, process_id, memory_base);
-        printf("\n");
-        free(key); // Liberar la memoria asignada por string_duplicate
-    }
-    list_destroy(keys);
-}
-
-uint32_t transform_base_to_decimal(void* address, void* memory_base) {
-    uintptr_t base = (uintptr_t)memory_base;
-    uintptr_t transformed_value = (uintptr_t)address;
-    return transformed_value - base;
-}
-
-// Función para graficar una tabla especifica de tipo table_pid_segments
-void graph_specific_table_pid_segments(t_list* segment_table, int process_id, void* memory_base) {
-    printf("\n|Tabla de segmentos del proceso PID  %i|\n", process_id);
-    printf("--------------------------------------\n");
-    for (int i = 0; i < list_size(segment_table); i++) {
-        segment* seg = list_get(segment_table, i);
-        log_info(memory_config.logger,"|PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id ,seg->s_id, transform_base_to_decimal(seg->base, memory_base), seg->offset);
-    }
-    printf("--------------------------------------\n");
-}
-
-// Función para graficar la RAM y la tabla table_pid_segments
-void graph_memory(memory_structure* memory_struct, void* memory_base) {
-    graph_ram(memory_struct, memory_base);
-    graph_table_pid_segments(memory_struct->table_pid_segments, memory_base);
-}
-

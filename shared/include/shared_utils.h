@@ -82,14 +82,6 @@ typedef struct physical_address {
     int offset;
 } t_physical_address;
 
-typedef struct segment_read_write {
-	uint32_t s_id;
-    uint32_t offset;
-    uint32_t size;
-    char* buffer;
-    uint32_t pid;
-} segment_read_write;
-
 typedef struct t_file {
 	uint32_t size_file;
 	void* file_direction;
@@ -123,30 +115,10 @@ typedef enum execution_context_index {
 
 typedef struct config_cpu {
 	t_log* logger;
+	sem_t flag_dislodge;
 	int connection_kernel;
 	int max_segment_size;
 } configuration_cpu;
-
-typedef struct config_filesystem {
-	t_log* logger;
-	t_config* config;
-	t_bitarray* bitmap;
-	char* block_file;
-	int connection_kernel;
-	int socket_memoria;
-	int block_size;
-	int block_count;
-	char* PATH_SUPERBLOQUE;
-	char* PATH_BITMAP;
-	char* PATH_BLOQUES;
-	char* PATH_FCB;
-} configuration_filesystem;
-
-typedef struct config_memory {
-	t_log* logger;
-	t_config* config;
-	char* port;
-} configuration_memory;
 
 typedef enum op_code {
 	F_READ,			 // 0
