@@ -28,11 +28,9 @@ t_package* serialize_instruction(t_instruction* instruction);
 // Deserializa las instrucciones y las agrega a una queue
 void deserialize_instructions(t_package* package, t_queue* instructions);
 
-t_instruction* deserialize_instruction_test(t_package* package);
-t_package* serialize_instruction_test(t_instruction* instruction);
+// Deserializa una instrucción
+t_instruction* deserialize_instruction(t_package* package);
 
-//Deserializa una instruccion de un packete y la devuelve
-void deserialize_single_instruction(t_package* package, t_instruction* instruction);
 // Serializa los registros de la CPU
 t_package* serialize_cpu_registers(cpu_register* registers);
 

@@ -8,7 +8,7 @@ int handle_kernel(int socket_kernel) {
 			break;
 		}
 
-		t_instruction* instruction = deserialize_instruction_test(package);
+		t_instruction* instruction = deserialize_instruction(package);
 		log_warning(config_fs.logger, "El código de operación es: %i", instruction->op_code);
 		if (process_instruction(instruction)) {
 			if (!socket_send(socket_kernel, serialize_message("OK_OPERATION", false))) {
@@ -33,7 +33,7 @@ bool process_instruction(t_instruction* instruction) {
 
 			char* miCharPuntero_r = read_file(instruction);
 			list_add(instruction->args, miCharPuntero_r);
-			if (!socket_send(config_fs.socket_memoria, serialize_instruction_test(instruction))) {
+			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
 				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
 			}
 			t_package* package_recive_memory = socket_receive(config_fs.socket_memoria);
@@ -52,7 +52,7 @@ bool process_instruction(t_instruction* instruction) {
 				escribir_info(posicion, info)
 				y voy a escribir info en la posicion que recibi*/
 			instruction->op_code = MEM_WRITE_ADDRESS;
-			if (!socket_send(config_fs.socket_memoria, serialize_instruction_test(instruction))) {
+			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
 				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
 			}
 			t_package* package_recive_memory = socket_receive(config_fs.socket_memoria);

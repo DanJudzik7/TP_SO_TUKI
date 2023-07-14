@@ -29,7 +29,7 @@ void handle_modules(t_memory_thread* mt) {
 	log_warning(config_memory.logger, "Se conectó un módulo en el puerto %d", mt->socket);
 	while (1) {
 		t_package* package = socket_receive(mt->socket);
-		t_instruction* instruction = deserialize_instruction_test(package);
+		t_instruction* instruction = deserialize_instruction(package);
 		switch ((t_memory_op)instruction->op_code) {
 			// Se debe respetar el orden de los argumentos
 			case MEM_WRITE_ADDRESS: {

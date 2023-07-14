@@ -72,7 +72,6 @@ uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset)
 	return pc_value_32;
 }
 
-
 t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
 	t_package* package = package_new(is_ec ? EC_INSTRUCTIONS : INSTRUCTIONS);
 	// Recorre la cola de instrucciones y las serializa
@@ -92,31 +91,19 @@ void deserialize_instructions(t_package* package, t_queue* instructions) {
 	// Va buscando todas las instrucciones
 	while (package_decode_isset(package, offset)) {
 		t_package* instruction_package = package_decode(package->buffer, &offset);
-		t_instruction* instruction = s_malloc(sizeof(t_instruction));
-		instruction->op_code = instruction_package->type;
-		instruction->args = list_create();
-		uint64_t offset_list = 0;
-		// Carga los args de package_add
-		while (package_decode_isset(instruction_package, offset_list)) list_add(instruction->args, package_decode_string(instruction_package->buffer, &offset_list));
-		queue_push(instructions, instruction);
+		queue_push(instructions, deserialize_instruction(instruction_package));
 		package_destroy(instruction_package);
 	}
 }
 
-void deserialize_single_instruction(t_package* package, t_instruction* instruction) {
-	uint64_t offset = 0;
-	// Va buscando todas las instrucciones
-	while (package_decode_isset(package, offset)) {
-		t_package* instruction_package = package_decode(package->buffer, &offset);
-		instruction->op_code = instruction_package->type;
-		instruction->args = list_create();
-		uint64_t offset_list = 0;
-		// Carga los args de package_add
-		while (package_decode_isset(instruction_package, offset_list)){
-			list_add(instruction->args, package_decode_string(instruction_package->buffer, &offset_list));
-		}
-		package_destroy(instruction_package);
-	}
+t_instruction* deserialize_instruction(t_package* package) {
+	t_instruction* instruction = s_malloc(sizeof(t_instruction));
+	instruction->op_code = package->type;
+	instruction->args = list_create();
+	uint64_t offset_list = 0;
+	// Carga los args de package_add
+	while (package_decode_isset(package, offset_list)) list_add(instruction->args, package_decode_string(package->buffer, &offset_list));
+	return instruction;
 }
 
 t_package* serialize_cpu_registers(cpu_register* registers) {
@@ -276,61 +263,4 @@ void serialize_package(t_package* package) {
 	package->size = package_size;
 	free(package->buffer);
 	package->buffer = stream;
-}
-
-
-
-
-						//////////////////////////// 	ZONA TEST 	///////////////////////////
-t_package* serialize_instruction_test(t_instruction* instruction) {
-    t_package* package = malloc(sizeof(t_package));
-    int args_count = list_size(instruction->args);
-    int total_size = sizeof(int) + sizeof(op_code) + args_count * sizeof(int); 
-
-    for (int i = 0; i < args_count; i++) {
-        char* arg = list_get(instruction->args, i);
-        total_size += strlen(arg) + 1; 
-    }
-    void* buffer = malloc(total_size);
-    int offset = 0;
-
-    memcpy(buffer + offset, &(instruction->op_code), sizeof(op_code));
-    offset += sizeof(op_code);
-    memcpy(buffer + offset, &args_count, sizeof(int));
-    offset += sizeof(int);
-    for (int i = 0; i < args_count; i++) {
-        char* arg = list_get(instruction->args, i);
-        int arg_size = strlen(arg) + 1;
-        memcpy(buffer + offset, &arg_size, sizeof(int));
-        offset += sizeof(int);
-        memcpy(buffer + offset, arg, arg_size);
-        offset += arg_size;
-    }
-    package->size = total_size;
-    package->type = instruction->op_code;
-    package->buffer = buffer;
-
-    return package;
-}
-
-t_instruction* deserialize_instruction_test(t_package* package) {
-    t_instruction* instruction = malloc(sizeof(t_instruction));
-    int offset = 0;
-    memcpy(&(instruction->op_code), package->buffer + offset, sizeof(op_code));
-    offset += sizeof(op_code);
-    int args_count;
-    memcpy(&args_count, package->buffer + offset, sizeof(int));
-    offset += sizeof(int);
-    instruction->args = list_create();
-    for (int i = 0; i < args_count; i++) {
-        int arg_size;
-        memcpy(&arg_size, package->buffer + offset, sizeof(int));
-        offset += sizeof(int);
-        char* arg = malloc(arg_size);
-        memcpy(arg, package->buffer + offset, arg_size);
-        offset += arg_size;
-        list_add(instruction->args, arg);
-    }
-
-    return instruction;
 }

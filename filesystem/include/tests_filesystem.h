@@ -6,8 +6,10 @@
 
 int main();
 
+void test_instruction_serializing();
+
 void test_bf_ip();
 
-void dynamic_op_test();
+void test_dynamic_op();
 
 #endif
