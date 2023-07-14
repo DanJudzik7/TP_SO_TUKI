@@ -3,14 +3,14 @@
 extern t_config_memory config_memory;
 
 int main() {
-    setup_config();
-    printf("Iniciando Tests...\n\n");
+	setup_config();
+	printf("Iniciando Tests...\n\n");
 
-    test_segment_creation();
-    test_compact();
-    //test_rw();
+	test_segment_creation();
+	test_compact();
+	// test_rw();
 
-    printf("\n\nTests Completados\n");
+	printf("\n\nTests Completados\n");
 	return 0;
 }
 
@@ -21,9 +21,9 @@ void express_segment(int pid, int segment, t_memory_structure* memory_structure)
 }
 
 void test_segment_creation() {
-    void* memory = s_malloc(4096);
+	void* memory = s_malloc(4096);
 	t_memory_structure* memory_structure = new_memory_structure(memory);
-    config_memory.remaining_memory = config_memory.memory_size;
+	config_memory.remaining_memory = config_memory.memory_size;
 
 	express_segment(0, 1, memory_structure);
 	express_segment(1, 1, memory_structure);
@@ -44,9 +44,9 @@ void test_segment_creation() {
 }
 
 void test_compact() {
-    void* memory = s_malloc(4096);
+	void* memory = s_malloc(4096);
 	t_memory_structure* memory_structure = new_memory_structure(memory);
-    config_memory.remaining_memory = config_memory.memory_size;
+	config_memory.remaining_memory = config_memory.memory_size;
 
 	express_segment(0, 1, memory_structure);
 	express_segment(1, 1, memory_structure);
@@ -66,9 +66,9 @@ void test_compact() {
 }
 
 void test_rw() {
-    void* memory = s_malloc(4096);
+	void* memory = s_malloc(4096);
 	t_memory_structure* memory_structure = new_memory_structure(memory);
-    config_memory.remaining_memory = config_memory.memory_size;
+	config_memory.remaining_memory = config_memory.memory_size;
 
 	express_segment(1, 1, memory_structure);
 	printf("Iniciando escritura");

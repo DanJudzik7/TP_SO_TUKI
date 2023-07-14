@@ -34,5 +34,5 @@ void compact_memory(t_memory_structure* memory_structure);
 // Compacta toda la lista de huecos para que quede uno solo
 void compact_hole(t_memory_structure* memory_structure);
 // Transforma la base dada a un entero para saber su posicion en la ram
-uint32_t transform_base_to_decimal(void*  address, void* memory_base);
+uint32_t transform_base_to_decimal(void* address, void* memory_base);
 #endif
