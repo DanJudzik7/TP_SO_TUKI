@@ -8,8 +8,6 @@ void setup_config() {
     config_fs.PATH_BITMAP = config_get_string_value(config_fs.config, "PATH_BITMAP");
     config_fs.PATH_BLOQUES = config_get_string_value(config_fs.config, "PATH_BLOQUES");
     config_fs.PATH_FCB = config_get_string_value(config_fs.config, "PATH_FCB");
-    char* ip_memory = config_get_string_value(config_fs.config, "IP_MEMORIA");
-	char* port_memory = config_get_string_value(config_fs.config, "PUERTO_MEMORIA");
 	log_warning(config_fs.logger, "Iniciando el filesystem");
 
 	t_config* superblock = start_superblock();
@@ -18,14 +16,9 @@ void setup_config() {
 
 	config_fs.bitmap = start_bitmap();
     config_fs.block_file = start_block_file();
-
 	log_warning(config_fs.logger, "Tamaño de bloque: %d, Cantidad de bloques: %d", config_fs.block_size, config_fs.block_count);
-	config_fs.socket_memoria = socket_initialize(ip_memory, port_memory);
-	if (config_fs.socket_memoria == -1) {
-		log_error(config_fs.logger, "No se pudo conectar a memoria con %s:%s", ip_memory, port_memory);
-		exit(EXIT_FAILURE);
-	}
-	log_warning(config_fs.logger, "Conectado a memoria en %s:%s", ip_memory, port_memory);
+
+	config_fs.socket_memoria = connect_module(config_fs.config, config_fs.logger, "MEMORIA");
 }
 
 t_config* start_superblock() {

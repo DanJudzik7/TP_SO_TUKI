@@ -11,6 +11,4 @@
 
 extern configuration_cpu config_cpu;
 
-void listen_kernel(int* socket_cpu);
-
 #endif

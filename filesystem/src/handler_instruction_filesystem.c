@@ -33,11 +33,12 @@ bool process_instruction(t_instruction* instruction) {
 
 			char* miCharPuntero_r = read_file(instruction);
 			list_add(instruction->args, miCharPuntero_r);
+			instruction->op_code = MEM_READ_ADDRESS;
 			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
 				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
 			}
-			t_package* package_recive_memory = socket_receive(config_fs.socket_memoria);
-			char* str_write = deserialize_message(package_recive_memory);
+			t_package* package_receive_memory = socket_receive(config_fs.socket_memoria);
+			char* str_write = deserialize_message(package_receive_memory);
 
 			list_destroy(instruction->args);
 			free(instruction);
@@ -55,8 +56,8 @@ bool process_instruction(t_instruction* instruction) {
 			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
 				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
 			}
-			t_package* package_recive_memory = socket_receive(config_fs.socket_memoria);
-			char* str_write = deserialize_message(package_recive_memory);
+			t_package* package_receive_memory = socket_receive(config_fs.socket_memoria);
+			char* str_write = deserialize_message(package_receive_memory);
 			list_add(instruction->args, str_write);
 			char* result_write = read_file(instruction);  // Esto es correcto?
 			list_destroy(instruction->args);

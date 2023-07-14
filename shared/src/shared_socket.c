@@ -94,7 +94,7 @@ int connect_module(t_config* config, t_log* logger, char* module) {
 		return -1;
 	}*/
 	if (module_socket == -1) {
-		log_error(logger, "No se pudo conectar a módulo %s", module);
+		log_error(logger, "No se pudo conectar a módulo %s con %s:%s", module, ip, port);
 		exit(EXIT_FAILURE);
 	}
 	log_info(logger, "Conectado a módulo %s en socket %d", module, module_socket);

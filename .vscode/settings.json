@@ -52,7 +52,15 @@
         "utils_filesystem.h": "c",
         "dirent.h": "c",
         "tests_memoria.h": "c",
-        "tests_filesystem.h": "c"
+        "tests_filesystem.h": "c",
+        "optional": "c",
+        "istream": "c",
+        "ostream": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "array": "c",
+        "tuple": "c",
+        "utility": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false

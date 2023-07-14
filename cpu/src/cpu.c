@@ -11,16 +11,17 @@ int main(int argc, char** argv) {
 	log_warning(logger, "Iniciando la CPU");
 	config_cpu.logger = logger;
 	config_cpu.max_segment_size = config_get_int_value(config, "TAM_MAX_SEGMENTO");
+	config_cpu.instruction_delay = config_get_int_value(config, "RETARDO_INSTRUCCION");
 
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
-	int socket_cpu = socket_initialize_server(port);  // Inicializo el socket en el puerto cargado por la config
-	if (socket_cpu == -1) {
+	int server_socket = socket_initialize_server(port);  // Inicializo el socket en el puerto cargado por la config
+	if (server_socket == -1) {
 		log_error(logger, "No se pudo inicializar el socket de servidor");
 		exit(EXIT_FAILURE);
 	}
 	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
-	// int conn_memoria = connect_module(config, logger, "MEMORIA");
+	config_cpu.socket_memoria = connect_module(config, logger, "MEMORIA");
 
 	// int kernel_fd = receive_modules(logger, config);
 	// execution_context* context = create_context_test();
@@ -33,25 +34,21 @@ int main(int argc, char** argv) {
 	// log_info(logger, "El proceso %d se creó en NEW\n", pcb_test->pid);
 	// pcb_test->execution_context = context;
 
-	pthread_t thread_consola;
-	pthread_create(&thread_consola, NULL, (void*)listen_kernel, &socket_cpu);
-	pthread_join(thread_consola, NULL);
-
 	// Recibe los pcbs que aca están harcodeados y los opera
-	// int kernel_socket = socket_accept(socket_cpu);
-	// config_cpu.connection_kernel = kernel_socket;
 	// fetch(context);
 
 	// free(context);
 	// free(pcb_test);
-}
 
-void listen_kernel(int* socket_cpu) {
-	int kernel_socket = socket_accept(*socket_cpu);
 	while (1) {
-			config_cpu.connection_kernel = kernel_socket;
+		int kernel_socket = socket_accept(server_socket);
+		if (kernel_socket == -1) {
+			log_warning(config_cpu.logger, "Hubo un error aceptando la conexión");
+			continue;
+		}
+		while (1) {
 			t_package* package = socket_receive(kernel_socket);
-			
+
 			if (package->type != EXECUTION_CONTEXT && package != NULL) {
 				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
 				socket_send(kernel_socket, serialize_message(invalid_package, true));
@@ -67,7 +64,25 @@ void listen_kernel(int* socket_cpu) {
 			}
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
 			execution_context* context = deserialize_execution_context(package);
-			fetch(context);
+			print_execution_context(context);
+			bool flag_dislodge = false;
+			t_instruction* instruction = NULL;
+			// Ejecuto mientras el flag de desalojo este libre
+			while (!flag_dislodge) {
+				instruction = fetch(context);
+				if (instruction != NULL) {
+					decode(context, instruction);
+					context->program_counter++;
+				}
+			}
+
+			t_package* package_context = serialize_execution_context(context);
+			if (!socket_send(kernel_socket, package_context)) {
+				log_error(config_cpu.logger, "ERROR AL ENVIAR EL CONTEXT AL KERNEL");
+				break;
+			}
+			log_info(config_cpu.logger, "Context enviado al Kernel");
+		}
+		log_warning(config_cpu.logger, "Se desconectó de kernel, abriendo para nuevas conexiones");
 	}
-	log_warning(config_cpu.logger, "Se cerró el socket de conexión con el kernel");
 }

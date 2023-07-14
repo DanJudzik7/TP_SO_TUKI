@@ -1,11 +1,9 @@
 #include "handlers.h"
 
-pthread_mutex_t mutex_compact;
-pthread_mutex_t mutex_write;
+pthread_mutex_t memory_access;
 
 void listen_modules(int server_memory, t_memory_structure* memory_structure) {
-	pthread_mutex_init(&mutex_compact, NULL);
-	pthread_mutex_init(&mutex_write, NULL);
+	pthread_mutex_init(&memory_access, NULL);
 	while (1) {
 		pthread_t thread;
 		t_memory_thread* memory_thread = s_malloc(sizeof(t_memory_thread));
@@ -30,47 +28,42 @@ void handle_modules(t_memory_thread* mt) {
 	while (1) {
 		t_package* package = socket_receive(mt->socket);
 		t_instruction* instruction = deserialize_instruction(package);
+		pthread_mutex_lock(&memory_access);
 		switch ((t_memory_op)instruction->op_code) {
 			// Se debe respetar el orden de los argumentos
-			case MEM_WRITE_ADDRESS: {
+			case MEM_READ_ADDRESS: {
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
 				int size = atoi(list_get(instruction->args, 2));
 				int pid = atoi(list_get(instruction->args, 3));
 				sleep(config_memory.mem_delay);
 				char* buffer = read_memory(s_id, offset, size, mt->mem_structure, pid);
-				if (buffer == NULL) {
-					// devolver seg_fault
+				if (buffer == NULL) // devolver seg_fault
 					socket_send(mt->socket, package_new(SEG_FAULT));
-				} else {
-					// devolver buffer
+				else // devolver buffer
 					socket_send(mt->socket, serialize_message(buffer, false));
-				}
 				break;
 			}
-			case MEM_READ_ADDRESS: {
+			case MEM_WRITE_ADDRESS: {
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
 				char* buffer = list_get(instruction->args, 2);
 				int size = strlen(buffer);
 				int pid = atoi(list_get(instruction->args, 3));
 				sleep(config_memory.mem_delay);
-				// pthread_mutex_lock(&mutex_write);
-				if (write_memory(s_id, offset, size, buffer, mt->mem_structure, pid)) {
+				if (write_memory(s_id, offset, size, buffer, mt->mem_structure, pid))
 					socket_send(mt->socket, package_new(OK_INSTRUCTION));
-				} else {
+				else
 					socket_send(mt->socket, package_new(SEG_FAULT));
-				}
-				// pthread_mutex_unlock(&mutex_write);
 				break;
 			}
 			case MEM_INIT_PROCESS: {
 				// Creo la tabla de segmentos y la devuelvo al kernel cuando crea un proceso
 				int pid = atoi(list_get(instruction->args, 0));
-				//t_list* segment_table = create_sg_table(mt->mem_structure, pid);
+				// t_list* segment_table = create_sg_table(mt->mem_structure, pid);
 				log_info(config_memory.logger, "Creación de Proceso PID: %d", pid);
 				// Envío la tabla de segmentos al kernel
-				//socket_send(mt->socket, serialize_segment_table(segment_table));
+				// socket_send(mt->socket, serialize_segment_table(segment_table));
 				// Definir qué recibe Kernel de acá
 				break;
 			}
@@ -110,9 +103,7 @@ void handle_modules(t_memory_thread* mt) {
 			case COMPACT_ALL: {
 				log_info(config_memory.logger, "Solicitud de compactación");
 				sleep(config_memory.com_delay);
-				pthread_mutex_lock(&mutex_compact);
 				compact_memory(mt->mem_structure);
-				pthread_mutex_unlock(&mutex_compact);
 				break;
 			}
 			default: {
@@ -121,5 +112,6 @@ void handle_modules(t_memory_thread* mt) {
 				break;
 			}
 		}
+		pthread_mutex_unlock(&memory_access);
 	}
 }

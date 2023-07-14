@@ -116,8 +116,9 @@ typedef enum execution_context_index {
 typedef struct config_cpu {
 	t_log* logger;
 	sem_t flag_dislodge;
-	int connection_kernel;
+	int socket_memoria;
 	int max_segment_size;
+	int instruction_delay;
 } configuration_cpu;
 
 typedef enum op_code {
@@ -160,7 +161,5 @@ char* get_full_path(char* path);
 void* s_malloc(size_t size);
 
 void print_execution_context(execution_context* execution_context);
-
-void print_instruction(t_instruction* instruction);
 
 #endif
