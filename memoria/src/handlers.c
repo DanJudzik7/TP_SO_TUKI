@@ -1,5 +1,6 @@
 #include "handlers.h"
 
+extern t_config_memory config_memory;
 pthread_mutex_t memory_access;
 
 void listen_modules(int server_memory, t_memory_structure* memory_structure) {
@@ -38,9 +39,9 @@ void handle_modules(t_memory_thread* mt) {
 				int pid = atoi(list_get(instruction->args, 3));
 				sleep(config_memory.mem_delay);
 				char* buffer = read_memory(s_id, offset, size, mt->mem_structure, pid);
-				if (buffer == NULL) // devolver seg_fault
+				if (buffer == NULL)	 // devolver seg_fault
 					socket_send(mt->socket, package_new(SEG_FAULT));
-				else // devolver buffer
+				else  // devolver buffer
 					socket_send(mt->socket, serialize_message(buffer, false));
 				break;
 			}

@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 	}
 	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
-	config_cpu.socket_memoria = connect_module(config, logger, "MEMORIA");
+	config_cpu.socket_memory = connect_module(config, logger, "MEMORIA");
 
 	// int kernel_fd = receive_modules(logger, config);
 	// execution_context* context = create_context_test();

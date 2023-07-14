@@ -1,5 +1,7 @@
 #include "tests_memoria.h"
 
+extern t_config_memory config_memory;
+
 int main() {
     setup_config();
     printf("Iniciando Tests...\n\n");

@@ -23,12 +23,26 @@ void decode(t_instruction* instruction, execution_context* ec) {
 	}
 }
 
-execution_context* execute(execution_context* execution_context, t_instruction* instruction) {
+void execute(t_instruction* instruction, execution_context* ec) {
 	switch (instruction->op_code) {
 		case SET:
-			execute_set(execution_context, instruction);
+			execute_set(ec, instruction);
 			break;
-		case MOV_IN:
+		case MOV_IN: { // Registro, t_physical_address {segment, offset}
+			t_physical_address* pa = list_get(instruction->args, 1);
+			t_instruction* mem_op = malloc(sizeof(t_instruction));
+			mem_op->op_code = MEM_READ_ADDRESS;
+			mem_op->args = list_create();
+			list_add(mem_op->args, pa->segment);
+			list_add(mem_op->args, pa->offset);
+			list_add(mem_op->args, sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
+			list_add(mem_op->args, ec->pid);
+			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
+				log_error(config_cpu.logger, "Error al enviar operación al memoria");
+			}
+			t_package* package_receive_memory = socket_receive(config_cpu.socket_memory);
+			char* str_write = deserialize_message(package_receive_memory);
+		}
 		case MOV_OUT:
 		case I_O:
 		case F_OPEN:
@@ -48,13 +62,13 @@ execution_context* execute(execution_context* execution_context, t_instruction* 
 			break;
 		case EXIT:
 			log_warning(config_cpu.logger, "Ejecutando un EXIT");
-			execute_exit(execution_context);
+			execute_exit(ec);
 			dislodge();
 			break;
 		default:
 			break;
 	}
-	return execution_context;
+	return ec;
 }
 
 void execute_set(execution_context* execution_context, t_instruction* instruction) {

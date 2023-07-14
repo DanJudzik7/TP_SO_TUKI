@@ -1,5 +1,6 @@
 #include "handler_instruction_memoria.h"
 
+extern t_config_memory config_memory;
 
 t_list* create_sg_table(t_memory_structure* memory_structure,int process_id){
     t_list* segment_table = list_create();

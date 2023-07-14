@@ -1,5 +1,7 @@
 #include "utils_memoria.h"
 
+t_config_memory config_memory;
+
 void setup_config() {
     config_memory.logger = start_logger("memoria");
     config_memory.config = start_config("memoria");

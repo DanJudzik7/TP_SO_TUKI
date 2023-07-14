@@ -76,8 +76,8 @@ typedef struct segment{
 	int s_id;
 } segment;
 
-//Direccion fisica
-typedef struct physical_address {
+// Dirección Física
+typedef struct t_physical_address {
     int segment;
     int offset;
 } t_physical_address;
@@ -116,7 +116,7 @@ typedef enum execution_context_index {
 typedef struct config_cpu {
 	t_log* logger;
 	sem_t flag_dislodge;
-	int socket_memoria;
+	int socket_memory;
 	int max_segment_size;
 	int instruction_delay;
 } configuration_cpu;
@@ -141,7 +141,7 @@ typedef enum op_code {
 } op_code;
 
 typedef struct t_instruction {
-	op_code op_code;
+	int32_t op_code;
 	t_list* args;
 } t_instruction;
 

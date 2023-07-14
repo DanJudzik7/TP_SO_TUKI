@@ -12,7 +12,7 @@ t_instruction* fetch(execution_context* execution_context);
 
 void decode(t_instruction* instruction, execution_context* ec);
 
-execution_context* execute(execution_context* execution_context, t_instruction* instruction);
+void execute(t_instruction* instruction, execution_context* ec);
 
 void execute_set(execution_context* execution_context, t_instruction* instruction);
 void execute_exit(execution_context* execution_context);
