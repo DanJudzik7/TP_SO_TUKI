@@ -10,7 +10,7 @@
 
 extern config_filesystem config_fs;
 
-typedef struct {
+typedef struct fcb {
 	char* file_name;
 	int file_size;
 	uint32_t direct_pointer;

@@ -15,12 +15,7 @@ typedef enum t_package_type {
     MESSAGE_PCB_FINISHED,   // 3
     MESSAGE_BUSY,           // 4
     INSTRUCTIONS,           // 5
-    EXECUTION_CONTEXT,      // 6
-    INSTRUCTION,            // 7
-    SEG_FAULT,              // 11
-    OK_INSTRUCTION,         // 12
-    NO_SPACE_LEFT,          // 15
-    MEMORY_BUFFER_R         // 16
+    EXECUTION_CONTEXT       // 6
 } t_package_type;
 
 typedef enum t_memory_op {
@@ -34,6 +29,13 @@ typedef enum t_memory_op {
     COMPACT_FINISHED,
     SEGMENT
 } t_memory_op;
+
+typedef enum t_memory_state {
+    SEG_FAULT,               // 0
+    OK_INSTRUCTION,          // 1
+    NO_SPACE_LEFT,           // 2
+    MEMORY_BUFFER_R          // 3
+} t_memory_state;
 
 // Crea y retorna un paquete con el código de operación especificado.
 t_package* package_new(int32_t type);

@@ -81,7 +81,7 @@ t_pcb* pcb_new(int pid, int burst_time) {
 }
 
 void pcb_destroy(t_pcb* pcb) {
-	list_destroy_and_destroy_elements(pcb->files, (void*)delete_file);
+	dictionary_destroy(pcb->files);
 	queue_destroy_and_destroy_elements(pcb->execution_context->instructions, (void*)delete_instruction);
 	free(pcb->execution_context->cpu_register);
 	pcb->execution_context->cpu_register = NULL;
@@ -91,11 +91,6 @@ void pcb_destroy(t_pcb* pcb) {
 	pcb->execution_context = NULL;
 	free(pcb);
 	pcb = NULL;
-}
-
-void delete_file(t_file* file) {
-	free(file->file_direction);
-	free(file);
 }
 
 void delete_instruction(t_instruction* instruction) {

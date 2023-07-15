@@ -10,12 +10,12 @@ int handle_kernel(int socket_kernel) {
 
 		t_instruction* instruction = deserialize_instruction(package);
 		log_warning(config_fs.logger, "El código de operación es: %i", instruction->op_code);
-		if (process_instruction(instruction)) {
-			if (!socket_send(socket_kernel, serialize_message("OK_OPERATION", false))) {
-				log_warning(config_fs.logger, "Error al enviar el paquete");
-				return -1;
-			}
-		} else abort();
+		bool processed = process_instruction(instruction);
+		if (!socket_send(socket_kernel, package_new(processed ? MESSAGE_OK : MESSAGE_FLAW))) {
+			log_warning(config_fs.logger, "Error al enviar el paquete");
+			return -1;
+		}
+		if (!processed) abort();
 		free(instruction);
 		free(package);
 	}
@@ -37,13 +37,19 @@ bool process_instruction(t_instruction* instruction) {
 			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
 				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
 			}
-			t_package* package_receive_memory = socket_receive(config_fs.socket_memoria);
-			char* str_write = deserialize_message(package_receive_memory);
-
+			t_package* package = socket_receive(config_fs.socket_memoria);
+			if (package->type == SEG_FAULT) {
+				log_error(config_fs.logger, "Segmentation fault al leer el archivo");
+				return false;
+			}
+			if (package->type != MESSAGE_OK) {
+				log_error(config_fs.logger, "Error desconocido al leer el archivo");
+				return false;
+			}
 			list_destroy(instruction->args);
 			free(instruction);
 			free(miCharPuntero_r);
-			return strcmp(str_write, "OK_OPERATION") == 0;
+			return true;
 		}
 		case F_WRITE: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
@@ -287,10 +293,10 @@ void open_file(t_instruction* instruction) {
 	FILE* fcb = fopen(full_file_path, "r");
 	if (fcb == NULL) {
 		fopen(full_file_path, "w");
-		log_warning(config_fs.logger, "NO existia el archivo");
+		log_warning(config_fs.logger, "No existía el archivo");
 		create_file(full_file_path, file_name);
 	} else {
-		log_warning(config_fs.logger, "Existia el archivo");
+		log_warning(config_fs.logger, "Existía el archivo");
 		fclose(fcb);
 	}
 	free(full_file_path);

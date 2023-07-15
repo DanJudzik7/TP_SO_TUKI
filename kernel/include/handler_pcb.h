@@ -11,9 +11,10 @@ typedef struct t_pcb {
 	process_state state;
 	int aprox_burst_time;
 	time_t last_ready_time;
-	t_list* files;
+	t_dictionary* files;
 	execution_context* execution_context;
 } t_pcb;
+
 typedef struct t_global_config_kernel {
 	t_log* logger;
 	t_queue* new_pcbs;
@@ -44,9 +45,6 @@ t_pcb* pcb_new(int pid, int burst_time);
 
 // Limpia un PCB de la memoria
 void pcb_destroy(t_pcb* pcb);
-
-// Limpia un t_file de la memoria
-void delete_file(t_file* file);
 
 // Limpia una t_instruction de la memoria
 void delete_instruction(t_instruction* instruction);
