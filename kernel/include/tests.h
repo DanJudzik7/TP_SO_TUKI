@@ -1,7 +1,7 @@
 #ifndef TESTS_KERNEL_H
 #define TESTS_KERNEL_H
 #include <CUnit/Basic.h>
-int main();
+int run_tests();
 void suma_kernel();
 
 #endif

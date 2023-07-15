@@ -4,7 +4,7 @@ t_package* package_new(int32_t type) {
 	t_package* package = s_malloc(sizeof(t_package));
 	package->type = type;
 	package->size = 0;
-	package->buffer = NULL;
+	package->buffer = malloc(0);
 	return package;
 };
 
@@ -33,7 +33,11 @@ void package_add(t_package* package, void* value, uint64_t* value_size) {
 
 void package_write(t_package* package, char* value) {
 	uint64_t size = strlen(value) + 1;
-	package_add(package, value, &size);
+	char* new_value = s_malloc(size);
+	memcpy(new_value, value, size);
+	new_value[size - 1] = '\0';
+	package_add(package, new_value, &size);
+	free(new_value);
 }
 
 t_package* package_decode(void* source, uint64_t* offset) {
