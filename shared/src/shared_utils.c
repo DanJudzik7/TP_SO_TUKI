@@ -51,6 +51,11 @@ void* s_malloc(size_t size) {
 	return ptr;
 }
 
+t_instruction* fetch(execution_context* ec) {
+	if (ec->program_counter >= list_size(ec->instructions->elements)) return NULL;
+	return list_get(ec->instructions->elements, ec->program_counter);
+}
+
 void print_execution_context(execution_context* execution_context) {
     printf("Execution Context:\n");
     printf(" - Program Counter: %u\n", execution_context->program_counter);

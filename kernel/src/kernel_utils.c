@@ -1,11 +1,6 @@
 #include "kernel_utils.h"
 
-bool no_more_instructions(execution_context* ec){
-	return ec->program_counter>= queue_size(ec->instructions);
-}
-
 void resources_handler(t_pcb* pcb, process_state process_state, t_global_config_kernel* gck){
-
 	char* resource_request = get_resource_name(pcb);
 	printf("El recurso requerido es: %s", resource_request);
 	if(!dictionary_has_key(gck->resources,resource_request)){

@@ -82,11 +82,6 @@ typedef struct t_physical_address {
     int offset;
 } t_physical_address;
 
-typedef struct t_file {
-	uint32_t size_file;
-	void* file_direction;
-} t_file;
-
 typedef enum process_state {
 	NEW,
 	READY,
@@ -159,6 +154,8 @@ char* get_full_path(char* path);
 
 // Safe Memory Allocation. Crashea si no hay más memoria.
 void* s_malloc(size_t size);
+
+t_instruction* fetch(execution_context* execution_context);
 
 void print_execution_context(execution_context* execution_context);
 
