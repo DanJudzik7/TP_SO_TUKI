@@ -30,7 +30,9 @@ typedef enum t_memory_op {
     MEM_WRITE_ADDRESS,
     MEM_CREATE_SEGMENT,
     MEM_DELETE_SEGMENT,
-    COMPACT_ALL
+    COMPACT_ALL,
+    COMPACT_FINISHED,
+    SEGMENT
 } t_memory_op;
 
 // Crea y retorna un paquete con el código de operación especificado.

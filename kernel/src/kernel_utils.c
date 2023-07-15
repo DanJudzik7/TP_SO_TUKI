@@ -18,6 +18,7 @@ void resources_handler(t_pcb* pcb, process_state process_state, t_global_config_
 		if(resource->instances >= 0) {
 			(resource->instances)--;
 			printf("Las instancias del recurso quedaro reducidas a -> %i", resource->instances);
+			gck->pcb_priority_helper = pcb;
 		}
 		// SI EL PROCESO ES MENOR A 0 ESTRICTAMENTE, LO MANDO A LA COLA DE BLOQUEADOS DE ESE RECURSO
 		// TODO: NO DICE NADA DE BLOQUEAR, CONSULTAR si pcb->state = BLOCK; aunque da igual.
@@ -35,9 +36,16 @@ void resources_handler(t_pcb* pcb, process_state process_state, t_global_config_
 	}
 }
 
-char* get_resource_name(t_pcb* pcb){
-	//Obtengo la instruccion apuntada por el program counter actual
-	t_instruction* instruction =  list_get(pcb->execution_context->instructions->elements, pcb->execution_context->program_counter);
-	//Obtengo el nombre del recurso
-	return list_get(instruction->args, 1);
+char* get_resource_name(t_pcb* pcb) {
+    // Obtengo la instruccion apuntada por el program counter actual
+    t_instruction* instruction = list_get(pcb->execution_context->instructions->elements, pcb->execution_context->program_counter);
+    
+    if (instruction != NULL) {
+        char* resource_name = list_get(instruction->args, 0);
+        printf("Nombre del recurso obtenido: %s\n", resource_name);
+        return resource_name;
+    } else {
+        printf("No se pudo obtener el nombre del recurso o no existe\n");
+        return NULL;
+    }
 }

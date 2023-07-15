@@ -27,4 +27,9 @@ void graph_table_pid_segments(t_dictionary* table_pid_segments, void* memory_bas
 // Función para graficar la RAM y la tabla table_pid_segments
 void graph_memory(t_memory_structure* memory_struct, void* memory_base);
 
+t_package* serialize_segment_table_test(t_memory_structure* mem_struct, t_list* segment_table);
+t_package* serialize_segment_test(segment* segment,t_memory_structure* mem_struct);
+t_package* serialize_all_segments(t_memory_structure* mem_struct);
+void deserialize_segment_table_test(t_package* package);
+void deserialize_segment_test(t_package* nested);
 #endif

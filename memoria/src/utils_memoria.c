@@ -23,6 +23,7 @@ t_memory_structure* new_memory_structure(void* memory) {
 	memory_structure->segment_zero = s_malloc(sizeof(segment));
 	// Recordemos que la ram es una t_list unicamente de ayuda, que apunta a las direcciones de memoria [dir_segment_zer, sig dirección, etc ]
 	memory_structure->ram = list_create();
+	memory_structure->heap = memory;
 
 	// Creo el segmento 0 y lo agrego al diccionario y a la memoria auxiliar ram
 	memory_structure->segment_zero->base = memory;

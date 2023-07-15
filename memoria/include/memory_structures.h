@@ -31,6 +31,7 @@ typedef struct t_memory_structure {
 	t_dictionary* table_pid_segments;  // un diccionario con todas las tablas de segmentos de todos los procesos  [ key: [lista_segmentos ] ]
 	t_list* hole_list;
 	t_list* ram;  // La memoria en si
+	void* heap;
 } t_memory_structure;
 
 typedef struct t_memory_thread {
