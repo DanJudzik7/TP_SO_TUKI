@@ -3,6 +3,15 @@
 	"compounds": [
 		{
 			"name": "TUKI",
+			"configurations": ["Memory", "Filesystem (delayed)", "CPU (delayed)", "Kernel (delayed)", "Console (delayed)"],
+			"presentation": {
+				"group": "+",
+				"order": 1
+			},
+			"stopAll": true
+		},
+		{
+			"name": "TUKI Light",
 			"configurations": ["CPU", "Kernel (delayed)", "Console (delayed)"],
 			"presentation": {
 				"group": "+",
@@ -10,6 +19,7 @@
 			},
 			"stopAll": true
 		}
+
 	],
 	"configurations": [
 		{
@@ -53,6 +63,33 @@
 				"hidden": true
 			},
 			"suppressMultipleSessionWarning": true,
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Console Test",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/consola/test",
+			"preLaunchTask": "Make Test Consola",
+			"cwd": "${workspaceFolder}/consola",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"presentation": {
+				"hidden": false,
+				"group": "Módulos",
+				"order": 3
+			},
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -146,6 +183,32 @@
 			]
 		},
 		{
+			"name": "CPU (delayed)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/cpu/cpu",
+			"preLaunchTask": "Make CPU (delayed)",
+			"cwd": "${workspaceFolder}/cpu",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"presentation": {
+				"hidden": true
+			},
+			"suppressMultipleSessionWarning": true,
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
 			"name": "Filesystem",
 			"type": "cppdbg",
 			"request": "launch",
@@ -154,6 +217,32 @@
 			"cwd": "${workspaceFolder}/filesystem",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Filesystem (delayed)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/filesystem/filesystem",
+			"preLaunchTask": "Make Filesystem (delayed)",
+			"cwd": "${workspaceFolder}/filesystem",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"presentation": {
+				"hidden": true
+			},
+			"suppressMultipleSessionWarning": true,
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",

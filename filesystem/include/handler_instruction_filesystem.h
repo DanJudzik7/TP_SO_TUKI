@@ -8,6 +8,8 @@
 
 extern config_filesystem config_fs;
 
+int handle_kernel(int socket_kernel);
+
 bool process_instruction(t_instruction* instruction);
 
 int next_bit_position();

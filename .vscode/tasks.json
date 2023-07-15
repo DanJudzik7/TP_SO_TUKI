@@ -22,7 +22,7 @@
         {
             "label": "Make Console (delayed)",
             "dependsOrder": "sequence",
-            "dependsOn": ["Delay", "Delay", "Make Console"],
+            "dependsOn": ["Delay", "Delay", "Delay", "Make Console"],
         },
         {
             "label": "Make Console",
@@ -40,9 +40,24 @@
             }
         },
         {
+            "label": "Make Test Consola",
+            "type": "shell",
+            "command": "make test",
+            "options": {
+                "cwd": "${workspaceFolder}/consola"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
             "label": "Make Kernel (delayed)",
             "dependsOrder": "sequence",
-            "dependsOn": ["Delay", "Make Kernel"],
+            "dependsOn": ["Delay", "Delay", "Make Kernel"],
         },
         {
             "label": "Make Kernel",
@@ -75,6 +90,11 @@
             }
         },
         {
+            "label": "Make CPU (delayed)",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Delay", "Make CPU"],
+        },
+        {
             "label": "Make Filesystem",
             "type": "shell",
             "command": "make",
@@ -88,6 +108,11 @@
             "presentation": {
                 "clear": true
             }
+        },
+        {
+            "label": "Make Filesystem (delayed)",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Delay", "Make Filesystem"],
         },
         {
             "label": "Make Test Filesystem",

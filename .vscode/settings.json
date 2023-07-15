@@ -61,7 +61,8 @@
         "array": "c",
         "tuple": "c",
         "utility": "c",
-        "handler_cpu.h": "c"
+        "handler_cpu.h": "c",
+        "tests_console.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false
