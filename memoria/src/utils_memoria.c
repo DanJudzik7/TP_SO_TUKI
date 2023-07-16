@@ -17,7 +17,7 @@ void setup_config() {
 
 t_memory_structure* new_memory_structure(void* memory) {
 	// Inicializo las estructuras de memoria
-	t_memory_structure* memory_structure = s_malloc(sizeof(memory_structure));
+	t_memory_structure* memory_structure = s_malloc(sizeof(t_memory_structure));
 	memory_structure->hole_list = list_create();
 	memory_structure->table_pid_segments = dictionary_create();
 	memory_structure->segment_zero = s_malloc(sizeof(segment));

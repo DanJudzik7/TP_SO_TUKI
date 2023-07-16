@@ -117,7 +117,6 @@ t_package* serialize_segment_table_test(t_memory_structure* mem_struct, t_list* 
 		t_package* nested = serialize_segment_test(list_get(segment_table, i), mem_struct);
 		deserialize_segment_test(nested);
 		package_nest(package,nested);
-		//free(nested);
 	}
 	return package;
 }
