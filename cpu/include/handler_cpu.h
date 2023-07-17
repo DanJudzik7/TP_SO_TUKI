@@ -8,9 +8,11 @@
 
 extern configuration_cpu config_cpu;
 
-void decode(t_instruction* instruction, execution_context* ec);
+t_instruction* fetch(execution_context* execution_context);
 
-void execute(t_instruction* instruction, execution_context* ec);
+t_physical_address* decode(t_instruction* instruction, execution_context* ec);
+
+void execute(t_instruction* instruction, execution_context* ec, t_physical_address* associated_pa);
 
 void set_register(char* register_name, char* value, cpu_register* registers);
 

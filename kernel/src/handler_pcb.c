@@ -12,12 +12,12 @@ void listen_consoles(t_global_config_kernel* gck) {
 		hcp->connection = console_socket;
 		hcp->config = gck;
 		// Se crea un thread para escuchar las instrucciones
-		pthread_create(&thread, NULL, (void*)handle_incoming_instructions, hcp);
+		pthread_create(&thread, NULL, (void*)handle_console, hcp);
 		pthread_detach(thread);
 	}
 }
 
-void handle_incoming_instructions(helper_create_pcb* hcp) {
+void handle_console(helper_create_pcb* hcp) {
 	t_pcb* pcb = pcb_new(hcp->connection, hcp->config->default_burst_time);
 	printf("Nueva consola conectada. PID: %i\n", pcb->pid);
 	log_info(hcp->config->logger, "El proceso %d se creó en NEW", pcb->pid);
@@ -82,7 +82,7 @@ t_pcb* pcb_new(int pid, int burst_time) {
 
 void pcb_destroy(t_pcb* pcb) {
 	dictionary_destroy(pcb->files);
-	queue_destroy_and_destroy_elements(pcb->execution_context->instructions, (void*)delete_instruction);
+	queue_destroy_and_destroy_elements(pcb->execution_context->instructions, (void*)instruction_delete);
 	free(pcb->execution_context->cpu_register);
 	pcb->execution_context->cpu_register = NULL;
 	free(pcb->execution_context->segment_table);
@@ -91,9 +91,4 @@ void pcb_destroy(t_pcb* pcb) {
 	pcb->execution_context = NULL;
 	free(pcb);
 	pcb = NULL;
-}
-
-void delete_instruction(t_instruction* instruction) {
-	list_destroy_and_destroy_elements(instruction->args, free);
-	free(instruction);
 }

@@ -12,9 +12,8 @@ int main(int argc, char** argv) {
 	}
 	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
-	// Connect_module conecta al modulo que le pasa como tercer parámetros
 	int socket_cpu = connect_module(config, logger, "CPU");
-	// int socket_memoria = connect_module(config, logger, "MEMORIA");
+	int socket_memoria = connect_module(config, logger, "MEMORIA");
 	int socket_filesystem = connect_module(config, logger, "FILESYSTEM");
 
 	// Obtengo del config el algoritmo a usar
@@ -102,15 +101,21 @@ int main(int argc, char** argv) {
 
 		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
 		// TODO: RELEER t.u.k.i y ver si hay que hacer algo con el PCB
-		t_instruction* instruction = fetch(pcb->execution_context);
-		if (instruction == NULL && pcb->state != EXIT_PROCESS) {
+		if (pcb->execution_context->program_counter >= list_size(pcb->execution_context->instructions->elements) && pcb->state != EXIT_PROCESS) {
 			log_warning(logger, "Bloqueando PCB, ya no posee mas instrucciones");
 			pcb->state = BLOCK;
 			sem_post(&gck->flag_with_pcb);
 		}
-		switch (instruction != NULL ? (op_code)instruction->op_code : EXIT) {
-			case F_OPEN: { // filename
-				if (!socket_send(socket_filesystem, serialize_instruction(instruction))) {
+		t_instruction* kernel_request = pcb->execution_context->kernel_request;
+		if (kernel_request == NULL) continue;
+		switch (kernel_request->op_code) {
+			case F_OPEN: {	// filename
+				char* filename = list_get(kernel_request->args, 0);
+				if (is_in_list(open_files, filename)) {
+					log_error(logger, "El archivo %s ya está abierto", filename);
+					continue;
+				}
+				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
 					log_error(logger, "Error al enviar operación a filesystem");
 					continue;
 				}
@@ -119,13 +124,17 @@ int main(int argc, char** argv) {
 					log_error(logger, "Error al abrir archivo");
 					continue;
 				}
-				char* filename = list_get(instruction->args, 0);
 				list_add(open_files, filename);
 				dictionary_put(pcb->files, filename, 0);
 				break;
 			}
-			case F_CLOSE: { // filename
-				if (!socket_send(socket_filesystem, serialize_instruction(instruction))) {
+			case F_CLOSE: {	 // filename
+				char* filename = list_get(kernel_request->args, 0);
+				if (!is_in_list(open_files, filename)) {
+					log_error(logger, "El archivo %s no está abierto", filename);
+					continue;
+				}
+				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
 					log_error(logger, "Error al enviar operación a filesystem");
 					continue;
 				}
@@ -134,14 +143,13 @@ int main(int argc, char** argv) {
 					log_error(logger, "Error al cerrar archivo");
 					continue;
 				}
-				char* filename = list_get(instruction->args, 0);
 				list_remove_element(open_files, filename);
 				dictionary_remove(pcb->files, filename);
 				break;
 			}
-			case F_SEEK: { // filename, position
-				char* filename = list_get(instruction->args, 0);
-				int pos = atoi(list_get(instruction->args, 0));
+			case F_SEEK: {	// filename, position
+				char* filename = list_get(kernel_request->args, 0);
+				int pos = atoi(list_get(kernel_request->args, 0));
 				if (dictionary_has_key(pcb->files, filename)) {
 					dictionary_put(pcb->files, filename, pos);
 					log_info(logger, "Se movió el puntero de %s a %d", filename, pos);
@@ -149,10 +157,60 @@ int main(int argc, char** argv) {
 					log_error(logger, "No se encontró el archivo %s", filename);
 				}
 			}
-			case F_READ: { // filename, t_physical_address, size -> NAME(0) posicion(1) tamaño_leer(2) PID(3) S_ID(4) OFFSET(5)
-				char* filename = list_get(instruction->args, 0);
-				t_physical_address* pa = list_get(instruction->args, 1);
-				int size = atoi(list_get(instruction->args, 2));
+			case F_TRUNCATE: {	// filename, bytes count
+				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
+					log_error(logger, "Error al enviar operación a filesystem");
+					return;
+				}
+				t_package* package = socket_receive(socket_filesystem);
+				printf("El truncate del archivo fue %s", package->type == MESSAGE_OK ? "exitosa" : "fallida");
+			}
+			case F_READ:  // filename, logical address, bytes count, segment, offset -> NAME(0) posicion(1) tamaño_leer(2) PID(3) S_ID(4) OFFSET(5)
+			case F_WRITE: {
+				list_replace(kernel_request->args, 1, dictionary_get(pcb->files, list_get(kernel_request->args, 0)));
+				list_add_in_index(kernel_request->args, 3, pcb->pid);
+				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
+					log_error(logger, "Error al enviar operación a filesystem");
+					return;
+				}
+				t_package* package = socket_receive(socket_filesystem);
+				printf("La lectura del archivo fue %s", package->type == MESSAGE_OK ? "exitosa" : "fallida");
+			}
+			case CREATE_SEGMENT: {
+				list_add(kernel_request->args, pcb->pid);
+				kernel_request->op_code = MEM_CREATE_SEGMENT;
+				if (!socket_send(socket_memoria, serialize_instruction(kernel_request))) {
+					log_error(logger, "Error al enviar instrucciones al memoria");
+				}
+				t_package* package = socket_receive(socket_memoria);
+				if (package->type == COMPACT_ALL) {
+					log_error(logger, "Solicitud de compactación");
+					return;
+				}
+				if (package->type == NO_SPACE_LEFT) {
+					log_error(logger, "Error del kernel: Out of Memory");
+					pcb->state = EXIT_PROCESS;
+					return;
+				}
+				if (package->type == MESSAGE_OK) {
+					char* s_base = deserialize_message(package);
+					log_error(logger, "Error desconocido al leer el archivo");
+					return;
+				}
+				log_error(logger, "Error desconocido al leer el archivo");
+				return;
+			}
+			case DELETE_SEGMENT: {
+				list_add(kernel_request->args, pcb->pid);
+				kernel_request->op_code = MEM_DELETE_SEGMENT;
+				if (!socket_send(socket_memoria, serialize_instruction(kernel_request))) {
+					log_error(logger, "Error al enviar instrucciones al memoria");
+				}
+				t_package* package = socket_receive(socket_memoria);
+				if (package->type != OK_INSTRUCTION) {
+					log_error(logger, "Error al eliminar segmento");
+					return;
+				}
 			}
 			case YIELD:
 				state_yield(pcb, gck);
@@ -170,6 +228,7 @@ int main(int argc, char** argv) {
 				sem_post(&gck->flag_with_pcb);
 				break;
 		}
+		instruction_delete(kernel_request);
 	}
 
 	log_warning(logger, "Finalizando el kernel. Se desconectó un módulo esencial.");

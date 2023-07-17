@@ -38,7 +38,7 @@ typedef struct helper_create_pcb {
 void listen_consoles(t_global_config_kernel* gck);
 
 // Administrador de instrucciones recibidas por consola
-void handle_incoming_instructions(helper_create_pcb* hcp);
+void handle_console(helper_create_pcb* hcp);
 
 // Crea un PCB con los datos recibidos
 t_pcb* pcb_new(int pid, int burst_time);
@@ -47,6 +47,6 @@ t_pcb* pcb_new(int pid, int burst_time);
 void pcb_destroy(t_pcb* pcb);
 
 // Limpia una t_instruction de la memoria
-void delete_instruction(t_instruction* instruction);
+void instruction_delete(t_instruction* instruction);
 
 #endif

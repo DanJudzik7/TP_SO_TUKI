@@ -1,36 +1,38 @@
 #include "handler_cpu.h"
 
-void decode(t_instruction* instruction, execution_context* ec) {
+t_instruction* fetch(execution_context* ec) {
+	if (ec->program_counter >= list_size(ec->instructions->elements)) return NULL;
+	return list_get(ec->instructions->elements, ec->program_counter);
+}
+
+t_physical_address* decode(t_instruction* instruction, execution_context* ec) {
 	switch (instruction->op_code) {
 		case SET:
 			sleep(config_cpu.instruction_delay);
 			break;
 		case MOV_IN:  // Registro, Dirección Lógica
-			list_replace(instruction->args, 1, mmu((int)list_get(instruction->args, 1), sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)), ec));
-			break;
+			return mmu((int)list_get(instruction->args, 1), sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)), ec);
 		case MOV_OUT:  // Dirección Lógica, Registro
-			list_replace(instruction->args, 0, mmu((int)list_get(instruction->args, 0), sizeof(register_pointer(list_get(instruction->args, 1), ec->cpu_register)), ec));
-			break;
+			return mmu((int)list_get(instruction->args, 0), sizeof(register_pointer(list_get(instruction->args, 1), ec->cpu_register)), ec);
 		case F_READ:   // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
 		case F_WRITE:  // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
-			list_replace(instruction->args, 1, mmu((int)list_get(instruction->args, 1), list_get(instruction->args, 2), ec));
-			break;
+			return mmu((int)list_get(instruction->args, 1), list_get(instruction->args, 2), ec);
 	}
+	return NULL;
 }
 
-void execute(t_instruction* instruction, execution_context* ec) {
+void execute(t_instruction* instruction, execution_context* ec, t_physical_address* associated_pa) {
 	switch (instruction->op_code) {
 		case SET: {
 			set_register(list_get(instruction->args, 0), list_get(instruction->args, 1), ec->cpu_register);
 			break;
 		}
-		case MOV_IN: { // Registro, t_physical_address {segment, offset}
-			t_physical_address* pa = list_get(instruction->args, 1);
+		case MOV_IN: {	// Registro, Dirección Lógica (y associated_pa)
 			t_instruction* mem_op = malloc(sizeof(t_instruction));
 			mem_op->op_code = MEM_READ_ADDRESS;
 			mem_op->args = list_create();
-			list_add(mem_op->args, pa->segment);
-			list_add(mem_op->args, pa->offset);
+			list_add(mem_op->args, associated_pa->segment);
+			list_add(mem_op->args, associated_pa->offset);
 			list_add(mem_op->args, sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
 			list_add(mem_op->args, ec->pid);
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
@@ -43,13 +45,12 @@ void execute(t_instruction* instruction, execution_context* ec) {
 			free(value);
 			break;
 		}
-		case MOV_OUT: { // t_physical_address {segment, offset}, Registro
-			t_physical_address* pa = list_get(instruction->args, 0);
+		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
 			t_instruction* mem_op = malloc(sizeof(t_instruction));
 			mem_op->op_code = MEM_WRITE_ADDRESS;
 			mem_op->args = list_create();
-			list_add(mem_op->args, pa->segment);
-			list_add(mem_op->args, pa->offset);
+			list_add(mem_op->args, associated_pa->segment);
+			list_add(mem_op->args, associated_pa->offset);
 			list_add(mem_op->args, register_pointer(list_get(instruction->args, 1), ec->cpu_register));
 			list_add(mem_op->args, ec->pid);
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
@@ -63,24 +64,17 @@ void execute(t_instruction* instruction, execution_context* ec) {
 				log_info(config_cpu.logger, "Escritura en memoria exitosa");
 			break;
 		}
-		case I_O: { // Tiempo
+		case I_O: {	 // Tiempo
 			log_error(config_cpu.logger, "Instrucción IO: Manejo de recursos no implementado");
 		}
-		case F_OPEN: {
-			
+		case F_READ:  // filename, logical address, bytes count
+		case F_WRITE: {
+			ec->kernel_request = malloc(sizeof(t_instruction));
+			ec->kernel_request->op_code = instruction->op_code;
+			ec->kernel_request->args = list_duplicate(instruction);
+			list_add(ec->kernel_request->args, associated_pa->segment);
+			list_add(ec->kernel_request->args, associated_pa->offset);
 		}
-		case F_CLOSE:
-		case F_SEEK:
-		case F_READ: { // NAME(0) posicion(1) tamaño_leer(2) PID(3) S_ID(4) OFFSET(5)
-			
-		}
-		case F_WRITE:
-		case F_TRUNCATE:
-		case WAIT:
-		case SIGNAL:
-		case CREATE_SEGMENT:
-		case DELETE_SEGMENT:
-			break;
 		case YIELD:
 			log_warning(config_cpu.logger, "Ejecutando un YIELD");
 			dislodge();
@@ -90,7 +84,18 @@ void execute(t_instruction* instruction, execution_context* ec) {
 			execute_exit(ec);
 			dislodge();
 			break;
+		case F_OPEN:
+		case F_CLOSE:
+		case F_SEEK:
+		case F_TRUNCATE:
+		case WAIT:
+		case SIGNAL:
+		case CREATE_SEGMENT:
+		case DELETE_SEGMENT:
+			ec->kernel_request = instruction;
+			break;
 		default:
+			log_error(config_cpu.logger, "Error: Operación inválida");
 			break;
 	}
 }

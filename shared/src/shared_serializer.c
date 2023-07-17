@@ -24,8 +24,7 @@ t_package* serialize_execution_context(execution_context* ec) {
 	sg_help->pid = ec->pid;
 	sg_help->segment_table_pcb = ec->segment_table;
 	package_nest(package, serialize_segment_table(ec->segment_table)); */
-
-	printf("\nTamaño TOTAL serializado del paquete: %lu bytes\n", package->size);
+	if (ec->kernel_request != NULL) package_nest(package, package_new_nested(KERNEL_REQUEST, ec->kernel_request));
 	return package;
 }
 
@@ -53,13 +52,15 @@ execution_context* deserialize_execution_context(t_package* package) {
 			case SEGMENT_TABLE:
 				//ec->segment_table = deserialize_segment_table(nested_package);
 				break;
+			case KERNEL_REQUEST:
+				ec->kernel_request = deserialize_instruction(nested_package);
+				break;
 			default:
 				printf("Error: Tipo de paquete desconocido.\n");
 				return NULL;
 		}
 		package_destroy(nested_package);
 	}
-	printf("\nTamaño deserealizado TOTAL -> %lu bytes\n", offset);
 	return ec;
 }
 

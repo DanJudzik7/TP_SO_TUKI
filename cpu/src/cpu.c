@@ -70,10 +70,10 @@ int main(int argc, char** argv) {
 			// Ejecuto mientras el flag de desalojo este libre
 			while (!flag_dislodge) {
 				instruction = fetch(context);
-				if (instruction != NULL) {
-					decode(context, instruction);
-					context->program_counter++;
-				}
+				if (instruction == NULL) break;
+				t_physical_address* pa = decode(context, instruction);
+				execute(instruction, context, pa);
+				context->program_counter++;
 			}
 
 			t_package* package_context = serialize_execution_context(context);

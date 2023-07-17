@@ -49,8 +49,11 @@ typedef struct t_memory_structure {
 // Crea y retorna un paquete con el código de operación especificado.
 t_package* package_new(int32_t type);
 
-// Crea un paquete de modo key-value
+// Crea un paquete de modo key-value que contiene un valor o buffer
 t_package* package_new_dict(int32_t key, void* value, uint64_t* value_size);
+
+// Crea un paquete de modo key-value que contiene otro paquete
+t_package* package_new_nested(int32_t key, t_package* value);
 
 // Inserta un paquete dentro de otro
 void package_nest(t_package* package, t_package* nested);

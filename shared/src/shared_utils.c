@@ -51,11 +51,6 @@ void* s_malloc(size_t size) {
 	return ptr;
 }
 
-t_instruction* fetch(execution_context* ec) {
-	if (ec->program_counter >= list_size(ec->instructions->elements)) return NULL;
-	return list_get(ec->instructions->elements, ec->program_counter);
-}
-
 void print_execution_context(execution_context* execution_context) {
     printf("Execution Context:\n");
     printf(" - Program Counter: %u\n", execution_context->program_counter);
@@ -81,4 +76,17 @@ void print_execution_context(execution_context* execution_context) {
     printf("    - ID: %u\n", segment_table->pid);
     printf("    - Direction: %p\n", segment_table->segment_table_pcb);
 	*/
+}
+
+bool is_in_list(t_list* list, char* value) {
+	for (int i = 0; i < list_size(list); i++) {
+		if (strcmp(list_get(list, i), value) == 0) return true;
+	}
+	return false;
+}
+
+void instruction_delete(t_instruction* instruction) {
+	list_destroy(instruction->args);
+	free(instruction);
+	instruction = NULL;
 }

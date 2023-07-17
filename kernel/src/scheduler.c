@@ -3,7 +3,7 @@
 void long_term_schedule(t_global_config_kernel* gck) {
 	log_info(gck->logger, "Realizando Planificación a Largo Plazo");
 	// TODO: LIST_REMOVE_BY_CONDITION no funciona, ACTUALMENTE HARDCODEADO EN KERNEL
-	//  Remover PCBs terminados por handle_incoming_instructions (o sea, usuario, desconexión, etc)
+	//  Remover PCBs terminados por handle_console (o sea, usuario, desconexión, etc)
 	/*
 	t_pcb* pcb_removed = list_remove_by_condition(gck->active_pcbs->elements, (void*)pcb_did_exit);
 	if (pcb_removed) {

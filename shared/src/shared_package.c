@@ -6,11 +6,17 @@ t_package* package_new(int32_t type) {
 	package->size = 0;
 	package->buffer = malloc(0);
 	return package;
-};
+}
 
 t_package* package_new_dict(int32_t key, void* value, uint64_t* value_size) {
 	t_package* package = package_new(key);
 	package_add(package, value, value_size);
+	return package;
+}
+
+t_package* package_new_nested(int32_t key, t_package* value) {
+	t_package* package = package_new(key);
+	package_nest(package, value);
 	return package;
 }
 

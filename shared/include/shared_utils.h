@@ -2,13 +2,13 @@
 #define SHARED_UTILS_H
 
 // Carga librerías varias de utilidades generales
+#include <commons/bitarray.h>
+#include <commons/collections/dictionary.h>
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
-#include <commons/collections/dictionary.h>
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/string.h>
-#include <commons/bitarray.h>
 #include <semaphore.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -51,13 +51,13 @@ typedef struct cpu_register {
 	cpu_register_16 register_16;
 } cpu_register;
 
-typedef struct instruction_memory{
+typedef struct instruction_memory {
 	uint32_t pid;
 	uint32_t s_id;
 	uint32_t offset;
 } instruction_memory;
 
-typedef struct memory_buffer{
+typedef struct memory_buffer {
 	uint32_t pid;
 	char* buffer;
 } memory_buffer;
@@ -70,7 +70,7 @@ typedef struct segment_table {
 } segment_table;
 
 // Estructura de cada segmento
-typedef struct segment{
+typedef struct segment {
 	void* base;
 	int offset;
 	int s_id;
@@ -78,8 +78,8 @@ typedef struct segment{
 
 // Dirección Física
 typedef struct t_physical_address {
-    int segment;
-    int offset;
+	int segment;
+	int offset;
 } t_physical_address;
 
 typedef enum process_state {
@@ -97,6 +97,7 @@ typedef struct execution_context {
 	cpu_register* cpu_register;
 	t_list* segment_table;
 	uint32_t pid;
+	t_instruction* kernel_request;	// Acá la CPU va a guardar si necesita algo de kernel
 } execution_context;
 
 typedef enum execution_context_index {
@@ -106,6 +107,7 @@ typedef enum execution_context_index {
 	CPU_REGISTERS,
 	SEGMENT_TABLE,
 	F_WRITE_READ,
+	KERNEL_REQUEST
 } execution_context_index;
 
 typedef struct config_cpu {
@@ -132,7 +134,7 @@ typedef enum op_code {
 	F_CLOSE,		 // 12
 	DELETE_SEGMENT,	 // 13
 	EXIT,			 // 14
-	YIELD,		 // 15
+	YIELD,			 // 15
 } op_code;
 
 typedef struct t_instruction {
@@ -155,8 +157,10 @@ char* get_full_path(char* path);
 // Safe Memory Allocation. Crashea si no hay más memoria.
 void* s_malloc(size_t size);
 
-t_instruction* fetch(execution_context* execution_context);
-
 void print_execution_context(execution_context* execution_context);
+
+bool is_in_list(t_list* list, char* value);
+
+void instruction_delete(t_instruction* instruction);
 
 #endif
