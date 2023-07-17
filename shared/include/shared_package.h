@@ -37,6 +37,15 @@ typedef enum t_memory_state {
     MEMORY_BUFFER_R          // 3
 } t_memory_state;
 
+// Estructuras para pasar solo este struct y no cada una de manera individual
+typedef struct t_memory_structure {
+	segment* segment_zero;
+	t_dictionary* table_pid_segments;  // un diccionario con todas las tablas de segmentos de todos los procesos  [ key: [lista_segmentos ] ]
+	t_list* hole_list;
+	t_list* ram;  // La memoria en si
+	void* heap;
+} t_memory_structure;
+
 // Crea y retorna un paquete con el código de operación especificado.
 t_package* package_new(int32_t type);
 

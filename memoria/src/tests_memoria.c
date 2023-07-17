@@ -61,77 +61,13 @@ void test_compact() {
 	char* buffer = read_memory(0, 1, 4, memory_structure, 1);
 	printf("El valor leído es: %s \n", buffer);
 	
-	//serialize_all_segments(memory_structure);
+	t_package* package = serialize_all_segments(memory_structure);
 	
 	// Función para graficar la RAM
 	graph_ram(memory_structure, memory);
 	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
-	t_list* sg = dictionary_get(memory_structure->table_pid_segments, string_itoa(2));
-	t_package* package = serialize_segment_table_test(memory_structure,sg);
-	deserialize_segment_table_test(package);
-}
-void deserialize_segment_table_test(t_package* package){
-	uint64_t offset = 0;
-	while (package_decode_isset(package, offset)){
-		t_package* nested = package_decode(package->buffer, &offset);
-		deserialize_segment_test(nested);
-	}
-}
-void deserialize_segment_test(t_package* nested){
-	t_instruction* instruction = deserialize_instruction(nested);
-	int base = atoi(list_get(instruction->args,0));
-	int offset = atoi(list_get(instruction->args,1));
-	int s_id = atoi(list_get(instruction->args,2));
-	printf("Base: %d\n",base);
-	printf("Offset: %d\n",offset);
-	printf("S_ID: %d\n",s_id);
 }
 
-t_package* serialize_all_segments(t_memory_structure* mem_struct){
-	t_package* package = package_new(COMPACT_FINISHED);
-
-	for (int i = 0; i < dictionary_size(mem_struct->table_pid_segments); i++)
-	{	
-		t_list* sg;
-		int j = 0;
-		while (1)
-		{
-			if (dictionary_has_key(mem_struct->table_pid_segments, string_itoa(i)))
-			{
-				sg = dictionary_get(mem_struct->table_pid_segments, string_itoa(i));
-				break;
-			}
-			else
-			{
-				j++;
-			}
-		}
-		serialize_segment_table_test(mem_struct,sg);
-	}
-}
-
-t_package* serialize_segment_table_test(t_memory_structure* mem_struct, t_list* segment_table){
-	t_package* package = package_new(COMPACT_FINISHED);
-	for (int i = 0; i < list_size(segment_table); i++)
-	{
-		t_package* nested = serialize_segment_test(list_get(segment_table, i), mem_struct);
-		deserialize_segment_test(nested);
-		package_nest(package,nested);
-	}
-	return package;
-}
-
-
-t_package* serialize_segment_test(segment* segment,t_memory_structure* mem_struct){
-	t_instruction* instruction = malloc(sizeof(t_instruction));
-	instruction->op_code = SEGMENT;
-	instruction->args = list_create();
-	list_add(instruction->args, string_itoa(segment->base - mem_struct->heap));
-	list_add(instruction->args, string_itoa(segment->offset));
-	list_add(instruction->args, string_itoa(segment->s_id));
-	t_package* package = serialize_instruction(instruction);
-	return package;
-}
 void test_rw() {
 	void* memory = s_malloc(4096);
 	t_memory_structure* memory_structure = new_memory_structure(memory);

@@ -37,15 +37,11 @@ t_package* serialize_cpu_registers(cpu_register* registers);
 // Deserializa los registros de la CPU
 cpu_register* deserialize_cpu_registers(void* source);
 
-// Serializa un segmento de memoria
-t_package* serialize_segment_table(segment_table* sg);
-// Serializa un segmento de memoria y retorna su buffer
-char* serialize_segment(segment* seg);
-
-// Deserializa un paquete del tipo segmento
-//segment_table* deserialize_segment_table(t_package* package);
-// Deserializa un segmento de memoria
-segment* deserialize_segment(char* buffer);
+t_package* serialize_segment_table(t_memory_structure* mem_struct, t_list* segment_table);
+t_package* serialize_segment(segment* segment,t_memory_structure* mem_struct);
+t_package* serialize_all_segments(t_memory_structure* mem_struct);
+void deserialize_segment_table(t_package* package);
+void deserialize_segment(t_package* nested);
 
 /* // Serializa un segmento de f_write y f_read
 t_package* serialize_segment_read_write(segment_read_write* seg_rw);

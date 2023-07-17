@@ -31,7 +31,8 @@ void handle_modules(t_memory_thread* mt) {
 		t_instruction* instruction = deserialize_instruction(package);
 		pthread_mutex_lock(&memory_access);
 		switch ((t_memory_op)instruction->op_code) {
-			// Se debe respetar el orden de los argumentos
+			// Se debe respetar el orden de los argumentos, si maxi, pero no es este el orden. 
+			//EL s_id es el 4 ponele y aca esta en el primero que recibo
 			case MEM_READ_ADDRESS: {
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
@@ -61,10 +62,10 @@ void handle_modules(t_memory_thread* mt) {
 			case MEM_INIT_PROCESS: {
 				// Creo la tabla de segmentos y la devuelvo al kernel cuando crea un proceso
 				int pid = atoi(list_get(instruction->args, 0));
-				// t_list* segment_table = create_sg_table(mt->mem_structure, pid);
+				t_list* segment_table = create_sg_table(mt->mem_structure, pid);
 				log_info(config_memory.logger, "Creación de Proceso PID: %d", pid);
 				// Envío la tabla de segmentos al kernel
-				// socket_send(mt->socket, serialize_segment_table(segment_table));
+				socket_send(mt->socket,serialize_segment_table(mt->mem_structure, segment_table));
 				// Definir qué recibe Kernel de acá
 				break;
 			}
@@ -72,6 +73,7 @@ void handle_modules(t_memory_thread* mt) {
 				int pid = atoi(list_get(instruction->args, 0));
 				remove_sg_table(mt->mem_structure, pid);
 				log_info(config_memory.logger, "Eliminación de Proceso PID: %d", pid);
+				socket_send(mt->socket, package_new(OK_INSTRUCTION));
 				break;
 			}
 			case MEM_CREATE_SEGMENT: {
@@ -90,7 +92,7 @@ void handle_modules(t_memory_thread* mt) {
 						break;
 					default:
 						// Devuelvo la base del segmento creado
-						socket_send(mt->socket, serialize_message((char*)&flag, false));
+						socket_send(mt->socket, serialize_message(string_itoa(flag), false));
 						break;
 				}
 				break;
@@ -99,12 +101,14 @@ void handle_modules(t_memory_thread* mt) {
 				int s_id = atoi(list_get(instruction->args, 0));
 				int pid = atoi(list_get(instruction->args, 2));
 				delete_segment(mt->mem_structure, pid, s_id);
+				socket_send(mt->socket, package_new(OK_INSTRUCTION));
 				break;
 			}
 			case COMPACT_ALL: {
 				log_info(config_memory.logger, "Solicitud de compactación");
 				sleep(config_memory.com_delay);
 				compact_memory(mt->mem_structure);
+				socket_send(mt->socket, serialize_all_segments(mt->mem_structure));
 				break;
 			}
 			default: {

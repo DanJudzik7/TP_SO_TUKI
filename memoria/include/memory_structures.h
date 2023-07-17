@@ -25,14 +25,7 @@ typedef struct t_config_memory {
 	int remaining_memory;
 } t_config_memory;
 
-// Estructuras para pasar solo este struct y no cada una de manera individual
-typedef struct t_memory_structure {
-	segment* segment_zero;
-	t_dictionary* table_pid_segments;  // un diccionario con todas las tablas de segmentos de todos los procesos  [ key: [lista_segmentos ] ]
-	t_list* hole_list;
-	t_list* ram;  // La memoria en si
-	void* heap;
-} t_memory_structure;
+
 
 typedef struct t_memory_thread {
 	int socket;

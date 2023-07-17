@@ -148,78 +148,69 @@ cpu_register* deserialize_cpu_registers(void* source) {
 	return registers;
 }
 
+void deserialize_segment_table(t_package* package){
+	uint64_t offset = 0;
+	while (package_decode_isset(package, offset)){
+		t_package* nested = package_decode(package->buffer, &offset);
+		deserialize_segment(nested);
+	}
+}
+void deserialize_segment(t_package* nested){
+	t_instruction* instruction = deserialize_instruction(nested);
+	int base = atoi(list_get(instruction->args,0));
+	int offset = atoi(list_get(instruction->args,1));
+	int s_id = atoi(list_get(instruction->args,2));
+	printf("Base: %d\n",base);
+	printf("Offset: %d\n",offset);
+	printf("S_ID: %d\n",s_id);
+}
 
-t_package* serialize_segment_table(segment_table* sg) {
-	// Crear un nuevo paquete con suficiente tamaño para todos los segmentos y el pid
-	t_package* package = package_new(SEGMENT_TABLE);
-
-	uint64_t size = sizeof(uint32_t);
-	// Serializar el pid y añadirlo al buffer del paquete
-	package_add(package, &(sg->pid),  &size);
-	package_add(package, &(sg->s_id), &size);
-	package_add(package, &(sg->size_segment), &size);
-/*
-    for (int i = 0; i < sg->segment_table_pcb->elements_count; i++) {
-        segment* seg = list_get(sg->segment_table_pcb, i);
-        char* serialized_segment = serialize_segment(seg);
-        package_add(package, serialized_segment, sizeof(segment));
-        free(serialized_segment);
-    }
-*/
+t_package *serialize_all_segments(t_memory_structure *mem_struct)
+{
+	t_package *package = package_new(COMPACT_FINISHED);
+	int j = 0;
+	int d = 1;
+	t_list *sg;
+	while (d < dictionary_size(mem_struct->table_pid_segments))
+	{
+		if (dictionary_has_key(mem_struct->table_pid_segments, string_itoa(j)))
+		{
+			sg = dictionary_get(mem_struct->table_pid_segments, string_itoa(j));
+			t_package *nested = serialize_segment_table(mem_struct, sg);
+			deserialize_segment_table(nested);
+			package_nest(package, nested);
+			d++;
+			j++;
+		}
+		else
+		{
+			j++;
+		}
+	}
 	return package;
 }
 
-char* serialize_segment(segment* seg) {
-	char* buffer = malloc(sizeof(segment));
-	// Reemplazar estas líneas con la lógica de serialización real para cada campo del segmento
-	memcpy(buffer, &(seg->base), sizeof(void*));
-	buffer += sizeof(void*);
-	memcpy(buffer, &(seg->offset), sizeof(uint32_t));
-	buffer += sizeof(uint32_t);
-	memcpy(buffer, &(seg->s_id), sizeof(uint32_t));
-	return buffer - sizeof(void*) - 2 * sizeof(uint32_t);  // Rebobinar el buffer antes de devolverlo
+t_package* serialize_segment_table(t_memory_structure* mem_struct, t_list* segment_table){
+	t_package* package = package_new(COMPACT_FINISHED);
+	for (int i = 0; i < list_size(segment_table); i++)
+	{
+		t_package* nested = serialize_segment(list_get(segment_table, i), mem_struct);
+		//deserialize_segment(nested);
+		package_nest(package,nested);
+	}
+	return package;
 }
 
-segment_table* deserialize_segment_table(t_package* package) {
-	// Creamos la estructura resultante
-	segment_table* sg_list_help = malloc(sizeof(segment_table));
-	// Creamos la lista de segmentos
-	sg_list_help->segment_table_pcb = list_create();
 
-	// Nos movemos a través del paquete buffer y creamos segmentos
-	char* temp_buffer = package->buffer;
-	
-	memcpy(&(sg_list_help->pid), temp_buffer, sizeof(uint32_t));
-	temp_buffer += sizeof(uint32_t);
-	memcpy(&(sg_list_help->s_id), temp_buffer, sizeof(uint32_t));
-	temp_buffer += sizeof(uint32_t);
-	memcpy(&(sg_list_help->size_segment), temp_buffer, sizeof(uint32_t));
-	temp_buffer += sizeof(uint32_t);
-
-/*
-	for (int i = 0; i < (package->size - sizeof(int)) / sizeof(segment); i++) {
-       	// Deserializamos el segmento
-		segment* new_segment = deserialize_segment(temp_buffer);
-       	// Añadimos el segmento a la lista
-		list_add(sg_list_help->segment_table_pcb, new_segment);
-       	// Avanzamos el buffer temporal
-		temp_buffer += sizeof(segment);
-    }
-*/
-	// Devolvemos el resultado
-	return sg_list_help;
-}
-
-segment* deserialize_segment(char* buffer) {
-
-	segment* new_segment = malloc(sizeof(segment));
-	// Reemplazar estas líneas con la lógica de deserialización real para cada campo del segmento
-	memcpy(&(new_segment->base), buffer, sizeof(void*));
-	buffer += sizeof(void*);
-	memcpy(&(new_segment->offset), buffer, sizeof(int));
-	buffer += sizeof(int);
-	memcpy(&(new_segment->s_id), buffer, sizeof(int));
-	return new_segment;
+t_package* serialize_segment(segment* segment,t_memory_structure* mem_struct){
+	t_instruction* instruction = malloc(sizeof(t_instruction));
+	instruction->op_code = SEGMENT;
+	instruction->args = list_create();
+	list_add(instruction->args, string_itoa(segment->base - mem_struct->heap));
+	list_add(instruction->args, string_itoa(segment->offset));
+	list_add(instruction->args, string_itoa(segment->s_id));
+	t_package* package = serialize_instruction(instruction);
+	return package;
 }
 
 /* t_package* serialize_segment_read_write(segment_read_write* seg_rw) {
