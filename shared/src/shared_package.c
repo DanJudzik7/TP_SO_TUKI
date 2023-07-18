@@ -4,7 +4,7 @@ t_package* package_new(int32_t type) {
 	t_package* package = s_malloc(sizeof(t_package));
 	package->type = type;
 	package->size = 0;
-	package->buffer = s_malloc(0);
+	package->buffer = NULL;
 	return package;
 }
 

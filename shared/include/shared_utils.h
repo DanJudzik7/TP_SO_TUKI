@@ -89,7 +89,18 @@ typedef enum process_state {
 	BLOCK,
 	EXIT_PROCESS
 } process_state;
-
+// Estructuras para pasar solo este struct y no cada una de manera individual
+typedef struct t_memory_structure {
+	segment* segment_zero;
+	t_dictionary* table_pid_segments;  // un diccionario con todas las tablas de segmentos de todos los procesos  [ key: [lista_segmentos ] ]
+	t_list* hole_list;
+	t_list* ram;  // La memoria en si
+	void* heap;
+} t_memory_structure;
+typedef struct t_instruction {
+	int32_t op_code;
+	t_list* args;
+} t_instruction;
 typedef struct execution_context {
 	t_queue* instructions;
 	uint32_t program_counter;
@@ -137,10 +148,6 @@ typedef enum op_code {
 	YIELD,			 // 15
 } op_code;
 
-typedef struct t_instruction {
-	int32_t op_code;
-	t_list* args;
-} t_instruction;
 
 // Carga la configuración de un módulo
 t_config* start_config(char* module);

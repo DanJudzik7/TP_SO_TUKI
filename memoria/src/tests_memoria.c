@@ -66,6 +66,13 @@ void test_compact() {
 	// Función para graficar la RAM
 	graph_ram(memory_structure, memory);
 	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
+
+	t_dictionary* all_segments = deserialize_all_segments(package);
+	t_list* segment_table = dictionary_get(all_segments, "0");
+	segment* segment = list_get(segment_table, 1);
+	printf("La base del segmento es: %i \n", segment->base);
+	graph_specific_table_pid_segments(segment_table, 0, 0);
+
 }
 
 void test_rw() {

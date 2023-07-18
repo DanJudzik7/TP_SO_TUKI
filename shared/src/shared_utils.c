@@ -43,7 +43,7 @@ char* get_config_type(char* module, char* file_type) {
 }
 
 void* s_malloc(size_t size) {
-	void* ptr = s_malloc(size);
+	void* ptr = malloc(size);
 	if (ptr == NULL) {
 		printf("Error: No hay más memoria disponible.\n");
 		abort();
