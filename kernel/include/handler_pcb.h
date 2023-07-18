@@ -27,12 +27,13 @@ typedef struct t_global_config_kernel {
 	int connection_kernel;
 	int connection_cpu;
 	t_pcb* pcb_priority_helper;
+	int socket_memory;
 } t_global_config_kernel;
 
 typedef struct helper_create_pcb {
 	int connection;
 	t_global_config_kernel* config;
-} helper_create_pcb;
+}  helper_create_pcb;
 
 // Servidor para Consolas, que genera un PCB para cada una
 void listen_consoles(t_global_config_kernel* gck);

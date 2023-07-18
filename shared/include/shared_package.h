@@ -12,10 +12,9 @@ typedef enum t_package_type {
     SERIALIZED,             // 0
     MESSAGE_OK,             // 1
     MESSAGE_FLAW,           // 2
-    MESSAGE_PCB_FINISHED,   // 3
-    MESSAGE_BUSY,           // 4
-    INSTRUCTIONS,           // 5
-    EXECUTION_CONTEXT       // 6
+    MESSAGE_DONE,           // 3
+    INSTRUCTIONS,           // 4
+    EXECUTION_CONTEXT       // 5
 } t_package_type;
 
 typedef enum t_memory_op {

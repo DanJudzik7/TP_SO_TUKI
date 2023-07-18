@@ -28,9 +28,7 @@ void execute(t_instruction* instruction, execution_context* ec, t_physical_addre
 			break;
 		}
 		case MOV_IN: {	// Registro, Dirección Lógica (y associated_pa)
-			t_instruction* mem_op = malloc(sizeof(t_instruction));
-			mem_op->op_code = MEM_READ_ADDRESS;
-			mem_op->args = list_create();
+			t_instruction* mem_op = instruction_new(MEM_READ_ADDRESS);
 			list_add(mem_op->args, associated_pa->segment);
 			list_add(mem_op->args, associated_pa->offset);
 			list_add(mem_op->args, sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
@@ -46,9 +44,7 @@ void execute(t_instruction* instruction, execution_context* ec, t_physical_addre
 			break;
 		}
 		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
-			t_instruction* mem_op = malloc(sizeof(t_instruction));
-			mem_op->op_code = MEM_WRITE_ADDRESS;
-			mem_op->args = list_create();
+			t_instruction* mem_op = instruction_new(MEM_WRITE_ADDRESS);
 			list_add(mem_op->args, associated_pa->segment);
 			list_add(mem_op->args, associated_pa->offset);
 			list_add(mem_op->args, register_pointer(list_get(instruction->args, 1), ec->cpu_register));
@@ -69,9 +65,7 @@ void execute(t_instruction* instruction, execution_context* ec, t_physical_addre
 		}
 		case F_READ:  // filename, logical address, bytes count
 		case F_WRITE: {
-			ec->kernel_request = malloc(sizeof(t_instruction));
-			ec->kernel_request->op_code = instruction->op_code;
-			ec->kernel_request->args = list_duplicate(instruction);
+			ec->kernel_request = instruction_duplicate(instruction);
 			list_add(ec->kernel_request->args, associated_pa->segment);
 			list_add(ec->kernel_request->args, associated_pa->offset);
 		}

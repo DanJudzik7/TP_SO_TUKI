@@ -30,7 +30,7 @@ char* register_pointer(char* name, cpu_register* registers) {
 }
 
 t_physical_address* mmu(int logical_address, int size, execution_context* ec) {
-	t_physical_address* physical_address = malloc(sizeof(t_physical_address));
+	t_physical_address* physical_address = s_malloc(sizeof(t_physical_address));
 	physical_address->segment = floor(logical_address / config_cpu.max_segment_size);
 	physical_address->offset = logical_address % config_cpu.max_segment_size;
 	if (physical_address->offset + size > list_get_by_sid(ec->segment_table, physical_address->segment)->offset) {

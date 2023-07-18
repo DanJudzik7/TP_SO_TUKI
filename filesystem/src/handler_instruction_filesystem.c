@@ -83,7 +83,7 @@ bool process_instruction(t_instruction* instruction) {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE TRUNCAR UN ARCHIVO\n");
 			truncate_file(instruction);
 			for (int i = 0; i < 256; i += sizeof(uint32_t)) {
-				uint32_t* number = malloc(sizeof(uint32_t));
+				uint32_t* number = s_malloc(sizeof(uint32_t));
 				memcpy(number, config_fs.block_file + i, sizeof(uint32_t));	 // remove '*'
 				printf("Valor en la posición %d: %u\n", i, *number);
 			}
@@ -120,7 +120,7 @@ char* read_file(t_instruction* instruction) {
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
 	int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
-	int* PUNTERO_DIRECTO = malloc(sizeof(int));
+	int* PUNTERO_DIRECTO = s_malloc(sizeof(int));
 	*PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
 	t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
 	list_add_in_index(pi_list, 0, PUNTERO_DIRECTO);
@@ -179,7 +179,7 @@ void truncate_file(t_instruction* instruction) {
 	}
 	char* file_name = list_get(instruction->args, 0);
 	char* char_file_size = list_get(instruction->args, 1);
-	int file_size = atoi(char_file_size);  // no necesitas hacer malloc para un int si lo vas a usar inmediatamente
+	int file_size = atoi(char_file_size);  // no necesitas hacer s_malloc para un int si lo vas a usar inmediatamente
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
@@ -208,7 +208,7 @@ void resize_block(t_config* fcb_data, int* file_size) {
 		diferencia = count_pi_need - list_length;
 		for (int i = 0; i < diferencia; i++) {
 			pi_position = next_bit_position();
-			int* pi_pos_ptr = malloc(sizeof(int));
+			int* pi_pos_ptr = s_malloc(sizeof(int));
 			*pi_pos_ptr = pi_position;
 			list_add(pi_list, pi_pos_ptr);
 		}
@@ -244,7 +244,7 @@ void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list) {
 t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 	t_list* pi_list = list_create();
 	for (int i = (PUNTERO_INDIRECTO * config_fs.block_size); i < ((PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size); i += 4) {
-		uint32_t* number = malloc(sizeof(uint32_t));
+		uint32_t* number = s_malloc(sizeof(uint32_t));
 		memcpy(number, config_fs.block_file + i, sizeof(uint32_t));
 		// printf("Valor en la posición %d: %u\n", i, *number);
 		if (*number != 0) {
@@ -307,9 +307,9 @@ void create_file(char* full_file_path, char* file_name) {
 		abort();
 	}
 	int pd_position = next_bit_position();
-	char* pd_position_string = malloc(12 * sizeof(char));
+	char* pd_position_string = s_malloc(12 * sizeof(char));
 	int pi_position = next_bit_position();
-	char* pi_position_string = malloc(12 * sizeof(char));
+	char* pi_position_string = s_malloc(12 * sizeof(char));
 	sprintf(pd_position_string, "%d", pd_position);
 	sprintf(pi_position_string, "%d", pi_position);
 	config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);

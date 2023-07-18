@@ -161,6 +161,10 @@ void print_execution_context(execution_context* execution_context);
 
 bool is_in_list(t_list* list, char* value);
 
+t_instruction* instruction_new(int32_t op_code);
+
+t_instruction* instruction_duplicate(t_instruction* source);
+
 void instruction_delete(t_instruction* instruction);
 
 #endif

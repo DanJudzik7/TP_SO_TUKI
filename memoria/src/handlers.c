@@ -31,8 +31,8 @@ void handle_modules(t_memory_thread* mt) {
 		t_instruction* instruction = deserialize_instruction(package);
 		pthread_mutex_lock(&memory_access);
 		switch ((t_memory_op)instruction->op_code) {
-			// Se debe respetar el orden de los argumentos, si maxi, pero no es este el orden. 
-			//EL s_id es el 4 ponele y aca esta en el primero que recibo
+			// Se debe respetar el orden de los argumentos, si maxi, pero no es este el orden.
+			// EL s_id es el 4 ponele y aca esta en el primero que recibo
 			case MEM_READ_ADDRESS: {
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
@@ -65,7 +65,7 @@ void handle_modules(t_memory_thread* mt) {
 				t_list* segment_table = create_sg_table(mt->mem_structure, pid);
 				log_info(config_memory.logger, "Creación de Proceso PID: %d", pid);
 				// Envío la tabla de segmentos al kernel
-				socket_send(mt->socket,serialize_segment_table(mt->mem_structure, segment_table));
+				socket_send(mt->socket, serialize_segment_table(mt->mem_structure, segment_table));
 				// Definir qué recibe Kernel de acá
 				break;
 			}

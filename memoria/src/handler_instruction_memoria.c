@@ -154,7 +154,7 @@ void compact_memory(t_memory_structure* memory_structure) {
 }
 
 char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid) {
-	char* buffer = malloc(size + 1);
+	char* buffer = s_malloc(size + 1);
 	;
 	segment* segment = get_segment_by_id(s_id, structures, pid);
 	if (segment != NULL) {

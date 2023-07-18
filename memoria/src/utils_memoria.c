@@ -34,7 +34,7 @@ t_memory_structure* new_memory_structure(void* memory) {
 	config_memory.remaining_memory -= config_memory.sg_zero_size;
 
 	// Creo el agujero inicial
-	hole* hole = malloc(sizeof(hole));
+	hole* hole = s_malloc(sizeof(hole));
 	hole->base = memory + config_memory.sg_zero_size;
 	hole->size = config_memory.memory_size - config_memory.sg_zero_size;
 	list_add(memory_structure->hole_list, hole);

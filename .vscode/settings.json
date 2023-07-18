@@ -43,7 +43,6 @@
         "scheduler.h": "c",
         "dictionary.h": "c",
         "kernel_utils.h": "c",
-        "handler_state.h": "c",
         "utils_memoria.h": "c",
         "conexions.h": "c",
         "handlers.h": "c",

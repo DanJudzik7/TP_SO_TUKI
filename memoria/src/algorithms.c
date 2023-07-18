@@ -7,7 +7,7 @@ segment* first_fit(t_memory_structure* memory_structure, int size, int pid, int 
 		current_hole = list_iterator_next(iterator);
 		if (current_hole->size >= size) {
 			// Creamos un nuevo segmento
-			segment* new_segment = malloc(sizeof(segment));
+			segment* new_segment = s_malloc(sizeof(segment));
 			new_segment->base = current_hole->base;
 			new_segment->offset = size;
 			new_segment->s_id = s_id;
@@ -69,7 +69,7 @@ segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int s
 	// Si encontramos un "mejor hueco" adecuado...
 	if (best_hole != NULL) {
 		// ...creamos un nuevo segmento y lo ubicamos en ese hueco.
-		segment* new_segment = malloc(sizeof(segment));
+		segment* new_segment = s_malloc(sizeof(segment));
 		new_segment->base = best_hole->base;
 		new_segment->offset = size;
 		new_segment->s_id = s_id;
@@ -117,7 +117,7 @@ segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, int 
 	// Si encontramos un "peor hueco" adecuado...
 	if (worst_hole != NULL) {
 		// ...creamos un nuevo segmento y lo ubicamos en ese hueco.
-		segment* new_segment = malloc(sizeof(segment));
+		segment* new_segment = s_malloc(sizeof(segment));
 		new_segment->base = worst_hole->base;
 		new_segment->offset = size;
 		new_segment->s_id = s_id;  // Asumiendo que hay un contador global para los IDs de segmentos.

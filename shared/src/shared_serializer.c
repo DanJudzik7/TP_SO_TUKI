@@ -50,7 +50,7 @@ execution_context* deserialize_execution_context(t_package* package) {
 				ec->cpu_register = deserialize_cpu_registers(nested_package->buffer);
 				break;
 			case SEGMENT_TABLE:
-				//ec->segment_table = deserialize_segment_table(nested_package);
+				// ec->segment_table = deserialize_segment_table(nested_package);
 				break;
 			case KERNEL_REQUEST:
 				ec->kernel_request = deserialize_instruction(nested_package);
@@ -98,9 +98,7 @@ void deserialize_instructions(t_package* package, t_queue* instructions) {
 }
 
 t_instruction* deserialize_instruction(t_package* package) {
-	t_instruction* instruction = s_malloc(sizeof(t_instruction));
-	instruction->op_code = package->type;
-	instruction->args = list_create();
+	t_instruction* instruction = instruction_new(package->type);
 	uint64_t offset_list = 0;
 	// Carga los args de package_add
 	while (package_decode_isset(package, offset_list)) list_add(instruction->args, package_decode_string(package->buffer, &offset_list));
@@ -149,64 +147,51 @@ cpu_register* deserialize_cpu_registers(void* source) {
 	return registers;
 }
 
-void deserialize_segment_table(t_package* package){
+void deserialize_segment_table(t_package* package) {
 	uint64_t offset = 0;
-	while (package_decode_isset(package, offset)){
+	while (package_decode_isset(package, offset)) {
 		t_package* nested = package_decode(package->buffer, &offset);
 		deserialize_segment(nested);
 	}
 }
-void deserialize_segment(t_package* nested){
+void deserialize_segment(t_package* nested) {
 	t_instruction* instruction = deserialize_instruction(nested);
-	int base = atoi(list_get(instruction->args,0));
-	int offset = atoi(list_get(instruction->args,1));
-	int s_id = atoi(list_get(instruction->args,2));
-	printf("Base: %d\n",base);
-	printf("Offset: %d\n",offset);
-	printf("S_ID: %d\n",s_id);
+	int base = atoi(list_get(instruction->args, 0));
+	int offset = atoi(list_get(instruction->args, 1));
+	int s_id = atoi(list_get(instruction->args, 2));
+	printf("Base: %d\n", base);
+	printf("Offset: %d\n", offset);
+	printf("S_ID: %d\n", s_id);
 }
 
-t_package *serialize_all_segments(t_memory_structure *mem_struct)
-{
-	t_package *package = package_new(COMPACT_FINISHED);
-	int j = 0;
-	int d = 1;
-	t_list *sg;
-	while (d < dictionary_size(mem_struct->table_pid_segments))
-	{
-		if (dictionary_has_key(mem_struct->table_pid_segments, string_itoa(j)))
-		{
+t_package* serialize_all_segments(t_memory_structure* mem_struct) {
+	t_package* package = package_new(COMPACT_FINISHED);
+	int j = 0, d = 1;
+	t_list* sg;
+	while (d < dictionary_size(mem_struct->table_pid_segments)) {
+		if (dictionary_has_key(mem_struct->table_pid_segments, string_itoa(j))) {
 			sg = dictionary_get(mem_struct->table_pid_segments, string_itoa(j));
-			t_package *nested = serialize_segment_table(mem_struct, sg);
+			t_package* nested = serialize_segment_table(mem_struct, sg);
 			deserialize_segment_table(nested);
 			package_nest(package, nested);
 			d++;
 			j++;
-		}
-		else
-		{
-			j++;
-		}
+		} else j++;
 	}
 	return package;
 }
 
-t_package* serialize_segment_table(t_memory_structure* mem_struct, t_list* segment_table){
+t_package* serialize_segment_table(t_memory_structure* mem_struct, t_list* segment_table) {
 	t_package* package = package_new(COMPACT_FINISHED);
-	for (int i = 0; i < list_size(segment_table); i++)
-	{
+	for (int i = 0; i < list_size(segment_table); i++) {
 		t_package* nested = serialize_segment(list_get(segment_table, i), mem_struct);
-		//deserialize_segment(nested);
-		package_nest(package,nested);
+		package_nest(package, nested);
 	}
 	return package;
 }
 
-
-t_package* serialize_segment(segment* segment,t_memory_structure* mem_struct){
-	t_instruction* instruction = malloc(sizeof(t_instruction));
-	instruction->op_code = SEGMENT;
-	instruction->args = list_create();
+t_package* serialize_segment(segment* segment, t_memory_structure* mem_struct) {
+	t_instruction* instruction = instruction_new(SEGMENT);
 	list_add(instruction->args, string_itoa(segment->base - mem_struct->heap));
 	list_add(instruction->args, string_itoa(segment->offset));
 	list_add(instruction->args, string_itoa(segment->s_id));
@@ -219,7 +204,7 @@ t_package* serialize_segment(segment* segment,t_memory_structure* mem_struct){
 
 	uint64_t size = sizeof(uint64_t);
 	uint64_t buffer_size = sizeof(seg_rw->buffer);
-	
+
 	package_add(package, &(seg_rw->pid),	&size);
 	package_add(package, &(seg_rw->buffer),	&buffer_size);
 	package_add(package, &(seg_rw->size),	&size);

@@ -13,8 +13,8 @@ typedef struct resources_table {
 	t_queue* resource_queue;
 } resources_table;
 
-void resources_handler(t_pcb* pcb, process_state process_state, t_global_config_kernel* gck);
+t_global_config_kernel* new_global_config_kernel(t_config* config);
 
-char* get_resource_name(t_pcb* pcb);
+void exit_process(t_pcb* pcb, t_global_config_kernel *gck);
 
 #endif

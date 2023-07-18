@@ -35,8 +35,8 @@ int main(int argc, char** argv) {
 		if (package == NULL) {
 			continue;
 		}
-		if (package->type == MESSAGE_PCB_FINISHED) {
-			log_warning(logger, "Exito al ejecutar todas las instrucciones");
+		if (package->type == MESSAGE_DONE) {
+			log_warning(logger, "Ejecución finalizada. Saliendo...");
 			package_destroy(package);
 			return 0;
 		} else if (package->type == MESSAGE_OK) {

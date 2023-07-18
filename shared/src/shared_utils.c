@@ -43,7 +43,7 @@ char* get_config_type(char* module, char* file_type) {
 }
 
 void* s_malloc(size_t size) {
-	void* ptr = malloc(size);
+	void* ptr = s_malloc(size);
 	if (ptr == NULL) {
 		printf("Error: No hay más memoria disponible.\n");
 		abort();
@@ -83,6 +83,20 @@ bool is_in_list(t_list* list, char* value) {
 		if (strcmp(list_get(list, i), value) == 0) return true;
 	}
 	return false;
+}
+
+t_instruction* instruction_new(int32_t op_code) {
+	t_instruction* instruction = s_malloc(sizeof(t_instruction));
+	instruction->op_code = op_code;
+	instruction->args = list_create();
+	return instruction;
+}
+
+t_instruction* instruction_duplicate(t_instruction* source) {
+	t_instruction* instruction = s_malloc(sizeof(t_instruction));
+	instruction->op_code = source->op_code;
+	instruction->args = list_duplicate(source->args);
+	return instruction;
 }
 
 void instruction_delete(t_instruction* instruction) {

@@ -36,17 +36,7 @@ void handle_console(helper_create_pcb* hcp) {
 		return;
 	}
 
-	if (package->type == INSTRUCTIONS) {
-		if (!socket_send(pcb->pid, serialize_message("Instrucciones recibidas", false))) {
-			pcb_destroy(pcb);
-			package_destroy(package);
-			return;
-		}
-
-		deserialize_instructions(package, pcb->execution_context->instructions);
-		queue_push(hcp->config->new_pcbs, pcb);
-		package_destroy(package);
-	} else {
+	if (package->type != INSTRUCTIONS) {
 		char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
 		if (!socket_send(pcb->pid, serialize_message(invalid_package, true))) {
 			free(invalid_package);
@@ -56,6 +46,16 @@ void handle_console(helper_create_pcb* hcp) {
 		}
 		free(invalid_package);
 	}
+
+	if (!socket_send(pcb->pid, serialize_message("Instrucciones recibidas", false))) {
+		pcb_destroy(pcb);
+		package_destroy(package);
+		return;
+	}
+
+	deserialize_instructions(package, pcb->execution_context->instructions);
+	queue_push(hcp->config->new_pcbs, pcb);
+	package_destroy(package);
 
 	long_term_schedule(hcp->config);
 }
