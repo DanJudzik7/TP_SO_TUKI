@@ -163,13 +163,12 @@ segment* deserialize_segment(t_package* nested) {
 	int base = atoi(list_get(instruction->args, 0));
 	int offset = atoi(list_get(instruction->args, 1));
 	int s_id = atoi(list_get(instruction->args, 2));
-	int pid = atoi(list_get(instruction->args, 3));
 	printf("\nBase: %d\n", base);
 	printf("Offset: %d\n", offset);
 	printf("S_ID: %d\n", s_id);
 	printf("...............\n");
 	segment* segment = s_malloc(sizeof(segment));
-	segment->base = base;
+	segment->base = (void*)(uintptr_t)base;
 	segment->offset = offset;
 	segment->s_id = s_id;
 	return segment;
