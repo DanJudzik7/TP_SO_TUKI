@@ -2,7 +2,6 @@
 #define SHARED_PACKAGE_H
 
 #include "shared_utils.h"
-#include "shared_serializer.h"
 
 // Librería de paquetes
 // Se encarga del manejo de bajo nivel de paquetes de datos

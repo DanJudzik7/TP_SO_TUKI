@@ -42,8 +42,8 @@ void test_instruction_serializing() {
 	list_add(instruction->args, argument4);
 
 	t_package* packaged = serialize_instruction(instruction);
-	t_instruction* instruction = deserialize_instruction(packaged);
-	printf("Instrucción 2: %d", instruction->op_code);
+	t_instruction* instruction_deserialized = deserialize_instruction(packaged);
+	printf("Instrucción op_code: %d", instruction_deserialized->op_code);
 }
 
 void test_dynamic_op() {
