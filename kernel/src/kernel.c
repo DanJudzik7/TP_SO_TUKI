@@ -23,13 +23,11 @@ int main(int argc, char** argv) {
 	char** inst_resources_helper = config_get_array_value(config, "INSTANCIAS_RECURSOS");
 	for (int i = 0; resources_helper[i] != NULL; i++) {
 		printf("Cargando de recurso un %s con valor -> %s", resources_helper[i], inst_resources_helper[i]);
-		resources_table* resource_table_handler = s_malloc(sizeof(resources_table));
-		t_queue* queue_resource = queue_create();
-		resource_table_handler->instances = (int)atoi(inst_resources_helper[i]);
-		resource_table_handler->resource_queue = queue_resource;
-		dictionary_put(gck->resources, resources_helper[i], resource_table_handler);
+		t_resource* resource = s_malloc(sizeof(t_resource));
+		resource->enqueued_processes = queue_create();
+		resource->available_instances = atoi(inst_resources_helper[i]);
+		dictionary_put(gck->resources, resources_helper[i], resource);
 	}
-	sem_init(&(gck->flag_with_pcb), 0, 1);
 
 	// Manejo de archivos y filesystem
 	t_list* open_files = list_create();
@@ -42,22 +40,13 @@ int main(int argc, char** argv) {
 	pthread_t thread_console;
 	pthread_create(&thread_console, NULL, (void*)listen_consoles, gck);
 
-	int sem_pcb_value;
-
 	// Manejo de CPU y Short Term Scheduler
 	while (1) {
-		// PARA QUE PUSE ESTA FLAG? NI DIOS SABE PORQUE pero recuerdo que era algo importante
-		sem_getvalue(&gck->flag_with_pcb, &sem_pcb_value);
-		if (sem_pcb_value != 1) continue;
-		sem_wait(&gck->flag_with_pcb);
 		// Si no hay PCBs en la cola de activos, espero a que llegue uno
 		// Organizo según el tipo de planificador
 		t_pcb* pcb = short_term_scheduler(gck);
 
-		if (pcb == NULL || pcb == 0) {
-			sem_post(&gck->flag_with_pcb);
-			continue;
-		};
+		if (pcb == NULL || pcb == 0) continue;
 		log_warning(gck->logger, "-----------------------Tenemos un nuevo PCB----------------------");
 		pcb->state = EXEC;
 		// Mando el PCB al CPU
@@ -66,9 +55,9 @@ int main(int argc, char** argv) {
 		t_package* ec_package = serialize_execution_context(pcb->execution_context);
 		// Recibe el nuevo execution context, que puede estar en EXIT o BLOCK
 		if (!socket_send(socket_cpu, ec_package)) {
-			sem_post(&gck->flag_with_pcb);
+			log_error(gck->logger, "Error al enviar el Execution Context al CPU");
 			break;
-		};
+		}
 
 		// Recibe el nuevo execution context
 		t_package* package = socket_receive(socket_cpu);
@@ -78,7 +67,6 @@ int main(int argc, char** argv) {
 			print_execution_context(pcb->execution_context);
 		} else {
 			log_warning(gck->logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
-			sem_post(&gck->flag_with_pcb);
 		}
 
 		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
@@ -86,14 +74,18 @@ int main(int argc, char** argv) {
 		if (pcb->execution_context->program_counter >= list_size(pcb->execution_context->instructions->elements) && pcb->state != EXIT_PROCESS) {
 			log_warning(gck->logger, "Bloqueando PCB, ya no posee mas instrucciones");
 			pcb->state = BLOCK;
-			sem_post(&gck->flag_with_pcb);
 		}
 		t_instruction* kernel_request = pcb->execution_context->kernel_request;
 		if (kernel_request == NULL) continue;
 		switch (kernel_request->op_code) {
-			case I_O: { // time
+			case I_O: {	 // time
 				pcb->state = BLOCK;
-				// To do: cantidad de unidades de tiempo que va a bloquearse el proceso.
+				t_helper_pcb_io* hpi = s_malloc(sizeof(t_helper_pcb_io));
+				hpi->pcb = pcb;
+				hpi->time = atoi(list_get(kernel_request->args, 0));
+				pthread_t thread_io;
+				pthread_create(&thread_io, NULL, (void*)handle_pcb_io, hpi);
+				log_info(gck->logger, "Proceso %d bloqueado en I/O por %d segundos", pcb->pid, hpi->time);
 				break;
 			}
 			case F_OPEN: {	// filename
@@ -172,7 +164,7 @@ int main(int argc, char** argv) {
 				t_package* package = socket_receive(gck->socket_memory);
 				if (package->type == COMPACT_REQUEST) {
 					log_error(gck->logger, "Solicitud de compactación");
-					while(!queue_is_empty(hfi->file_instructions)) sleep(1);
+					while (!queue_is_empty(hfi->file_instructions)) sleep(1);
 					t_instruction* mem_op = instruction_new(MEM_COMPACT_ALL);
 					if (!socket_send(gck->socket_memory, serialize_instruction(mem_op))) {
 						log_error(gck->logger, "Error al enviar operación a memoria");
@@ -225,51 +217,36 @@ int main(int argc, char** argv) {
 					// if(gck->algorithm_is_hrrn)
 					// pcb->aprox_burst_time =
 				}
-				queue_push(gck->active_pcbs, pcb);
 				break;
 			}
 			case WAIT: {
-				resources_table* resource = dictionary_get(gck->resources, list_get(kernel_request->args, 0));
-				if (resource->instances >= 0) {
-					(resource->instances)--;
-					printf("Las instancias del recurso quedaron reducidas a -> %i", resource->instances);
-					gck->pcb_priority_helper = pcb;
+				t_resource* resource = resource_get(pcb, gck, list_get(kernel_request->args, 0));
+				if (resource->available_instances >= 0) {
+					resource->available_instances--;
+					log_info(gck->logger, "Las instancias del recurso se redujeron a -> %i", resource->available_instances);
+					gck->prioritized_pcb = pcb;
+				} else {
+					pcb->state = BLOCK;
+					queue_push(resource->enqueued_processes, pcb);
 				}
-				// SI EL PROCESO ES MENOR A 0 ESTRICTAMENTE, LO MANDO A LA COLA DE BLOQUEADOS DE ESE RECURSO
-				// TODO: NO DICE NADA DE BLOQUEAR, CONSULTAR si pcb->state = BLOCK; aunque da igual.
-				else
-					queue_push(resource->resource_queue, pcb);
 				break;
 			}
 			case SIGNAL: {
-				char* resource_name = list_get(kernel_request->args, 0);
-				if (!dictionary_has_key(gck->resources, resource_name)) {
-					log_error(gck->logger, "El recurso %s no existe", resource_name);
-					continue;
-				}
-				log_info(gck->logger, "El recurso requerido es %s", resource_name);
-				resources_table* resource = dictionary_get(gck->resources, resource_name);
-				if (resource->instances > 0) {
-					(resource->instances)++;
-					printf("Las instancias del recurso aumentaron a -> %i", resource->instances);
-					// se devuelve la ejecución al proceso que peticionó el SIGNAL.
-					t_pcb* pcb_priority = queue_pop(resource->resource_queue);
-					gck->pcb_priority_helper = pcb_priority;
-				}
-				// TODO: NO DICE NADA DE ESTE SIGNAL, AVERIGUAR ? igual dudo que haga algo
+				t_resource* resource = resource_get(pcb, gck, list_get(kernel_request->args, 0));
+				resource->available_instances++;
+				log_info(gck->logger, "Las instancias del recurso aumentaron a %i", resource->available_instances);
+				t_pcb* pcb_priority = queue_pop(resource->enqueued_processes);
+				pcb_priority->state = READY;
+				gck->prioritized_pcb = pcb;
 				break;
 			}
 			case EXIT: {
 				exit_process(pcb, gck);
 				break;
 			}
-			default: {
-				queue_push(gck->active_pcbs, pcb);
-				log_warning(gck->logger, "-----------------------Guardando PCB %d en cola de READY-----------------------", pcb->pid);
-				sem_post(&gck->flag_with_pcb);
-				break;
-			}
 		}
+		log_warning(gck->logger, "-----------------------Guardando PCB %d en cola de READY-----------------------", pcb->pid);
+		queue_push(gck->active_pcbs, pcb);
 		instruction_delete(kernel_request);
 	}
 

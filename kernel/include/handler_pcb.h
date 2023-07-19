@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 
+#include "scheduler.h"
 #include "shared_serializer.h"
 #include "shared_socket.h"
 
@@ -19,21 +20,20 @@ typedef struct t_global_config_kernel {
 	t_log* logger;
 	t_queue* new_pcbs;
 	t_queue* active_pcbs;
-	sem_t flag_with_pcb;
 	t_dictionary* resources;
 	bool algorithm_is_hrrn;
 	int max_multiprogramming;
 	int default_burst_time;
 	int connection_kernel;
 	int connection_cpu;
-	t_pcb* pcb_priority_helper;
+	t_pcb* prioritized_pcb;
 	int socket_memory;
 } t_global_config_kernel;
 
 typedef struct helper_create_pcb {
 	int connection;
-	t_global_config_kernel* config;
-}  helper_create_pcb;
+	t_global_config_kernel* gck;
+} helper_create_pcb;
 
 typedef struct t_helper_file_instruction {
 	int socket_filesystem;
@@ -47,10 +47,13 @@ void listen_consoles(t_global_config_kernel* gck);
 // Administrador de conexiones de lectura y escritura a Filesystem
 void handle_fs(t_helper_file_instruction* hfi);
 
-// Administrador de instrucciones recibidas por consola
-void handle_console(helper_create_pcb* hcp);
+// Inicializa un proceso en kernel y sus estructuras
+void handle_new_process(helper_create_pcb* hcp);
 
-// Crea un PCB con los datos recibidos
+// Termina un proceso en kernel y elimina sus estructuras
+void exit_process(t_pcb* pcb, t_global_config_kernel* gck);
+
+// Inicializa un PCB con los datos recibidos
 t_pcb* pcb_new(int pid, int burst_time);
 
 // Limpia un PCB de la memoria

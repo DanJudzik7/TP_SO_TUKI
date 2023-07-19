@@ -3,8 +3,6 @@
 configuration_cpu config_cpu;
 
 int main(int argc, char** argv) {
-	sem_init(&(config_cpu.flag_dislodge), 0, 1);
-
 	t_log* logger = start_logger("cpu");
 	t_config* config = start_config("cpu");
 
@@ -14,7 +12,7 @@ int main(int argc, char** argv) {
 	config_cpu.instruction_delay = config_get_int_value(config, "RETARDO_INSTRUCCION");
 
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
-	int server_socket = socket_initialize_server(port);  // Inicializo el socket en el puerto cargado por la config
+	int server_socket = socket_initialize_server(port);
 	if (server_socket == -1) {
 		log_error(logger, "No se pudo inicializar el socket de servidor");
 		exit(EXIT_FAILURE);
@@ -22,23 +20,6 @@ int main(int argc, char** argv) {
 	log_warning(logger, "Socket de servidor inicializado en puerto %s", port);
 
 	config_cpu.socket_memory = connect_module(config, logger, "MEMORIA");
-
-	// int kernel_fd = receive_modules(logger, config);
-	// execution_context* context = create_context_test();
-	// TODO: En el primer recv llega basura no se porque
-	// socket_receive_message(kernel_fd);
-	// socket_receive_message(kernel_fd);
-
-	// To do: CPU debe recibir solo execution context, no todo este PCB
-
-	// log_info(logger, "El proceso %d se creó en NEW\n", pcb_test->pid);
-	// pcb_test->execution_context = context;
-
-	// Recibe los pcbs que aca están harcodeados y los opera
-	// fetch(context);
-
-	// free(context);
-	// free(pcb_test);
 
 	while (1) {
 		int kernel_socket = socket_accept(server_socket);
@@ -66,13 +47,12 @@ int main(int argc, char** argv) {
 			t_execution_context* context = deserialize_execution_context(package);
 			print_execution_context(context);
 			bool flag_dislodge = false;
-			t_instruction* instruction = NULL;
-			// Ejecuto mientras el flag de desalojo este libre
+			// Ejecuto mientras no se tenga que desalojar
 			while (!flag_dislodge) {
-				instruction = fetch(context);
+				t_instruction* instruction = fetch(context);
 				if (instruction == NULL) break;
 				t_physical_address* pa = decode(context, instruction);
-				execute(instruction, context, pa);
+				flag_dislodge = execute(instruction, context, pa);
 				context->program_counter++;
 			}
 

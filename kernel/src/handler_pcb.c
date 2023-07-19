@@ -10,17 +10,17 @@ void listen_consoles(t_global_config_kernel* gck) {
 		}
 		helper_create_pcb* hcp = s_malloc(sizeof(helper_create_pcb));
 		hcp->connection = console_socket;
-		hcp->config = gck;
+		hcp->gck = gck;
 		// Se crea un thread para escuchar las instrucciones
-		pthread_create(&thread, NULL, (void*)handle_console, hcp);
+		pthread_create(&thread, NULL, (void*)handle_new_process, hcp);
 		pthread_detach(thread);
 	}
 }
 
-void handle_console(helper_create_pcb* hcp) {
-	t_pcb* pcb = pcb_new(hcp->connection, hcp->config->default_burst_time);
+void handle_new_process(helper_create_pcb* hcp) {
+	t_pcb* pcb = pcb_new(hcp->connection, hcp->gck->default_burst_time);
 	printf("Nueva consola conectada. PID: %i\n", pcb->pid);
-	log_info(hcp->config->logger, "El proceso %d se creó en NEW", pcb->pid);
+	log_info(hcp->gck->logger, "El proceso %d se creó en NEW", pcb->pid);
 	char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
 	if (!socket_send(pcb->pid, serialize_message(welcome_message, true))) {
 		pcb_destroy(pcb);
@@ -54,10 +54,16 @@ void handle_console(helper_create_pcb* hcp) {
 	}
 
 	deserialize_instructions(package, pcb->execution_context->instructions);
-	queue_push(hcp->config->new_pcbs, pcb);
+	queue_push(hcp->gck->new_pcbs, pcb);
 	package_destroy(package);
 
-	long_term_schedule(hcp->config);
+	long_term_schedule(hcp->gck);
+}
+
+void exit_process(t_pcb* pcb, t_global_config_kernel* gck) {
+	log_warning(gck->logger, "----------------------El PCB %d tiene estado exit----------------------", pcb->pid);
+	pcb->state = EXIT_PROCESS;
+	long_term_schedule(gck);
 }
 
 void handle_fs(t_helper_file_instruction* hfi) {
@@ -80,7 +86,6 @@ void handle_fs(t_helper_file_instruction* hfi) {
 }
 
 t_pcb* pcb_new(int pid, int burst_time) {
-	// La inicialización se hace de forma segura en memoria (con memset)
 	t_pcb* pcb = s_malloc(sizeof(t_pcb));
 	pcb->state = NEW;
 	pcb->pid = pid;
@@ -102,7 +107,7 @@ void pcb_destroy(t_pcb* pcb) {
 	queue_destroy_and_destroy_elements(pcb->execution_context->instructions, (void*)instruction_delete);
 	free(pcb->execution_context->cpu_register);
 	pcb->execution_context->cpu_register = NULL;
-	free(pcb->execution_context->segments_table);
+	list_destroy_and_destroy_elements(pcb->execution_context->segments_table, (void*)free);
 	pcb->execution_context->segments_table = NULL;
 	free(pcb->execution_context);
 	pcb->execution_context = NULL;

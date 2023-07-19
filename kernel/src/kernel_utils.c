@@ -20,15 +20,23 @@ t_global_config_kernel* new_global_config_kernel(t_config* config) {
 	gck->max_multiprogramming = *config_get_string_value(config, "GRADO_MAX_MULTIPROGRAMACION") - '0';
 	gck->default_burst_time = *config_get_string_value(config, "ESTIMACION_INICIAL") - '0';
 	gck->algorithm_is_hrrn = algorithm_is_hrrn;
-	gck->pcb_priority_helper = NULL;
+	gck->prioritized_pcb = NULL;
 	gck->resources = dictionary_create();
 	return gck;
 }
 
-void exit_process(t_pcb* pcb, t_global_config_kernel* gck) {
-	log_warning(gck->logger, "----------------------El PCB %d tiene estado exit----------------------", pcb->pid);
-	pcb->state = EXIT_PROCESS;
-	// TODO: HARDCODEADO hasta que se pueda mover a long_term_shedule
-	long_term_schedule(gck);
-	sem_post(&gck->flag_with_pcb);
+void handle_pcb_io(t_helper_pcb_io* hpi) {
+	sleep(hpi->time);
+	hpi->pcb->state = READY;
+	free(hpi);
+}
+
+t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name) {
+	if (!dictionary_has_key(gck->resources, name)) {
+		exit_process(pcb, gck);
+		log_error(gck->logger, "El recurso %s no existe", name);
+		return;
+	}
+	log_info(gck->logger, "El recurso requerido es %s", name);
+	return dictionary_get(gck->resources, name);
 }

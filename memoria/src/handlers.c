@@ -65,7 +65,7 @@ void handle_modules(t_memory_thread* mt) {
 				t_list* segment_table = create_sg_table(mt->mem_structure, pid);
 				log_info(config_memory.logger, "Creación de Proceso PID: %d", pid);
 				// Envío la tabla de segmentos al kernel
-				socket_send(mt->socket, serialize_segment_table(mt->mem_structure, segment_table,pid));
+				socket_send(mt->socket, serialize_segments_table(segment_table, SEGMENTS_TABLE, mt->mem_structure->heap));
 				// Definir qué recibe Kernel de acá
 				break;
 			}

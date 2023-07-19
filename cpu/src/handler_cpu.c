@@ -21,7 +21,7 @@ t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) 
 	return NULL;
 }
 
-void execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa) {
+bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa) {
 	switch (instruction->op_code) {
 		case SET: {
 			set_register(list_get(instruction->args, 0), list_get(instruction->args, 1), ec->cpu_register);
@@ -67,9 +67,8 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			list_add(ec->kernel_request->args, associated_pa->offset);
 		}
 		case YIELD:
-			log_warning(config_cpu.logger, "Ejecutando un YIELD");
-			dislodge();
-			break;
+			log_warning(config_cpu.logger, "Desalojando proceso");
+			return true;
 		case I_O:
 		case F_OPEN:
 		case F_CLOSE:
@@ -79,14 +78,15 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		case SIGNAL:
 		case CREATE_SEGMENT:
 		case DELETE_SEGMENT:
-		case EXIT: // Definir si también necesita hacer dislodge
-			log_info(config_cpu.logger, "Ejecutando instrucción %d", instruction->op_code);
+		case EXIT:
+			log_info(config_cpu.logger, "Ejecutando instrucción %d y desalojando", instruction->op_code);
 			ec->kernel_request = instruction;
-			break;
+			return true;
 		default:
 			log_error(config_cpu.logger, "Error: Operación inválida");
 			break;
 	}
+	return false;
 }
 
 void set_register(char* register_name, char* value, cpu_register* registers) {
@@ -112,9 +112,3 @@ void set_register(char* register_name, char* value, cpu_register* registers) {
 	log_info(config_cpu.logger, "Asignando en %s: %s", register_name, value);
 	free(register_ptr);
 }
-
-void dislodge() {
-	log_warning(config_cpu.logger, "Desalojando el Context");
-	// Bloquear el semáforo
-	sem_wait(&config_cpu.flag_dislodge);
-};

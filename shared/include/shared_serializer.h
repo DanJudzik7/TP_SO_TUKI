@@ -41,7 +41,7 @@ cpu_register* deserialize_cpu_registers(void* source);
 t_package* serialize_all_segments_tables(t_memory_structure* mem_struct);
 
 // Serializa una tabla de segmentos
-t_package* serialize_segments_table(t_list* segment_table, uint32_t pid, void* heap_pointer);
+t_package* serialize_segments_table(t_list* segment_table, uint32_t type, void* heap_pointer);
 
 // Serializa un segmento
 t_package* serialize_segment(t_segment* segment, void* heap_pointer);
