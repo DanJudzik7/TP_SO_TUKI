@@ -98,8 +98,30 @@ t_instruction* instruction_duplicate(t_instruction* source) {
 	return instruction;
 }
 
-void instruction_delete(t_instruction* instruction) {
+void instruction_destroy(t_instruction* instruction) {
 	list_destroy(instruction->args);
 	free(instruction);
 	instruction = NULL;
+}
+
+t_execution_context* execution_context_new(int pid) {
+	t_execution_context* ec = s_malloc(sizeof(t_execution_context));
+	ec->instructions = queue_create();
+	ec->program_counter = 0;
+	ec->cpu_register = s_malloc(sizeof(cpu_register));
+	memset(ec->cpu_register, 0, sizeof(cpu_register));
+	ec->segments_table = list_create();
+	ec->pid = pid;
+	return ec;
+}
+
+void execution_context_destroy(t_execution_context* ec) {
+	queue_destroy_and_destroy_elements(ec->instructions, (void*)instruction_destroy);
+	free(ec->cpu_register);
+	ec->cpu_register = NULL;
+	list_destroy_and_destroy_elements(ec->segments_table, (void*)free);
+	ec->segments_table = NULL;
+	if (ec->kernel_request) instruction_destroy(ec->kernel_request);
+	free(ec);
+	ec = NULL;
 }

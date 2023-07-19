@@ -2,6 +2,7 @@
 #define SCHEDULER_H
 
 #include "algorithms_kernel.h"
+#include "kernel_utils.h"
 #include "shared_utils.h"
 
 // Se llama cuando: se crean procesos, o cuando uno existente llega a EXIT

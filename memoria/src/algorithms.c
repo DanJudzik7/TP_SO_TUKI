@@ -11,9 +11,7 @@ t_segment* first_fit(t_memory_structure* memory_structure, int size, int pid, in
 			new_segment->base = current_hole->base;
 			new_segment->offset = size;
 			new_segment->s_id = s_id;
-			// TODO: Transformar a una funcion en utility
-			char pid_str[10];
-			sprintf(pid_str, "%i", pid);
+			char* pid_str = string_itoa(pid);
 
 			if (dictionary_has_key(memory_structure->table_pid_segments, pid_str)) {
 				t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
@@ -49,9 +47,7 @@ bool is_hole_empty(hole* h) {
 }
 
 t_segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
-	// TODO: Transformar a una funcion en utility
-	char pid_str[10];
-	sprintf(pid_str, "%i", pid);
+	char* pid_str = string_itoa(pid);
 	hole* best_hole = NULL;
 	// Iteramos a través de la lista de huecos.
 	for (int i = 0; i < list_size(memory_structure->hole_list); i++) {
@@ -88,18 +84,11 @@ t_segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int
 			list_remove_by_condition(memory_structure->hole_list, (bool (*)(void*))is_hole_empty);
 		}
 		return new_segment;
-	}
-	// Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.
-	else {
-		return NULL;
-	}
+	} else return NULL; // Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.
 }
 
 t_segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
-	// TODO: Transformar a una funcion en utility
-	char pid_str[10];
-	sprintf(pid_str, "%i", pid);
-
+	char* pid_str = string_itoa(pid);
 	hole* worst_hole = NULL;
 	// Iteramos a través de la lista de huecos.
 	for (int i = 0; i < list_size(memory_structure->hole_list); i++) {
@@ -137,9 +126,5 @@ t_segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, in
 		}
 
 		return new_segment;
-	}
-	// Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.
-	else {
-		return NULL;
-	}
+	} else return NULL; // Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.
 }

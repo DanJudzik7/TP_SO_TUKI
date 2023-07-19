@@ -2,22 +2,20 @@
 
 extern t_config_memory config_memory;
 
-t_list* create_sg_table(t_memory_structure* memory_structure, int process_id) {
+t_list* create_sg_table(t_memory_structure* memory_structure, int pid) {
 	t_list* segment_table = list_create();
 	list_add(segment_table, memory_structure->segment_zero);
-	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
-	sprintf(pid_str, "%d", process_id);
+	char* pid_str = string_itoa(pid);
 	dictionary_put(memory_structure->table_pid_segments, pid_str, segment_table);
 	return segment_table;
 }
 
-void remove_sg_table(t_memory_structure* memory_structure, int process_id) {
-	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
-	sprintf(pid_str, "%d", process_id);
+void remove_sg_table(t_memory_structure* memory_structure, int pid) {
+	char* pid_str = string_itoa(pid);
 	t_list* segment_table_delete = dictionary_get(memory_structure->table_pid_segments, pid_str);
 	for (int i = 1; i < list_size(segment_table_delete); i++) {
 		t_segment* segment = list_get(segment_table_delete, i);
-		delete_segment(memory_structure, process_id, segment->s_id);
+		delete_segment(memory_structure, pid, segment->s_id);
 	}
 
 	dictionary_remove(memory_structure->table_pid_segments, pid_str);
@@ -55,10 +53,8 @@ int add_segment(t_memory_structure* memory_structure, int process_id, int size, 
 		return 2;  // No hay espacio
 	}
 }
-void delete_segment(t_memory_structure* memory_structure, int process_id, int s_id_to_delete) {
-	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
-	sprintf(pid_str, "%d", process_id);
-
+void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_delete) {
+	char* pid_str = string_itoa(pid);
 	t_segment* segment_to_delete = NULL;
 
 	// Obtengo la lista de segmentos del proceso a eliminar
@@ -88,7 +84,7 @@ void delete_segment(t_memory_structure* memory_structure, int process_id, int s_
 		}
 	}
 	int dir_base = transform_base_to_decimal(segment_to_delete->base, memory_structure->segment_zero->base);
-	log_info(config_memory.logger, "|PID: %i | Eliminar Segmento: %i | Base: %i  | Tamaño: %i |", process_id, s_id_to_delete, dir_base, segment_to_delete->offset);
+	log_info(config_memory.logger, "|PID: %i | Eliminar Segmento: %i | Base: %i  | Tamaño: %i |", pid, s_id_to_delete, dir_base, segment_to_delete->offset);
 
 	// Caso de que tenga huecos libres aledaños, los deberá consolidar actualizando sus estructuras administrativas.
 	compact_hole_list(memory_structure);
@@ -155,7 +151,6 @@ void compact_memory(t_memory_structure* memory_structure) {
 
 char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid) {
 	char* buffer = s_malloc(size + 1);
-	;
 	t_segment* segment = get_segment_by_id(s_id, structures, pid);
 	if (segment != NULL) {
 		if (segment->base + offset + size > segment->base + segment->offset) {
@@ -189,8 +184,7 @@ bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structu
 }
 
 t_segment* get_segment_by_id(int s_id, t_memory_structure* structures, int pid) {
-	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
-	sprintf(pid_str, "%d", pid);
+	char* pid_str = string_itoa(pid);
 	t_list* segment_table = dictionary_get(structures->table_pid_segments, pid_str);
 
 	t_segment* segment;

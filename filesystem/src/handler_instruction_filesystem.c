@@ -4,7 +4,7 @@ int handle_kernel(int socket_kernel) {
 	while (1) {
 		t_package* package = socket_receive(socket_kernel);
 		if (package == NULL) {
-			log_warning(config_fs.logger, "El cliente se desconectó");
+			log_error(config_fs.logger, "El cliente se desconectó");
 			break;
 		}
 
@@ -46,7 +46,7 @@ bool process_instruction(t_instruction* instruction) {
 				log_error(config_fs.logger, "Error desconocido al leer el archivo");
 				return false;
 			}
-			instruction_delete(instruction);
+			instruction_destroy(instruction);
 			free(miCharPuntero_r);
 			return true;
 		}
@@ -65,7 +65,7 @@ bool process_instruction(t_instruction* instruction) {
 			char* str_write = deserialize_message(package_receive_memory);
 			list_add(instruction->args, str_write);
 			char* result_write = read_file(instruction);  // Esto es correcto?
-			instruction_delete(instruction);
+			instruction_destroy(instruction);
 			free(result_write);
 			return true;
 		}
@@ -306,12 +306,8 @@ void create_file(char* full_file_path, char* file_name) {
 		log_warning(config_fs.logger, "Error creando FCB");	 // liberamos full_file_path antes de abortar
 		abort();
 	}
-	int pd_position = next_bit_position();
-	char* pd_position_string = s_malloc(12 * sizeof(char));
-	int pi_position = next_bit_position();
-	char* pi_position_string = s_malloc(12 * sizeof(char));
-	sprintf(pd_position_string, "%d", pd_position);
-	sprintf(pi_position_string, "%d", pi_position);
+	char* pd_position_string = string_itoa(next_bit_position());
+	char* pi_position_string = string_itoa(next_bit_position());
 	config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
 	config_set_value(fcb_data, "NOMBRE_ARCHIVO", file_name);
 	config_set_value(fcb_data, "TAMANIO_ARCHIVO", "");

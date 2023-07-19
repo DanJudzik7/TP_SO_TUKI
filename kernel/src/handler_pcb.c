@@ -3,7 +3,7 @@
 void listen_consoles(t_global_config_kernel* gck) {
 	while (1) {
 		pthread_t thread;
-		int console_socket = socket_accept(gck->connection_kernel);
+		int console_socket = socket_accept(gck->server_socket);
 		if (console_socket == -1) {
 			log_warning(gck->logger, "Hubo un error aceptando la conexión");
 			continue;
@@ -19,7 +19,6 @@ void listen_consoles(t_global_config_kernel* gck) {
 
 void handle_new_process(helper_create_pcb* hcp) {
 	t_pcb* pcb = pcb_new(hcp->connection, hcp->gck->default_burst_time);
-	printf("Nueva consola conectada. PID: %i\n", pcb->pid);
 	log_info(hcp->gck->logger, "El proceso %d se creó en NEW", pcb->pid);
 	char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
 	if (!socket_send(pcb->pid, serialize_message(welcome_message, true))) {
@@ -32,7 +31,7 @@ void handle_new_process(helper_create_pcb* hcp) {
 	t_package* package = socket_receive(pcb->pid);
 	if (package == NULL) {
 		pcb_destroy(pcb);
-		printf("El cliente se desconectó\n");
+		log_error(hcp->gck->logger, "El cliente se desconectó");
 		return;
 	}
 
@@ -60,12 +59,6 @@ void handle_new_process(helper_create_pcb* hcp) {
 	long_term_schedule(hcp->gck);
 }
 
-void exit_process(t_pcb* pcb, t_global_config_kernel* gck) {
-	log_warning(gck->logger, "----------------------El PCB %d tiene estado exit----------------------", pcb->pid);
-	pcb->state = EXIT_PROCESS;
-	long_term_schedule(gck);
-}
-
 void handle_fs(t_helper_file_instruction* hfi) {
 	while (1) {
 		while (queue_is_empty(hfi->file_instructions)) sleep(1);
@@ -81,36 +74,6 @@ void handle_fs(t_helper_file_instruction* hfi) {
 		t_package* package = socket_receive(hfi->socket_filesystem);
 		printf("La %s del archivo fue %s", fs_op->op_code == F_READ ? "lectura" : "escritura", package->type == MESSAGE_OK ? "exitosa" : "fallida");
 		package_destroy(package);
-		free(fs_op);
+		instruction_destroy(fs_op);
 	}
-}
-
-t_pcb* pcb_new(int pid, int burst_time) {
-	t_pcb* pcb = s_malloc(sizeof(t_pcb));
-	pcb->state = NEW;
-	pcb->pid = pid;
-	pcb->aprox_burst_time = burst_time;
-	pcb->last_ready_time = time(NULL);
-	pcb->files = list_create();
-	pcb->execution_context = s_malloc(sizeof(t_execution_context));
-	pcb->execution_context->instructions = queue_create();
-	pcb->execution_context->program_counter = 0;
-	pcb->execution_context->cpu_register = s_malloc(sizeof(cpu_register));
-	memset(pcb->execution_context->cpu_register, 0, sizeof(cpu_register));
-	pcb->execution_context->segments_table = list_create();
-	pcb->execution_context->pid = pid;
-	return pcb;
-}
-
-void pcb_destroy(t_pcb* pcb) {
-	dictionary_destroy(pcb->files);
-	queue_destroy_and_destroy_elements(pcb->execution_context->instructions, (void*)instruction_delete);
-	free(pcb->execution_context->cpu_register);
-	pcb->execution_context->cpu_register = NULL;
-	list_destroy_and_destroy_elements(pcb->execution_context->segments_table, (void*)free);
-	pcb->execution_context->segments_table = NULL;
-	free(pcb->execution_context);
-	pcb->execution_context = NULL;
-	free(pcb);
-	pcb = NULL;
 }

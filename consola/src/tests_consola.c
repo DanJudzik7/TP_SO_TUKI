@@ -1,4 +1,4 @@
-#include "tests_console.h"
+#include "tests_consola.h"
 
 int main() {
 	printf("Iniciando Tests...\n\n");

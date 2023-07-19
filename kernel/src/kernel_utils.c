@@ -15,10 +15,14 @@ t_global_config_kernel* new_global_config_kernel(t_config* config) {
 
 	gck->new_pcbs = queue_create();		// Cola local de PCBs en NEW
 	gck->active_pcbs = queue_create();	// Cola global de PCBs en READY, EXEC y BLOCK
-	gck->connection_kernel = NULL;
-	// TODO: ESTO es realmente int no un string_value
-	gck->max_multiprogramming = *config_get_string_value(config, "GRADO_MAX_MULTIPROGRAMACION") - '0';
-	gck->default_burst_time = *config_get_string_value(config, "ESTIMACION_INICIAL") - '0';
+	gck->server_socket = -1;
+
+	char* max_multiprogramming = config_get_string_value(config, "GRADO_MAX_MULTIPROGRAMACION");
+	gck->max_multiprogramming = atoi(max_multiprogramming);
+	free(max_multiprogramming);
+	char* default_burst_time = config_get_string_value(config, "ESTIMACION_INICIAL");
+	gck->default_burst_time = atoi(default_burst_time);
+	free(default_burst_time);
 	gck->algorithm_is_hrrn = algorithm_is_hrrn;
 	gck->prioritized_pcb = NULL;
 	gck->resources = dictionary_create();
@@ -29,14 +33,46 @@ void handle_pcb_io(t_helper_pcb_io* hpi) {
 	sleep(hpi->time);
 	hpi->pcb->state = READY;
 	free(hpi);
+	log_warning(hpi->logger, "El proceso %d se desbloqueó", hpi->pcb->pid);
 }
 
 t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name) {
 	if (!dictionary_has_key(gck->resources, name)) {
-		exit_process(pcb, gck);
+		pcb->state = EXIT_PROCESS;
 		log_error(gck->logger, "El recurso %s no existe", name);
-		return;
+		return NULL;
 	}
 	log_info(gck->logger, "El recurso requerido es %s", name);
 	return dictionary_get(gck->resources, name);
+}
+
+void resource_signal(t_resource* resource, t_log* logger) {
+	if (!queue_is_empty(resource->enqueued_processes)) {
+		resource->assigned_to = queue_pop(resource->enqueued_processes);
+		resource->assigned_to->state = READY;
+		log_info(logger, "Se desbloqueó el proceso %d", resource->assigned_to->pid);
+	} else {
+		log_info(logger, "Las instancias del recurso aumentaron a %i", resource->available_instances);
+		resource->available_instances++;
+		resource->assigned_to = NULL;
+	}
+}
+
+t_pcb* pcb_new(int pid, int burst_time) {
+	t_pcb* pcb = s_malloc(sizeof(t_pcb));
+	pcb->state = NEW;
+	pcb->pid = pid;
+	pcb->aprox_burst_time = burst_time;
+	pcb->last_ready_time = time(NULL);
+	pcb->local_files = dictionary_create();
+	pcb->execution_context = execution_context_new(pcb->pid);
+	return pcb;
+}
+
+void pcb_destroy(t_pcb* pcb) {
+	execution_context_destroy(pcb->execution_context);
+	dictionary_destroy(pcb->local_files);
+	pcb->local_files = NULL;
+	free(pcb);
+	pcb = NULL;
 }

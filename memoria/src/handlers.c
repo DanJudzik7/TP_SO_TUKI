@@ -21,13 +21,13 @@ void listen_modules(int server_memory, t_memory_structure* memory_structure) {
 
 // Manejo los receive con cada una de estas funciones
 void handle_modules(t_memory_thread* mt) {
-	/*if (!socket_send(socket_fs, serialize_message("OK_OPERATION", false))) {
-		printf("Error al enviar el paquete\n");
-		return -1;
-	}*/
 	log_warning(config_memory.logger, "Se conectó un módulo en el puerto %d", mt->socket);
 	while (1) {
 		t_package* package = socket_receive(mt->socket);
+		if (package == NULL) {
+			log_error(config_memory.logger, "El módulo se desconectó");
+			break;
+		}
 		t_instruction* instruction = deserialize_instruction(package);
 		pthread_mutex_lock(&memory_access);
 		switch ((t_memory_op)instruction->op_code) {

@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 		while (1) {
 			t_package* package = socket_receive(kernel_socket);
 
-			if (package->type != EXECUTION_CONTEXT && package != NULL) {
+			if (package != NULL && package->type != EXECUTION_CONTEXT) {
 				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
 				socket_send(kernel_socket, serialize_message(invalid_package, true));
 				log_warning(config_cpu.logger, "Se recibió un paquete inválido: %i", package->type);
@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
 				continue;
 			}
 			if (package == NULL) {
-				// Definir si acá se tiene que hacer algo más
 				log_error(config_cpu.logger, "El kernel se desconectó");
 				break;
 			}
@@ -50,8 +49,8 @@ int main(int argc, char** argv) {
 			// Ejecuto mientras no se tenga que desalojar
 			while (!flag_dislodge) {
 				t_instruction* instruction = fetch(context);
-				if (instruction == NULL) break;
-				t_physical_address* pa = decode(context, instruction);
+				if (instruction == NULL) context->kernel_request = instruction_new(EXIT_PROCESS);
+				t_physical_address* pa = decode(instruction, context);
 				flag_dislodge = execute(instruction, context, pa);
 				context->program_counter++;
 			}
@@ -62,6 +61,7 @@ int main(int argc, char** argv) {
 				break;
 			}
 			log_info(config_cpu.logger, "Context enviado al Kernel");
+			execution_context_destroy(context);
 		}
 		log_warning(config_cpu.logger, "Se desconectó de kernel, abriendo para nuevas conexiones");
 	}

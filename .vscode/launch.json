@@ -3,7 +3,7 @@
 	"compounds": [
 		{
 			"name": "TUKI",
-			"configurations": ["Memory", "Filesystem (delayed)", "CPU (delayed)", "Kernel (delayed)", "Console (delayed)"],
+			"configurations": ["Memoria", "Filesystem (delayed)", "CPU (delayed)", "Kernel (delayed)", "Consola (delayed)"],
 			"presentation": {
 				"group": "+",
 				"order": 1
@@ -12,7 +12,7 @@
 		},
 		{
 			"name": "TUKI Light",
-			"configurations": ["CPU", "Kernel (delayed)", "Console (delayed)"],
+			"configurations": ["CPU", "Kernel (delayed)", "Consola (delayed)"],
 			"presentation": {
 				"group": "+",
 				"order": 1
@@ -23,11 +23,11 @@
 	],
 	"configurations": [
 		{
-			"name": "Console",
+			"name": "Consola",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/consola/consola",
-			"preLaunchTask": "Make Console",
+			"preLaunchTask": "Make Consola",
 			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
@@ -51,11 +51,11 @@
 			]
 		},
 		{
-			"name": "Console (delayed)",
+			"name": "Consola (delayed)",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/consola/consola",
-			"preLaunchTask": "Make Console (delayed)",
+			"preLaunchTask": "Make Consola (delayed)",
 			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
@@ -77,7 +77,7 @@
 			]
 		},
 		{
-			"name": "Console Test",
+			"name": "Consola Test",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/consola/test",
@@ -279,11 +279,11 @@
 			]
 		},
 		{
-			"name": "Memory",
+			"name": "Memoria",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/memoria/memoria",
-			"preLaunchTask": "Make Memory",
+			"preLaunchTask": "Make Memoria",
 			"cwd": "${workspaceFolder}/memoria",
 			"externalConsole": false,
 			"MIMode": "gdb",
@@ -301,11 +301,11 @@
 			]
 		},
 		{
-			"name": "Memory Test",
+			"name": "Memoria Test",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/memoria/test",
-			"preLaunchTask": "Make Test Memory",
+			"preLaunchTask": "Make Test Memoria",
 			"cwd": "${workspaceFolder}/memoria",
 			"externalConsole": false,
 			"MIMode": "gdb",

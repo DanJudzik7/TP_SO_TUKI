@@ -3,7 +3,8 @@
 
 #include <math.h>
 
-#include "shared_package.h"
+#include "shared_serializer.h"
+#include "shared_socket.h"
 #include "utils_cpu.h"
 
 extern configuration_cpu config_cpu;

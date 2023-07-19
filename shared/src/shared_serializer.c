@@ -21,7 +21,7 @@ t_package* serialize_execution_context(t_execution_context* ec) {
 	package_nest(package, package_new_dict(PROCESS_PID, &(ec->pid), &size4));
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
 	package_nest(package, serialize_segments_table(ec->segments_table, SEGMENTS_TABLE, 0));
-	if (ec->kernel_request != NULL) package_nest(package, package_new_nested(KERNEL_REQUEST, ec->kernel_request));
+	if (ec->kernel_request != NULL) package_nest(package, package_new_nested(KERNEL_REQUEST, serialize_instruction(ec->kernel_request)));
 	return package;
 }
 
@@ -150,10 +150,12 @@ t_list* deserialize_segment_table(t_package* package) {
 t_segment* deserialize_segment(t_package* nested) {
 	t_instruction* instruction = deserialize_instruction(nested);
 	t_segment* segment = s_malloc(sizeof(segment));
-	segment->base = atoi(list_get(instruction->args, 0));
+	int base_value = atoi(list_get(instruction->args, 0));
+	segment->base = malloc(sizeof(int));
+	memcpy(segment->base, &base_value, sizeof(int));
 	segment->offset = atoi(list_get(instruction->args, 1));
 	segment->s_id = atoi(list_get(instruction->args, 2));
-	instruction_delete(instruction);
+	instruction_destroy(instruction);
 	return segment;
 }
 

@@ -20,12 +20,12 @@
             }
         },
         {
-            "label": "Make Console (delayed)",
+            "label": "Make Consola (delayed)",
             "dependsOrder": "sequence",
-            "dependsOn": ["Delay", "Delay", "Delay", "Make Console"],
+            "dependsOn": ["Delay", "Delay", "Delay", "Make Consola"],
         },
         {
-            "label": "Make Console",
+            "label": "Make Consola",
             "type": "shell",
             "command": "make",
             "options": {
@@ -130,7 +130,7 @@
             }
         },
         {
-            "label": "Make Memory",
+            "label": "Make Memoria",
             "type": "shell",
             "command": "make",
             "options": {
@@ -145,7 +145,7 @@
             }
         },
         {
-            "label": "Make Test Memory",
+            "label": "Make Test Memoria",
             "type": "shell",
             "command": "make test",
             "options": {

@@ -14,9 +14,22 @@ void long_term_schedule(t_global_config_kernel* gck) {
 			log_error(gck->logger, "Error al informar finalización a la consola %d", pcb->pid);
 		socket_close(pcb->pid);
 
+		// Libero todos los recursos
+		t_list* resources_names = dictionary_keys(gck->resources);
+		for (int i = 0; i < list_size(resources_names); i++) {
+			char* resource_name = list_get(resources_names, i);
+			t_resource* resource = dictionary_get(gck->resources, resource_name);
+			if (resource->assigned_to == pcb) resource_signal(resource, gck->logger);
+			t_list* resource_list = resource->enqueued_processes->elements;
+			for (int j = 0; j < list_size(resource_list); j++) {
+				if (list_get(resource_list, j) == pcb) list_remove(resource_list, j);
+			}
+			
+		}
+
 		// Destruyo las estructuras
 		t_instruction* mem_op = instruction_new(MEM_END_PROCCESS);
-		list_add(mem_op->args, pcb->pid);
+		list_add(mem_op->args, string_itoa(pcb->pid));
 		if (!socket_send(gck->socket_memory, serialize_instruction(mem_op))) {
 			log_error(gck->logger, "Error al enviar instrucciones a memoria");
 		}
@@ -39,12 +52,12 @@ void long_term_schedule(t_global_config_kernel* gck) {
 
 		// Solicito a Memoria las estructuras necesarias para inicializar
 		t_instruction* mem_op = instruction_new(MEM_INIT_PROCESS);
-		list_add(mem_op->args, pcb->pid);
+		list_add(mem_op->args, string_itoa(pcb->pid));
 		if (!socket_send(gck->socket_memory, serialize_instruction(mem_op))) {
 			log_error(gck->logger, "Error al enviar instrucciones a memoria");
 		}
 		t_package* package = socket_receive(gck->socket_memory);
-		if (package->type != SEGMENTS_TABLE) {
+		if (package == NULL || package->type != SEGMENTS_TABLE) {
 			log_error(gck->logger, "Error al inicializar estructuras del proceso");
 			abort();
 		}

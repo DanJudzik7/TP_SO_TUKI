@@ -3,8 +3,8 @@
 
 #include <pthread.h>
 
-#include "handler_cpu.h"
 #include "shared_utils.h"
+#include "handler_cpu.h"
 #include "shared_socket.h"
 #include "shared_serializer.h"
 #include "tests.h"

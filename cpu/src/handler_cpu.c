@@ -10,13 +10,22 @@ t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) 
 		case SET:
 			sleep(config_cpu.instruction_delay);
 			break;
-		case MOV_IN:  // Registro, Dirección Lógica
-			return mmu((int)list_get(instruction->args, 1), sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)), ec);
-		case MOV_OUT:  // Dirección Lógica, Registro
-			return mmu((int)list_get(instruction->args, 0), sizeof(register_pointer(list_get(instruction->args, 1), ec->cpu_register)), ec);
-		case F_READ:   // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
-		case F_WRITE:  // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
-			return mmu((int)list_get(instruction->args, 1), list_get(instruction->args, 2), ec);
+		case MOV_IN: {	// Registro, Dirección Lógica
+			char* register_name = list_get(instruction->args, 0);
+			int* logical_address = list_get(instruction->args, 1);
+			return mmu(*logical_address, sizeof(register_pointer(register_name, ec->cpu_register)), ec);
+		}
+		case MOV_OUT: {	 // Dirección Lógica, Registro
+			int* logical_address = list_get(instruction->args, 0);
+			char* register_name = list_get(instruction->args, 1);
+			return mmu(*logical_address, sizeof(register_pointer(register_name, ec->cpu_register)), ec);
+		}
+		case F_READ:	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
+		case F_WRITE: {	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
+			int* logical_address = list_get(instruction->args, 1);
+			int* bytes_count = list_get(instruction->args, 2);
+			return mmu(*logical_address, *bytes_count, ec);
+		}
 	}
 	return NULL;
 }
@@ -29,13 +38,14 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		}
 		case MOV_IN: {	// Registro, Dirección Lógica (y associated_pa)
 			t_instruction* mem_op = instruction_new(MEM_READ_ADDRESS);
-			list_add(mem_op->args, associated_pa->segment);
-			list_add(mem_op->args, associated_pa->offset);
-			list_add(mem_op->args, sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
-			list_add(mem_op->args, ec->pid);
+			list_add(mem_op->args, string_itoa(associated_pa->segment));
+			list_add(mem_op->args, string_itoa(associated_pa->offset));
+			list_add(mem_op->args, string_itoa(sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register))));
+			printf("El tamaño del registro es: %s\n", string_itoa(sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register))));
+			list_add(mem_op->args, string_itoa(ec->pid));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
-				return;
+				break;
 			}
 			t_package* package = socket_receive(config_cpu.socket_memory);
 			char* value = deserialize_message(package);
@@ -45,13 +55,13 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		}
 		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
 			t_instruction* mem_op = instruction_new(MEM_WRITE_ADDRESS);
-			list_add(mem_op->args, associated_pa->segment);
-			list_add(mem_op->args, associated_pa->offset);
+			list_add(mem_op->args, string_itoa(associated_pa->segment));
+			list_add(mem_op->args, string_itoa(associated_pa->offset));
 			list_add(mem_op->args, register_pointer(list_get(instruction->args, 1), ec->cpu_register));
-			list_add(mem_op->args, ec->pid);
+			list_add(mem_op->args, string_itoa(ec->pid));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
-				return;
+				break;
 			}
 			t_package* package = socket_receive(config_cpu.socket_memory);
 			if (package->type == SEG_FAULT)
@@ -63,8 +73,8 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		case F_READ:  // filename, logical address, bytes count
 		case F_WRITE: {
 			ec->kernel_request = instruction_duplicate(instruction);
-			list_add(ec->kernel_request->args, associated_pa->segment);
-			list_add(ec->kernel_request->args, associated_pa->offset);
+			list_add(ec->kernel_request->args, string_itoa(associated_pa->segment));
+			list_add(ec->kernel_request->args, string_itoa(associated_pa->offset));
 		}
 		case YIELD:
 			log_warning(config_cpu.logger, "Desalojando proceso");

@@ -178,6 +178,12 @@ t_instruction* instruction_new(int32_t op_code);
 t_instruction* instruction_duplicate(t_instruction* source);
 
 // Elimina una instrucción
-void instruction_delete(t_instruction* instruction);
+void instruction_destroy(t_instruction* instruction);
+
+// Inicializa un Execution Context con los datos recibidos
+t_execution_context* execution_context_new(int pid);
+
+// Limpia un Execution Context de la memoria
+void execution_context_destroy(t_execution_context* ec);
 
 #endif
