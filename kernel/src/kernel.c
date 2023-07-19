@@ -3,6 +3,7 @@
 int main(int argc, char** argv) {
 	t_config* config = start_config("kernel");
 	t_global_config_kernel* gck = new_global_config_kernel(config);
+	t_helper_file_instruction* hfi = s_malloc(sizeof(t_helper_file_instruction));
 	log_warning(gck->logger, "Iniciando el kernel");
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
 	int socket_kernel = socket_initialize_server(port);
@@ -14,7 +15,7 @@ int main(int argc, char** argv) {
 
 	int socket_cpu = connect_module(config, gck->logger, "CPU");
 	gck->socket_memory = connect_module(config, gck->logger, "MEMORIA");
-	int socket_filesystem = connect_module(config, gck->logger, "FILESYSTEM");
+	hfi->socket_filesystem = connect_module(config, gck->logger, "FILESYSTEM");
 
 	// To do: flags mutex para manejo de estos listas
 	// Creación de Recursos: Diccionario de recursos -> [recurso,[instancias, [Cola de recursos] ] ]
@@ -30,12 +31,16 @@ int main(int argc, char** argv) {
 	}
 	sem_init(&(gck->flag_with_pcb), 0, 1);
 
-	// Inicializo tabla de archivos
+	// Manejo de archivos y filesystem
 	t_list* open_files = list_create();
+	hfi->logger = gck->logger;
+	hfi->file_instructions = queue_create();
+	pthread_t thread_fs;
+	pthread_create(&thread_fs, NULL, (void*)handle_fs, hfi);
 
 	// Manejo de consolas
-	pthread_t thread_consola;
-	pthread_create(&thread_consola, NULL, (void*)listen_consoles, gck);
+	pthread_t thread_console;
+	pthread_create(&thread_console, NULL, (void*)listen_consoles, gck);
 
 	int sem_pcb_value;
 
@@ -75,8 +80,6 @@ int main(int argc, char** argv) {
 			log_warning(gck->logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
 			sem_post(&gck->flag_with_pcb);
 		}
-		// Actualizo el estado del PCB según el nuevo execution context
-		pcb->state = pcb->execution_context->updated_state;
 
 		// Nota: EXIT es solo finalización implícita del proceso (según la consigna, usuario y error). El completado de instrucciones debe devolver READY.
 		// TODO: RELEER t.u.k.i y ver si hay que hacer algo con el PCB
@@ -88,17 +91,22 @@ int main(int argc, char** argv) {
 		t_instruction* kernel_request = pcb->execution_context->kernel_request;
 		if (kernel_request == NULL) continue;
 		switch (kernel_request->op_code) {
+			case I_O: { // time
+				pcb->state = BLOCK;
+				// To do: cantidad de unidades de tiempo que va a bloquearse el proceso.
+				break;
+			}
 			case F_OPEN: {	// filename
 				char* filename = list_get(kernel_request->args, 0);
 				if (is_in_list(open_files, filename)) {
 					log_error(gck->logger, "El archivo %s ya está abierto", filename);
 					continue;
 				}
-				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
+				if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
 					log_error(gck->logger, "Error al enviar operación a filesystem");
 					continue;
 				}
-				t_package* package = socket_receive(socket_filesystem);
+				t_package* package = socket_receive(hfi->socket_filesystem);
 				if (package->type != MESSAGE_OK) {
 					log_error(gck->logger, "Error al abrir archivo");
 					continue;
@@ -113,11 +121,11 @@ int main(int argc, char** argv) {
 					log_error(gck->logger, "El archivo %s no está abierto", filename);
 					continue;
 				}
-				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
+				if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
 					log_error(gck->logger, "Error al enviar operación a filesystem");
 					continue;
 				}
-				t_package* package = socket_receive(socket_filesystem);
+				t_package* package = socket_receive(hfi->socket_filesystem);
 				if (package->type != MESSAGE_OK) {
 					log_error(gck->logger, "Error al cerrar archivo");
 					continue;
@@ -135,61 +143,81 @@ int main(int argc, char** argv) {
 				} else {
 					log_error(gck->logger, "No se encontró el archivo %s", filename);
 				}
+				break;
 			}
 			case F_TRUNCATE: {	// filename, bytes count
-				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
+				if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
 					log_error(gck->logger, "Error al enviar operación a filesystem");
 					return;
 				}
-				t_package* package = socket_receive(socket_filesystem);
+				t_package* package = socket_receive(hfi->socket_filesystem);
 				printf("El truncate del archivo fue %s", package->type == MESSAGE_OK ? "exitosa" : "fallida");
+				break;
 			}
 			case F_READ:  // filename, logical address, bytes count, segment, offset -> NAME(0) posicion(1) tamaño_leer(2) PID(3) S_ID(4) OFFSET(5)
 			case F_WRITE: {
-				list_replace(kernel_request->args, 1, dictionary_get(pcb->files, list_get(kernel_request->args, 0)));
-				list_add_in_index(kernel_request->args, 3, pcb->pid);
-				if (!socket_send(socket_filesystem, serialize_instruction(kernel_request))) {
-					log_error(gck->logger, "Error al enviar operación a filesystem");
-					return;
-				}
-				t_package* package = socket_receive(socket_filesystem);
-				printf("La lectura del archivo fue %s", package->type == MESSAGE_OK ? "exitosa" : "fallida");
+				t_instruction* fs_op = instruction_duplicate(kernel_request);
+				list_replace(fs_op->args, 1, dictionary_get(pcb->files, list_get(fs_op->args, 0)));
+				list_add_in_index(fs_op->args, 3, pcb->pid);
+				queue_push(hfi->file_instructions, fs_op);
+				pcb->state = BLOCK;
+				break;
 			}
 			case CREATE_SEGMENT: {
 				list_add(kernel_request->args, pcb->pid);
 				kernel_request->op_code = MEM_CREATE_SEGMENT;
 				if (!socket_send(gck->socket_memory, serialize_instruction(kernel_request))) {
-					log_error(gck->logger, "Error al enviar instrucciones al memoria");
+					log_error(gck->logger, "Error al enviar instrucción a memoria");
 				}
 				t_package* package = socket_receive(gck->socket_memory);
-				if (package->type == COMPACT_ALL) {
+				if (package->type == COMPACT_REQUEST) {
 					log_error(gck->logger, "Solicitud de compactación");
-					return;
+					while(!queue_is_empty(hfi->file_instructions)) sleep(1);
+					t_instruction* mem_op = instruction_new(MEM_COMPACT_ALL);
+					if (!socket_send(gck->socket_memory, serialize_instruction(mem_op))) {
+						log_error(gck->logger, "Error al enviar operación a memoria");
+						continue;
+					}
+					free(mem_op);
+					t_package* package = socket_receive(gck->socket_memory);
+					t_dictionary* segment_tables = deserialize_all_segments_tables(package);
+					// Cargar todos los nuevos segmentos
+					for (int i = 0; i < list_size(gck->active_pcbs->elements); i++) {
+						t_pcb* pcb = list_get(gck->active_pcbs->elements, i);
+						list_destroy(pcb->execution_context->segments_table);
+						pcb->execution_context->segments_table = dictionary_get(segment_tables, pcb->pid);
+					}
+					if (!socket_send(gck->socket_memory, serialize_instruction(kernel_request))) {
+						log_error(gck->logger, "Error al volver a enviar instrucción a memoria");
+					}
+					free(package);
+					continue;
 				}
 				if (package->type == NO_SPACE_LEFT) {
 					log_error(gck->logger, "Error del kernel: Out of Memory");
 					exit_process(pcb, gck);
-					return;
+					continue;
 				}
 				if (package->type == MESSAGE_OK) {
 					char* s_base = deserialize_message(package);
 					log_error(gck->logger, "Error desconocido al leer el archivo");
-					return;
+					continue;
 				}
 				log_error(gck->logger, "Error desconocido al leer el archivo");
-				return;
+				break;
 			}
 			case DELETE_SEGMENT: {
 				list_add(kernel_request->args, pcb->pid);
 				kernel_request->op_code = MEM_DELETE_SEGMENT;
 				if (!socket_send(gck->socket_memory, serialize_instruction(kernel_request))) {
-					log_error(gck->logger, "Error al enviar instrucciones al memoria");
+					log_error(gck->logger, "Error al enviar instrucción a memoria");
 				}
 				t_package* package = socket_receive(gck->socket_memory);
 				if (package->type != OK_INSTRUCTION) {
 					log_error(gck->logger, "Error al eliminar segmento");
 					return;
 				}
+				break;
 			}
 			case YIELD: {
 				if (gck->algorithm_is_hrrn) {
@@ -200,23 +228,6 @@ int main(int argc, char** argv) {
 				queue_push(gck->active_pcbs, pcb);
 				break;
 			}
-			case SIGNAL: {
-				char* resource_name = list_get(kernel_request->args, 0);
-				if (!dictionary_has_key(gck->resources, resource_name)) {
-					log_error(gck->logger, "El recurso %s no existe", resource_name);
-					continue;
-				}
-				log_info(gck->logger, "El recurso requerido es %s", resource_name); 
-				resources_table* resource = dictionary_get(gck->resources, resource_name);
-				if (resource->instances > 0) {
-					(resource->instances)++;
-					printf("Las instancias del recurso aumentaron a -> %i", resource->instances);
-					// se devuelve la ejecución al proceso que peticionó el SIGNAL.
-					t_pcb* pcb_priority = queue_pop(resource->resource_queue);
-					gck->pcb_priority_helper = pcb_priority;
-				}
-				// TODO: NO DICE NADA DE ESTE SIGNAL, AVERIGUAR ? igual dudo que haga algo
-			}
 			case WAIT: {
 				resources_table* resource = dictionary_get(gck->resources, list_get(kernel_request->args, 0));
 				if (resource->instances >= 0) {
@@ -226,7 +237,26 @@ int main(int argc, char** argv) {
 				}
 				// SI EL PROCESO ES MENOR A 0 ESTRICTAMENTE, LO MANDO A LA COLA DE BLOQUEADOS DE ESE RECURSO
 				// TODO: NO DICE NADA DE BLOQUEAR, CONSULTAR si pcb->state = BLOCK; aunque da igual.
-				else queue_push(resource->resource_queue, pcb);
+				else
+					queue_push(resource->resource_queue, pcb);
+				break;
+			}
+			case SIGNAL: {
+				char* resource_name = list_get(kernel_request->args, 0);
+				if (!dictionary_has_key(gck->resources, resource_name)) {
+					log_error(gck->logger, "El recurso %s no existe", resource_name);
+					continue;
+				}
+				log_info(gck->logger, "El recurso requerido es %s", resource_name);
+				resources_table* resource = dictionary_get(gck->resources, resource_name);
+				if (resource->instances > 0) {
+					(resource->instances)++;
+					printf("Las instancias del recurso aumentaron a -> %i", resource->instances);
+					// se devuelve la ejecución al proceso que peticionó el SIGNAL.
+					t_pcb* pcb_priority = queue_pop(resource->resource_queue);
+					gck->pcb_priority_helper = pcb_priority;
+				}
+				// TODO: NO DICE NADA DE ESTE SIGNAL, AVERIGUAR ? igual dudo que haga algo
 				break;
 			}
 			case EXIT: {

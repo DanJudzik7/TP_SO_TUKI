@@ -24,14 +24,14 @@ void long_term_schedule(t_global_config_kernel* gck) {
 		t_instruction* mem_op = instruction_new(MEM_INIT_PROCESS);
 		list_add(mem_op->args, pcb->pid);
 		if (!socket_send(gck->socket_memory, serialize_instruction(mem_op))) {
-			log_error(gck->logger, "Error al enviar instrucciones al memoria");
+			log_error(gck->logger, "Error al enviar instrucciones a memoria");
 		}
 		t_package* package = socket_receive(gck->socket_memory);
-		if (package->type != COMPACT_FINISHED) {
-			log_error(gck->logger, "Error al inicializar proceso");
+		if (package->type != pcb->pid) {
+			log_error(gck->logger, "Error al inicializar proceso (pid inválido)");
 			return;
 		}
-		//pcb->execution_context->segment_table = deserialize_segment_table(package); // El deserializador todavía no está listo
+		pcb->execution_context->segments_table = deserialize_segment_table(package);
 
 		queue_push(gck->active_pcbs, pcb);
 		log_info(gck->logger, "El proceso %d ahora está en Ready", pcb->pid);

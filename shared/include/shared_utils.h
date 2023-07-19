@@ -18,12 +18,6 @@
 #include <time.h>
 #include <unistd.h>
 
-typedef struct t_package {
-	uint64_t size;
-	int32_t type;
-	void* buffer;
-} t_package;
-
 typedef struct cpu_register_4 {
 	char AX[4];
 	char BX[4];
@@ -57,30 +51,36 @@ typedef struct instruction_memory {
 	uint32_t offset;
 } instruction_memory;
 
-typedef struct memory_buffer {
-	uint32_t pid;
-	char* buffer;
-} memory_buffer;
-
-typedef struct segment_table {
-	uint32_t pid;
-	uint32_t s_id;
-	uint32_t size_segment;
-	t_list* segment_table_pcb;
-} segment_table;
-
 // Estructura de cada segmento
-typedef struct segment {
+typedef struct t_segment {
 	void* base;
 	int offset;
 	int s_id;
-} segment;
+} t_segment;
 
 // Dirección Física
 typedef struct t_physical_address {
 	int segment;
 	int offset;
 } t_physical_address;
+
+typedef enum t_memory_op {
+	MEM_INIT_PROCESS,
+	MEM_END_PROCCESS,
+	MEM_READ_ADDRESS,
+	MEM_WRITE_ADDRESS,
+	MEM_CREATE_SEGMENT,
+	MEM_DELETE_SEGMENT,
+	MEM_COMPACT_ALL,
+} t_memory_op;
+
+typedef enum t_memory_state {
+	SEG_FAULT,		  // 0
+	OK_INSTRUCTION,	  // 1
+	NO_SPACE_LEFT,	  // 2
+	COMPACT_REQUEST,  // 3
+	SEGMENT,		  // 4
+} t_memory_state;
 
 typedef enum process_state {
 	NEW,
@@ -89,34 +89,37 @@ typedef enum process_state {
 	BLOCK,
 	EXIT_PROCESS
 } process_state;
+
 // Estructuras para pasar solo este struct y no cada una de manera individual
 typedef struct t_memory_structure {
-	segment* segment_zero;
+	t_segment* segment_zero;
 	t_dictionary* table_pid_segments;  // un diccionario con todas las tablas de segmentos de todos los procesos  [ key: [lista_segmentos ] ]
 	t_list* hole_list;
 	t_list* ram;  // La memoria en si
 	void* heap;
 } t_memory_structure;
+
 typedef struct t_instruction {
 	int32_t op_code;
 	t_list* args;
 } t_instruction;
-typedef struct execution_context {
+
+typedef struct t_execution_context {
 	t_queue* instructions;
 	uint32_t program_counter;
-	process_state updated_state;
 	cpu_register* cpu_register;
-	t_list* segment_table;
+	t_list* segments_table;
 	uint32_t pid;
 	t_instruction* kernel_request;	// Acá la CPU va a guardar si necesita algo de kernel
-} execution_context;
+} t_execution_context;
 
 typedef enum execution_context_index {
 	EC_INSTRUCTIONS,
 	PROGRAM_COUNTER,
-	UPDATED_STATE,
+	PROCESS_PID,
 	CPU_REGISTERS,
-	SEGMENT_TABLE,
+	SEGMENTS_TABLE,
+	ALL_SEGMENTS_TABLES,
 	F_WRITE_READ,
 	KERNEL_REQUEST
 } execution_context_index;
@@ -148,7 +151,6 @@ typedef enum op_code {
 	YIELD,			 // 15
 } op_code;
 
-
 // Carga la configuración de un módulo
 t_config* start_config(char* module);
 
@@ -164,14 +166,18 @@ char* get_full_path(char* path);
 // Safe Memory Allocation. Crashea si no hay más memoria.
 void* s_malloc(size_t size);
 
-void print_execution_context(execution_context* execution_context);
+void print_execution_context(t_execution_context* execution_context);
 
+// Retorna si un valor está en una lista
 bool is_in_list(t_list* list, char* value);
 
+// Crea una nueva instrucción con el tipo proporcionado
 t_instruction* instruction_new(int32_t op_code);
 
+// Duplica una instrucción
 t_instruction* instruction_duplicate(t_instruction* source);
 
+// Elimina una instrucción
 void instruction_delete(t_instruction* instruction);
 
 #endif

@@ -60,6 +60,25 @@ void handle_console(helper_create_pcb* hcp) {
 	long_term_schedule(hcp->config);
 }
 
+void handle_fs(t_helper_file_instruction* hfi) {
+	while (1) {
+		while (queue_is_empty(hfi->file_instructions)) sleep(1);
+		t_instruction* fs_op = queue_pop(hfi->file_instructions);
+		if (fs_op->op_code != F_READ && fs_op->op_code != F_WRITE) {
+			log_error(hfi->logger, "Operación inválida recibida");
+			continue;
+		}
+		if (!socket_send(hfi->socket_filesystem, serialize_instruction(fs_op))) {
+			log_error(hfi->logger, "Error al enviar operación a filesystem");
+			continue;
+		}
+		t_package* package = socket_receive(hfi->socket_filesystem);
+		printf("La %s del archivo fue %s", fs_op->op_code == F_READ ? "lectura" : "escritura", package->type == MESSAGE_OK ? "exitosa" : "fallida");
+		package_destroy(package);
+		free(fs_op);
+	}
+}
+
 t_pcb* pcb_new(int pid, int burst_time) {
 	// La inicialización se hace de forma segura en memoria (con memset)
 	t_pcb* pcb = s_malloc(sizeof(t_pcb));
@@ -68,15 +87,13 @@ t_pcb* pcb_new(int pid, int burst_time) {
 	pcb->aprox_burst_time = burst_time;
 	pcb->last_ready_time = time(NULL);
 	pcb->files = list_create();
-	pcb->execution_context = s_malloc(sizeof(execution_context));
+	pcb->execution_context = s_malloc(sizeof(t_execution_context));
 	pcb->execution_context->instructions = queue_create();
 	pcb->execution_context->program_counter = 0;
-	pcb->execution_context->updated_state = NEW;
 	pcb->execution_context->cpu_register = s_malloc(sizeof(cpu_register));
 	memset(pcb->execution_context->cpu_register, 0, sizeof(cpu_register));
-	pcb->execution_context->segment_table = list_create();
+	pcb->execution_context->segments_table = list_create();
 	pcb->execution_context->pid = pid;
-	memset(pcb->execution_context->segment_table, 0, sizeof(segment_table));
 	return pcb;
 }
 
@@ -85,8 +102,8 @@ void pcb_destroy(t_pcb* pcb) {
 	queue_destroy_and_destroy_elements(pcb->execution_context->instructions, (void*)instruction_delete);
 	free(pcb->execution_context->cpu_register);
 	pcb->execution_context->cpu_register = NULL;
-	free(pcb->execution_context->segment_table);
-	pcb->execution_context->segment_table = NULL;
+	free(pcb->execution_context->segments_table);
+	pcb->execution_context->segments_table = NULL;
 	free(pcb->execution_context);
 	pcb->execution_context = NULL;
 	free(pcb);

@@ -87,10 +87,6 @@ int connect_module(t_config* config, t_log* logger, char* module) {
 	int module_socket = socket_initialize(module_ip, module_port);
 	free(port);
 	free(ip);
-	/*if (!socket_send(module_socket, package_new_message("Mensaje de prueba", false))) {
-		printf("Error al enviar mensaje de prueba en %s en %d\n", module, module_socket);
-		return -1;
-	}*/
 	if (module_socket == -1) {
 		log_error(logger, "No se pudo conectar a módulo %s con %s:%s", module, module_ip, module_port);
 		exit(EXIT_FAILURE);

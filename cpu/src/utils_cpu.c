@@ -29,11 +29,11 @@ char* register_pointer(char* name, cpu_register* registers) {
 		return NULL;
 }
 
-t_physical_address* mmu(int logical_address, int size, execution_context* ec) {
+t_physical_address* mmu(int logical_address, int size, t_execution_context* ec) {
 	t_physical_address* physical_address = s_malloc(sizeof(t_physical_address));
 	physical_address->segment = floor(logical_address / config_cpu.max_segment_size);
 	physical_address->offset = logical_address % config_cpu.max_segment_size;
-	if (physical_address->offset + size > list_get_by_sid(ec->segment_table, physical_address->segment)->offset) {
+	if (physical_address->offset + size > list_get_by_sid(ec->segments_table, physical_address->segment)->offset) {
 		log_error(config_cpu.logger, "La dirección lógica resultó en Segmentation Fault");
 		free(physical_address);
 		return NULL;
@@ -41,10 +41,10 @@ t_physical_address* mmu(int logical_address, int size, execution_context* ec) {
 	return physical_address;
 }
 
-segment* list_get_by_sid(t_list* list, int id) {
+t_segment* list_get_by_sid(t_list* list, int id) {
 	int i = 0;
 	while (i < list_size(list)) {
-		segment* segment = list_get(list, i);
+		t_segment* segment = list_get(list, i);
 		if (segment->s_id == id) return segment;
 		i++;
 	}

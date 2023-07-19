@@ -67,9 +67,9 @@ void test_compact() {
 	graph_ram(memory_structure, memory);
 	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
 
-	t_dictionary* all_segments = deserialize_all_segments(package);
+	t_dictionary* all_segments = deserialize_all_segments_tables(package);
 	t_list* segment_table = dictionary_get(all_segments, "0");
-	segment* segment = list_get(segment_table, 1);
+	t_segment* segment = list_get(segment_table, 1);
 	printf("La base del segmento es: %i \n", segment->base);
 	graph_specific_table_pid_segments(segment_table, 0, 0);
 
@@ -106,15 +106,15 @@ void graph_ram(t_memory_structure* memory_structure, void* memory_base) {
 
 	// Recorrer tanto los segmentos en RAM como los huecos en hole_list
 	while (ram_index < ram_size || hole_index < hole_list_size) {
-		uintptr_t ram_base = (ram_index < ram_size) ? ((segment*)list_get(ram, ram_index))->base : UINTPTR_MAX;
-		uintptr_t hole_base = (hole_index < hole_list_size) ? ((segment*)list_get(hole_list, hole_index))->base : UINTPTR_MAX;
+		uintptr_t ram_base = (ram_index < ram_size) ? ((t_segment*)list_get(ram, ram_index))->base : UINTPTR_MAX;
+		uintptr_t hole_base = (hole_index < hole_list_size) ? ((t_segment*)list_get(hole_list, hole_index))->base : UINTPTR_MAX;
 
 		if (ram_base <= hole_base) {
-			segment* seg = list_get(ram, ram_index);
+			t_segment* seg = list_get(ram, ram_index);
 			printf("| Segmento: %i | base: %u | tamaño: %i |\n", seg->s_id, transform_base_to_decimal(seg->base, memory_base), seg->offset);
 			ram_index++;
 		} else {
-			segment* hole_seg = list_get(hole_list, hole_index);
+			t_segment* hole_seg = list_get(hole_list, hole_index);
 			printf("|Segmento Hueco | base: %u  | tamaño: %i |\n", transform_base_to_decimal(hole_seg->base, memory_base), hole_seg->offset);
 			hole_index++;
 		}
@@ -149,7 +149,7 @@ void graph_specific_table_pid_segments(t_list* segment_table, int process_id, vo
 	printf("\n|Tabla de segmentos del proceso PID  %i|\n", process_id);
 	printf("--------------------------------------\n");
 	for (int i = 0; i < list_size(segment_table); i++) {
-		segment* seg = list_get(segment_table, i);
+		t_segment* seg = list_get(segment_table, i);
 		printf("|PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base), seg->offset);
 	}
 	printf("--------------------------------------\n");

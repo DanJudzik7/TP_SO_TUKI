@@ -20,7 +20,7 @@ t_memory_structure* new_memory_structure(void* memory) {
 	t_memory_structure* memory_structure = s_malloc(sizeof(t_memory_structure));
 	memory_structure->hole_list = list_create();
 	memory_structure->table_pid_segments = dictionary_create();
-	memory_structure->segment_zero = s_malloc(sizeof(segment));
+	memory_structure->segment_zero = s_malloc(sizeof(t_segment));
 	// Recordemos que la ram es una t_list unicamente de ayuda, que apunta a las direcciones de memoria [dir_segment_zer, sig dirección, etc ]
 	memory_structure->ram = list_create();
 	memory_structure->heap = memory;

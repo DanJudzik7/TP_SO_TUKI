@@ -16,7 +16,7 @@ void remove_sg_table(t_memory_structure* memory_structure, int process_id) {
 	sprintf(pid_str, "%d", process_id);
 	t_list* segment_table_delete = dictionary_get(memory_structure->table_pid_segments, pid_str);
 	for (int i = 1; i < list_size(segment_table_delete); i++) {
-		segment* segment = list_get(segment_table_delete, i);
+		t_segment* segment = list_get(segment_table_delete, i);
 		delete_segment(memory_structure, process_id, segment->s_id);
 	}
 
@@ -24,7 +24,7 @@ void remove_sg_table(t_memory_structure* memory_structure, int process_id) {
 }
 
 int add_segment(t_memory_structure* memory_structure, int process_id, int size, int s_id) {
-	segment* segment;
+	t_segment* segment;
 
 	if (config_memory.remaining_memory > size) {
 		// Recorro la ram para asignar el segmento segun el algoritmo
@@ -59,13 +59,13 @@ void delete_segment(t_memory_structure* memory_structure, int process_id, int s_
 	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
 	sprintf(pid_str, "%d", process_id);
 
-	segment* segment_to_delete = NULL;
+	t_segment* segment_to_delete = NULL;
 
 	// Obtengo la lista de segmentos del proceso a eliminar
 	t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
 	// Obtengo el segmento que coincida con el que quiero eliminar en la tabla de su pid
 	for (int i = 1; i < list_size(segment_table); i++) {
-		segment* segment_pid = list_get(segment_table, i);
+		t_segment* segment_pid = list_get(segment_table, i);
 		if (segment_pid->s_id == s_id_to_delete) {
 			// Asigno para tener el segmento más a mano
 			segment_to_delete = segment_pid;
@@ -79,7 +79,7 @@ void delete_segment(t_memory_structure* memory_structure, int process_id, int s_
 
 	// Recorro la RAM para eliminarla
 	for (int i = 1; i < list_size(memory_structure->ram); i++) {
-		segment* segment_ram = list_get(memory_structure->ram, i);
+		t_segment* segment_ram = list_get(memory_structure->ram, i);
 		// Si tiene la misma base que el segmento a eliminar
 		if (segment_ram->base == segment_to_delete->base) {
 			// Elimino justo esa posición
@@ -99,9 +99,9 @@ void compact_hole_list(t_memory_structure* memory_structure) {
 		for (int i = 0; i < list_size(memory_structure->hole_list); i++) {
 			// Mientras segment no sea el ultimo
 			if (i < list_size(memory_structure->hole_list) - 1) {
-				segment* segment_current = list_get(memory_structure->hole_list, i);
+				t_segment* segment_current = list_get(memory_structure->hole_list, i);
 				// agarro su siguiente segmento para comparar
-				segment* segment_next = list_get(memory_structure->hole_list, i + 1);
+				t_segment* segment_next = list_get(memory_structure->hole_list, i + 1);
 				// Si el sig segmento comienza dps del anterior los compacto y elimino el sigiente
 				if (segment_current->base + segment_current->offset == segment_next->base) {
 					segment_current->offset += segment_next->offset;
@@ -114,16 +114,16 @@ void compact_hole_list(t_memory_structure* memory_structure) {
 	}
 }
 
-void swap(segment* a, segment* b) {
-	segment temp;
-	memcpy(&temp, a, sizeof(segment));
-	memcpy(a, b, sizeof(segment));
-	memcpy(b, &temp, sizeof(segment));
+void swap(t_segment* a, t_segment* b) {
+	t_segment temp;
+	memcpy(&temp, a, sizeof(t_segment));
+	memcpy(a, b, sizeof(t_segment));
+	memcpy(b, &temp, sizeof(t_segment));
 }
 
 bool more_close_to_heap(void* segment1, void* segment2) {
-	segment* seg1 = (segment*)segment1;
-	segment* seg2 = (segment*)segment2;
+	t_segment* seg1 = (t_segment*)segment1;
+	t_segment* seg2 = (t_segment*)segment2;
 	return seg1->base < seg2->base;
 }
 
@@ -135,15 +135,15 @@ void compact_memory(t_memory_structure* memory_structure) {
 		// Recorro la memoria ram auxiliar donde estan mis procesos actuales
 		for (int i = 1; i < list_size(memory_structure->ram); i++) {
 			// Agarro la posicion de memoria en la ram
-			segment* ram_segment = list_get(memory_structure->ram, i);
+			t_segment* ram_segment = list_get(memory_structure->ram, i);
 			// agarro el primer hole que siempre va a ser el mas cercano al heap
-			segment* hole_segment = list_get(memory_structure->hole_list, 0);
+			t_segment* hole_segment = list_get(memory_structure->hole_list, 0);
 			// Si el segmento en ram esta mas abajo que el hueco (osea tengo un hueco arriba en ram), hago el swap
 			if (ram_segment->base > hole_segment->base) {
-				segment temp;
-				memcpy(&temp, hole_segment, sizeof(segment));
-				memcpy(hole_segment, ram_segment, sizeof(segment));
-				memcpy(ram_segment, &temp, sizeof(segment));
+				t_segment temp;
+				memcpy(&temp, hole_segment, sizeof(t_segment));
+				memcpy(hole_segment, ram_segment, sizeof(t_segment));
+				memcpy(ram_segment, &temp, sizeof(t_segment));
 
 				i--;  // Disminuyo el índice para mantenerlo en la posición correcta en el siguiente ciclo
 			}
@@ -156,7 +156,7 @@ void compact_memory(t_memory_structure* memory_structure) {
 char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid) {
 	char* buffer = s_malloc(size + 1);
 	;
-	segment* segment = get_segment_by_id(s_id, structures, pid);
+	t_segment* segment = get_segment_by_id(s_id, structures, pid);
 	if (segment != NULL) {
 		if (segment->base + offset + size > segment->base + segment->offset) {
 			log_error(config_memory.logger, "Segmentation fault, no se puede leer mas alla del segment");
@@ -173,7 +173,7 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
 }
 
 bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structure* structures, int pid) {
-	segment* segment = get_segment_by_id(s_id, structures, pid);
+	t_segment* segment = get_segment_by_id(s_id, structures, pid);
 	if (segment != NULL) {
 		if (segment->base + offset + size > segment->base + segment->offset) {
 			log_error(config_memory.logger, "Segmentation fault, no se puede escribir mas alla del segment");
@@ -188,12 +188,12 @@ bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structu
 	}
 }
 
-segment* get_segment_by_id(int s_id, t_memory_structure* structures, int pid) {
+t_segment* get_segment_by_id(int s_id, t_memory_structure* structures, int pid) {
 	char pid_str[10];  // Almacena el ID del proceso como una cadena de caracteres
 	sprintf(pid_str, "%d", pid);
 	t_list* segment_table = dictionary_get(structures->table_pid_segments, pid_str);
 
-	segment* segment;
+	t_segment* segment;
 	for (int i = 0; i < list_size(segment_table); i++) {
 		segment = list_get(segment_table, i);
 		if (segment->s_id == s_id) {

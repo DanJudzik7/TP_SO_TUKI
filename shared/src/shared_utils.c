@@ -51,10 +51,9 @@ void* s_malloc(size_t size) {
 	return ptr;
 }
 
-void print_execution_context(execution_context* execution_context) {
+void print_execution_context(t_execution_context* execution_context) {
     printf("Execution Context:\n");
     printf(" - Program Counter: %u\n", execution_context->program_counter);
-    printf(" - Updated State: %d\n", execution_context->updated_state);
     
     cpu_register* registers = execution_context->cpu_register;
     printf(" - CPU Registers:\n");

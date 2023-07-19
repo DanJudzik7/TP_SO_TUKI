@@ -1,13 +1,13 @@
 #include "algorithms.h"
 
-segment* first_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
+t_segment* first_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
 	t_list_iterator* iterator = list_iterator_create(memory_structure->hole_list);
 	hole* current_hole;
 	while (list_iterator_has_next(iterator)) {
 		current_hole = list_iterator_next(iterator);
 		if (current_hole->size >= size) {
 			// Creamos un nuevo segmento
-			segment* new_segment = s_malloc(sizeof(segment));
+			t_segment* new_segment = s_malloc(sizeof(t_segment));
 			new_segment->base = current_hole->base;
 			new_segment->offset = size;
 			new_segment->s_id = s_id;
@@ -48,7 +48,7 @@ bool is_hole_empty(hole* h) {
 	return h->size == 0;
 }
 
-segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
+t_segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
 	// TODO: Transformar a una funcion en utility
 	char pid_str[10];
 	sprintf(pid_str, "%i", pid);
@@ -69,7 +69,7 @@ segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int s
 	// Si encontramos un "mejor hueco" adecuado...
 	if (best_hole != NULL) {
 		// ...creamos un nuevo segmento y lo ubicamos en ese hueco.
-		segment* new_segment = s_malloc(sizeof(segment));
+		t_segment* new_segment = s_malloc(sizeof(t_segment));
 		new_segment->base = best_hole->base;
 		new_segment->offset = size;
 		new_segment->s_id = s_id;
@@ -95,7 +95,7 @@ segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int s
 	}
 }
 
-segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
+t_segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
 	// TODO: Transformar a una funcion en utility
 	char pid_str[10];
 	sprintf(pid_str, "%i", pid);
@@ -117,7 +117,7 @@ segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, int 
 	// Si encontramos un "peor hueco" adecuado...
 	if (worst_hole != NULL) {
 		// ...creamos un nuevo segmento y lo ubicamos en ese hueco.
-		segment* new_segment = s_malloc(sizeof(segment));
+		t_segment* new_segment = s_malloc(sizeof(t_segment));
 		new_segment->base = worst_hole->base;
 		new_segment->offset = size;
 		new_segment->s_id = s_id;  // Asumiendo que hay un contador global para los IDs de segmentos.

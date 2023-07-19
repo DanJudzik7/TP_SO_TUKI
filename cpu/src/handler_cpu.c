@@ -1,11 +1,11 @@
 #include "handler_cpu.h"
 
-t_instruction* fetch(execution_context* ec) {
+t_instruction* fetch(t_execution_context* ec) {
 	if (ec->program_counter >= list_size(ec->instructions->elements)) return NULL;
 	return list_get(ec->instructions->elements, ec->program_counter);
 }
 
-t_physical_address* decode(t_instruction* instruction, execution_context* ec) {
+t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) {
 	switch (instruction->op_code) {
 		case SET:
 			sleep(config_cpu.instruction_delay);
@@ -21,7 +21,7 @@ t_physical_address* decode(t_instruction* instruction, execution_context* ec) {
 	return NULL;
 }
 
-void execute(t_instruction* instruction, execution_context* ec, t_physical_address* associated_pa) {
+void execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa) {
 	switch (instruction->op_code) {
 		case SET: {
 			set_register(list_get(instruction->args, 0), list_get(instruction->args, 1), ec->cpu_register);
@@ -60,9 +60,6 @@ void execute(t_instruction* instruction, execution_context* ec, t_physical_addre
 				log_info(config_cpu.logger, "Escritura en memoria exitosa");
 			break;
 		}
-		case I_O: {	 // Tiempo
-			log_error(config_cpu.logger, "Instrucción IO: Manejo de recursos no implementado");
-		}
 		case F_READ:  // filename, logical address, bytes count
 		case F_WRITE: {
 			ec->kernel_request = instruction_duplicate(instruction);
@@ -73,11 +70,7 @@ void execute(t_instruction* instruction, execution_context* ec, t_physical_addre
 			log_warning(config_cpu.logger, "Ejecutando un YIELD");
 			dislodge();
 			break;
-		case EXIT:
-			log_warning(config_cpu.logger, "Ejecutando un EXIT");
-			execute_exit(ec);
-			dislodge();
-			break;
+		case I_O:
 		case F_OPEN:
 		case F_CLOSE:
 		case F_SEEK:
@@ -86,6 +79,8 @@ void execute(t_instruction* instruction, execution_context* ec, t_physical_addre
 		case SIGNAL:
 		case CREATE_SEGMENT:
 		case DELETE_SEGMENT:
+		case EXIT: // Definir si también necesita hacer dislodge
+			log_info(config_cpu.logger, "Ejecutando instrucción %d", instruction->op_code);
 			ec->kernel_request = instruction;
 			break;
 		default:
@@ -116,10 +111,6 @@ void set_register(char* register_name, char* value, cpu_register* registers) {
 	((char*)register_ptr)[register_size - 1] = '\0';
 	log_info(config_cpu.logger, "Asignando en %s: %s", register_name, value);
 	free(register_ptr);
-}
-
-void execute_exit(execution_context* execution_context) {
-	execution_context->updated_state = EXIT_PROCESS;
 }
 
 void dislodge() {

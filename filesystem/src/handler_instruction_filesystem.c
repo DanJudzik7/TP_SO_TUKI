@@ -35,7 +35,7 @@ bool process_instruction(t_instruction* instruction) {
 			list_add(instruction->args, miCharPuntero_r);
 			instruction->op_code = MEM_READ_ADDRESS;
 			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
-				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
+				log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 			}
 			t_package* package = socket_receive(config_fs.socket_memoria);
 			if (package->type == SEG_FAULT) {
@@ -59,7 +59,7 @@ bool process_instruction(t_instruction* instruction) {
 				y voy a escribir info en la posicion que recibi*/
 			instruction->op_code = MEM_WRITE_ADDRESS;
 			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
-				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
+				log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 			}
 			t_package* package_receive_memory = socket_receive(config_fs.socket_memoria);
 			char* str_write = deserialize_message(package_receive_memory);

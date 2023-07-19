@@ -84,7 +84,7 @@ void handle_modules(t_memory_thread* mt) {
 				switch (flag) {
 					case 1:
 						// Devuelvo solicitud de compactación
-						socket_send(mt->socket, package_new(COMPACT_ALL));
+						socket_send(mt->socket, package_new(COMPACT_REQUEST));
 						break;
 					case 2:
 						// Devuelvo no hay espacio suficiente
@@ -104,11 +104,11 @@ void handle_modules(t_memory_thread* mt) {
 				socket_send(mt->socket, package_new(OK_INSTRUCTION));
 				break;
 			}
-			case COMPACT_ALL: {
+			case MEM_COMPACT_ALL: {
 				log_info(config_memory.logger, "Solicitud de compactación");
 				sleep(config_memory.com_delay);
 				compact_memory(mt->mem_structure);
-				socket_send(mt->socket, serialize_all_segments(mt->mem_structure));
+				socket_send(mt->socket, serialize_all_segments_tables(mt->mem_structure));
 				break;
 			}
 			default: {

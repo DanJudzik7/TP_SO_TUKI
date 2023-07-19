@@ -8,15 +8,13 @@
 
 extern configuration_cpu config_cpu;
 
-t_instruction* fetch(execution_context* execution_context);
+t_instruction* fetch(t_execution_context* execution_context);
 
-t_physical_address* decode(t_instruction* instruction, execution_context* ec);
+t_physical_address* decode(t_instruction* instruction, t_execution_context* ec);
 
-void execute(t_instruction* instruction, execution_context* ec, t_physical_address* associated_pa);
+void execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa);
 
 void set_register(char* register_name, char* value, cpu_register* registers);
-
-void execute_exit(execution_context* execution_context);
 
 void dislodge();
 

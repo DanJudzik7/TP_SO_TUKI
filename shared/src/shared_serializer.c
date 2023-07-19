@@ -13,23 +13,20 @@ char* deserialize_message(t_package* package) {
 	return message;
 }
 
-t_package* serialize_execution_context(execution_context* ec) {
+t_package* serialize_execution_context(t_execution_context* ec) {
 	t_package* package = package_new(EXECUTION_CONTEXT);
 	uint64_t size4 = 4;
 	package_nest(package, serialize_instructions(ec->instructions, true));
 	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(ec->program_counter), &size4));
-	package_nest(package, package_new_dict(UPDATED_STATE, &(ec->updated_state), &size4));
+	package_nest(package, package_new_dict(PROCESS_PID, &(ec->pid), &size4));
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
-	/* segment_table* sg_help = s_malloc(sizeof(segment_table));
-	sg_help->pid = ec->pid;
-	sg_help->segment_table_pcb = ec->segment_table;
-	package_nest(package, serialize_segment_table(ec->segment_table)); */
+	package_nest(package, serialize_segments_table(ec->segments_table, SEGMENTS_TABLE, 0));
 	if (ec->kernel_request != NULL) package_nest(package, package_new_nested(KERNEL_REQUEST, ec->kernel_request));
 	return package;
 }
 
-execution_context* deserialize_execution_context(t_package* package) {
-	execution_context* ec = s_malloc(sizeof(execution_context));
+t_execution_context* deserialize_execution_context(t_package* package) {
+	t_execution_context* ec = s_malloc(sizeof(t_execution_context));
 	uint64_t offset = 0;
 	uint64_t offset_start = 0;
 	while (package_decode_isset(package, offset)) {
@@ -40,17 +37,18 @@ execution_context* deserialize_execution_context(t_package* package) {
 				deserialize_instructions(nested_package, ec->instructions);
 				break;
 			case PROGRAM_COUNTER:
-				deserialize_program_counter(nested_package->buffer, &(ec->program_counter), &offset_start);
-				break;
-			case UPDATED_STATE:
 				offset_start = 0;
-				package_decode_buffer(nested_package->buffer, &(ec->updated_state), &offset_start);
+				package_decode_buffer(nested_package->buffer, &(ec->program_counter), &offset_start);
+				break;
+			case PROCESS_PID:
+				offset_start = 0;
+				package_decode_buffer(nested_package->buffer, &(ec->pid), &offset_start);
 				break;
 			case CPU_REGISTERS:
 				ec->cpu_register = deserialize_cpu_registers(nested_package->buffer);
 				break;
-			case SEGMENT_TABLE:
-				// ec->segment_table = deserialize_segment_table(nested_package);
+			case SEGMENTS_TABLE:
+				ec->segments_table = deserialize_segment_table(nested_package);
 				break;
 			case KERNEL_REQUEST:
 				ec->kernel_request = deserialize_instruction(nested_package);
@@ -62,15 +60,6 @@ execution_context* deserialize_execution_context(t_package* package) {
 		package_destroy(nested_package);
 	}
 	return ec;
-}
-
-uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset) {
-	uint64_t* pc_value_64 = s_malloc(sizeof(uint64_t));
-	package_decode_buffer(buffer, pc_value_64, offset);
-	uint32_t pc_value_32 = (uint32_t)(*pc_value_64);
-	free(pc_value_64);
-	*(uint32_t*)dest = pc_value_32;
-	return pc_value_32;
 }
 
 t_package* serialize_instructions(t_queue* instructions, bool is_ec) {
@@ -152,66 +141,57 @@ t_list* deserialize_segment_table(t_package* package) {
 	t_list* segment_table = list_create();
 	while (package_decode_isset(package, offset)) {
 		t_package* nested = package_decode(package->buffer, &offset);
-		segment* segment = deserialize_segment(nested);
+		t_segment* segment = deserialize_segment(nested);
 		list_add(segment_table, segment);
 	}
-	printf("Fin del proceso\n--------------\n ");
 	return segment_table;
 }
-segment* deserialize_segment(t_package* nested) {
+
+t_segment* deserialize_segment(t_package* nested) {
 	t_instruction* instruction = deserialize_instruction(nested);
-	int base = atoi(list_get(instruction->args, 0));
-	int offset = atoi(list_get(instruction->args, 1));
-	int s_id = atoi(list_get(instruction->args, 2));
-	printf("\nBase: %d\n", base);
-	printf("Offset: %d\n", offset);
-	printf("S_ID: %d\n", s_id);
-	printf("...............\n");
-	segment* segment = s_malloc(sizeof(segment));
-	segment->base = (void*)(uintptr_t)base;
-	segment->offset = offset;
-	segment->s_id = s_id;
+	t_segment* segment = s_malloc(sizeof(segment));
+	segment->base = atoi(list_get(instruction->args, 0));
+	segment->offset = atoi(list_get(instruction->args, 1));
+	segment->s_id = atoi(list_get(instruction->args, 2));
+	instruction_delete(instruction);
 	return segment;
 }
 
-t_package* serialize_all_segments(t_memory_structure* mem_struct) {
-	t_package* package = package_new(COMPACT_FINISHED);
-	int j = 0, d = 1;
+t_package* serialize_all_segments_tables(t_memory_structure* mem_struct) {
+	t_package* package = package_new(ALL_SEGMENTS_TABLES);
+	int pid = 0, count = 1;
 	t_list* sg;
-	while (d < dictionary_size(mem_struct->table_pid_segments)) {
-		if (dictionary_has_key(mem_struct->table_pid_segments, string_itoa(j))) {
-			sg = dictionary_get(mem_struct->table_pid_segments, string_itoa(j));
-			t_package* nested = serialize_segment_table(mem_struct, sg,j);
-			deserialize_segment_table(nested);
+	while (count < dictionary_size(mem_struct->table_pid_segments)) {
+		if (dictionary_has_key(mem_struct->table_pid_segments, string_itoa(pid))) {
+			sg = dictionary_get(mem_struct->table_pid_segments, string_itoa(pid));
+			t_package* nested = serialize_segments_table(sg, pid, mem_struct->heap);
 			package_nest(package, nested);
-			d++;
-			j++;
-		} else j++;
+			count++;
+		}
+		pid++;
 	}
 	return package;
 }
 
-t_package* serialize_segment_table(t_memory_structure* mem_struct, t_list* segment_table,int pid) {
-	t_package* package = package_new(COMPACT_FINISHED);
-	package->type = pid;
+t_package* serialize_segments_table(t_list* segment_table, uint32_t type, void* heap_pointer) {
+	t_package* package = package_new(type);
 	for (int i = 0; i < list_size(segment_table); i++) {
-		t_package* nested = serialize_segment(list_get(segment_table, i), mem_struct, pid);
+		t_package* nested = serialize_segment(list_get(segment_table, i), heap_pointer);
 		package_nest(package, nested);
 	}
 	return package;
 }
 
-t_package* serialize_segment(segment* segment, t_memory_structure* mem_struct,	int pid) {
+t_package* serialize_segment(t_segment* segment, void* heap_pointer) {
 	t_instruction* instruction = instruction_new(SEGMENT);
-	list_add(instruction->args, string_itoa(segment->base - mem_struct->heap));
+	list_add(instruction->args, string_itoa(segment->base - heap_pointer));
 	list_add(instruction->args, string_itoa(segment->offset));
 	list_add(instruction->args, string_itoa(segment->s_id));
-	list_add(instruction->args, string_itoa(pid));
 	t_package* package = serialize_instruction(instruction);
 	return package;
 }
 
-t_dictionary* deserialize_all_segments(t_package* package) {
+t_dictionary* deserialize_all_segments_tables(t_package* package) {
 	t_dictionary* table_pid_segments = dictionary_create();
 	uint64_t offset = 0;
 	while (package_decode_isset(package, offset)) {
@@ -221,33 +201,6 @@ t_dictionary* deserialize_all_segments(t_package* package) {
 	}
 	return table_pid_segments;
 }
-/* t_package* serialize_segment_read_write(segment_read_write* seg_rw) {
-	t_package* package = package_new(F_WRITE_READ);
-
-	uint64_t size = sizeof(uint64_t);
-	uint64_t buffer_size = sizeof(seg_rw->buffer);
-
-	package_add(package, &(seg_rw->pid),	&size);
-	package_add(package, &(seg_rw->buffer),	&buffer_size);
-	package_add(package, &(seg_rw->size),	&size);
-	package_add(package, &(seg_rw->offset), &size);
-	package_add(package, &(seg_rw->s_id), 	&size);
-	return package;
-}
-
-segment_read_write* deserialize_segment_read_write(void* source) {
-	uint64_t offset = 0;
-	segment_read_write* seg_rw = s_malloc(sizeof(segment_read_write));
-	memset(seg_rw, 0, sizeof(segment_read_write));
-
-	package_decode_buffer(source, &(seg_rw->pid), &offset);
-	package_decode_buffer(source, &(seg_rw->buffer), &offset);
-	package_decode_buffer(source, &(seg_rw->size), &offset);
-	package_decode_buffer(source, &(seg_rw->offset), &offset);
-	package_decode_buffer(source, &(seg_rw->s_id), &offset);
-
-	return seg_rw;
-} */
 
 void serialize_package(t_package* package) {
 	uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;

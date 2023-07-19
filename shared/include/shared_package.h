@@ -8,6 +8,12 @@
 // Se encarga del manejo de bajo nivel de paquetes de datos
 // Permite interpretar tipos recursivos con facilidad
 
+typedef struct t_package {
+	uint64_t size;
+	int32_t type;
+	void* buffer;
+} t_package;
+
 typedef enum t_package_type {
     SERIALIZED,             // 0
     MESSAGE_OK,             // 1
@@ -16,26 +22,6 @@ typedef enum t_package_type {
     INSTRUCTIONS,           // 4
     EXECUTION_CONTEXT       // 5
 } t_package_type;
-
-typedef enum t_memory_op {
-    MEM_INIT_PROCESS,
-    MEM_END_PROCCESS,
-    MEM_READ_ADDRESS,
-    MEM_WRITE_ADDRESS,
-    MEM_CREATE_SEGMENT,
-    MEM_DELETE_SEGMENT,
-    COMPACT_ALL,
-    COMPACT_FINISHED,
-    SEGMENT
-} t_memory_op;
-
-typedef enum t_memory_state {
-    SEG_FAULT,               // 0
-    OK_INSTRUCTION,          // 1
-    NO_SPACE_LEFT,           // 2
-    MEMORY_BUFFER_R          // 3
-} t_memory_state;
-
 
 // Crea y retorna un paquete con el código de operación especificado.
 t_package* package_new(int32_t type);

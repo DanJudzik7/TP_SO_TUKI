@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 				break;
 			}
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
-			execution_context* context = deserialize_execution_context(package);
+			t_execution_context* context = deserialize_execution_context(package);
 			print_execution_context(context);
 			bool flag_dislodge = false;
 			t_instruction* instruction = NULL;

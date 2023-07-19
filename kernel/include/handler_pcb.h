@@ -12,7 +12,7 @@ typedef struct t_pcb {
 	int aprox_burst_time;
 	time_t last_ready_time;
 	t_dictionary* files;
-	execution_context* execution_context;
+	t_execution_context* execution_context;
 } t_pcb;
 
 typedef struct t_global_config_kernel {
@@ -35,8 +35,17 @@ typedef struct helper_create_pcb {
 	t_global_config_kernel* config;
 }  helper_create_pcb;
 
+typedef struct t_helper_file_instruction {
+	int socket_filesystem;
+	t_log* logger;
+	t_queue* file_instructions;
+} t_helper_file_instruction;
+
 // Servidor para Consolas, que genera un PCB para cada una
 void listen_consoles(t_global_config_kernel* gck);
+
+// Administrador de conexiones de lectura y escritura a Filesystem
+void handle_fs(t_helper_file_instruction* hfi);
 
 // Administrador de instrucciones recibidas por consola
 void handle_console(helper_create_pcb* hcp);
