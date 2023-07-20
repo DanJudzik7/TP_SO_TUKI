@@ -31,7 +31,7 @@ void handle_new_process(helper_create_pcb* hcp) {
 	t_package* package = socket_receive(pcb->pid);
 	if (package == NULL) {
 		pcb_destroy(pcb);
-		log_error(hcp->gck->logger, "El cliente se desconectó");
+		log_error(hcp->gck->logger, "La consola en el socket %d se desconectó", pcb->pid);
 		return;
 	}
 

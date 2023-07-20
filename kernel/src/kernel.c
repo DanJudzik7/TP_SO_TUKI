@@ -48,12 +48,10 @@ int main(int argc, char** argv) {
 			sleep(1);
 			continue;
 		}
-		log_warning(gck->logger, "-----------------------Tenemos un nuevo PCB----------------------");
+		log_warning(gck->logger, "Iniciando nuevo ciclo de ejecución del proceso %d", pcb->pid);
 		pcb->state = EXEC;
 
 		// Mando el PCB al CPU
-		log_warning(gck->logger, "----------------------Enviando context al CPU-----------------------");
-		print_execution_context(pcb->execution_context);
 		t_package* ec_package = serialize_execution_context(pcb->execution_context);
 		if (!socket_send(socket_cpu, ec_package)) {
 			log_error(gck->logger, "Error al enviar el Execution Context al CPU");
@@ -62,12 +60,11 @@ int main(int argc, char** argv) {
 
 		// Recibe el nuevo execution context
 		t_package* package = socket_receive(socket_cpu);
-		if (package != NULL && package->type == EXECUTION_CONTEXT) {
+		if (package != NULL && package->type == EXECUTION_CONTEXT)
 			pcb->execution_context = deserialize_execution_context(package);
-			log_warning(gck->logger, "----------------------Recibiendo context %d al CPU----------------------", pcb->pid);
-			print_execution_context(pcb->execution_context);
-		} else {
-			log_warning(gck->logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
+		else {
+			log_error(gck->logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
+			break;
 		}
 
 		t_instruction* kernel_request = pcb->execution_context->kernel_request;
@@ -123,7 +120,8 @@ int main(int argc, char** argv) {
 				if (queue_is_empty(waiting_pcbs)) {
 					list_destroy(dictionary_get(hfi->global_files, filename));
 					dictionary_remove(hfi->global_files, filename);
-				} else ((t_pcb*)queue_pop(waiting_pcbs))->state = READY;
+				} else
+					((t_pcb*)queue_pop(waiting_pcbs))->state = READY;
 				dictionary_remove(pcb->local_files, filename);
 				break;
 			}
@@ -133,7 +131,8 @@ int main(int argc, char** argv) {
 				if (dictionary_has_key(pcb->local_files, filename)) {
 					dictionary_put(pcb->local_files, filename, position);
 					log_info(gck->logger, "Se movió el puntero de %s a %s", filename, position);
-				} else log_error(gck->logger, "No se encontró el archivo %s", filename);
+				} else
+					log_error(gck->logger, "No se encontró el archivo %s", filename);
 				break;
 			}
 			case F_TRUNCATE: {	// filename, bytes count
@@ -202,7 +201,8 @@ int main(int argc, char** argv) {
 					char* s_base = deserialize_message(package);
 					log_info(gck->logger, "El segmento se creó con base %s", s_base);
 					free(s_base);
-				} else log_error(gck->logger, "Error desconocido al crear segmento");
+				} else
+					log_error(gck->logger, "Error desconocido al crear segmento");
 				break;
 			}
 			case DELETE_SEGMENT: {
@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
 				if (resource->available_instances >= 0) {
 					resource->assigned_to = pcb;
 					resource->available_instances--;
-					log_info(gck->logger, "Las instancias del recurso se redujeron a -> %i", resource->available_instances);
+					log_info(gck->logger, "Las instancias del recurso se redujeron a %i", resource->available_instances);
 					gck->prioritized_pcb = pcb;
 				} else {
 					pcb->state = BLOCK;
@@ -255,11 +255,14 @@ int main(int argc, char** argv) {
 				break;
 			}
 		}
-		log_warning(gck->logger, "-----------------------Guardando PCB %d en cola de READY-----------------------", pcb->pid);
+		log_warning(gck->logger, "Se ha completado el ciclo de instrucción de %d", pcb->pid);
 		if (pcb->state == EXEC) pcb->state = READY;
 		if (pcb->state == EXIT_PROCESS) long_term_schedule(gck);
 		queue_push(gck->active_pcbs, pcb);
-		if (kernel_request != NULL) instruction_destroy(kernel_request);
+		if (kernel_request != NULL) {
+			instruction_destroy(kernel_request);
+			pcb->execution_context->kernel_request = NULL;
+		}
 	}
 
 	log_warning(gck->logger, "Finalizando el kernel. Se desconectó un módulo esencial.");

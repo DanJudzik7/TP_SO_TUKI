@@ -27,8 +27,8 @@ t_package* serialize_execution_context(t_execution_context* ec) {
 
 t_execution_context* deserialize_execution_context(t_package* package) {
 	t_execution_context* ec = s_malloc(sizeof(t_execution_context));
+	ec->kernel_request = NULL;
 	uint64_t offset = 0;
-	uint64_t offset_start = 0;
 	while (package_decode_isset(package, offset)) {
 		t_package* nested_package = package_decode(package->buffer, &offset);
 		switch (nested_package->type) {
@@ -37,12 +37,10 @@ t_execution_context* deserialize_execution_context(t_package* package) {
 				deserialize_instructions(nested_package, ec->instructions);
 				break;
 			case PROGRAM_COUNTER:
-				offset_start = 0;
-				package_decode_buffer(nested_package->buffer, &(ec->program_counter), &offset_start);
+				package_decode_buffer(nested_package->buffer, &(ec->program_counter), NULL);
 				break;
 			case PROCESS_PID:
-				offset_start = 0;
-				package_decode_buffer(nested_package->buffer, &(ec->pid), &offset_start);
+				package_decode_buffer(nested_package->buffer, &(ec->pid), NULL);
 				break;
 			case CPU_REGISTERS:
 				ec->cpu_register = deserialize_cpu_registers(nested_package->buffer);
@@ -50,9 +48,12 @@ t_execution_context* deserialize_execution_context(t_package* package) {
 			case SEGMENTS_TABLE:
 				ec->segments_table = deserialize_segment_table(nested_package);
 				break;
-			case KERNEL_REQUEST:
-				ec->kernel_request = deserialize_instruction(nested_package);
+			case KERNEL_REQUEST: {
+				t_package* kernel_request = package_decode(nested_package->buffer, NULL);
+				ec->kernel_request = deserialize_instruction(kernel_request);
+				package_destroy(kernel_request);
 				break;
+			}
 			default:
 				printf("Error: Tipo de paquete desconocido.\n");
 				return NULL;
@@ -202,19 +203,4 @@ t_dictionary* deserialize_all_segments_tables(t_package* package) {
 		dictionary_put(table_pid_segments, string_itoa(nested->type), segment_table);
 	}
 	return table_pid_segments;
-}
-
-void serialize_package(t_package* package) {
-	uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;
-	void* stream = s_malloc(package_size);
-	uint64_t offset = 0;
-	memcpy(stream + offset, &(package->size), sizeof(uint64_t));
-	offset += sizeof(uint64_t);
-	memcpy(stream + offset, &(package->type), sizeof(int32_t));
-	offset += sizeof(int32_t);
-	memcpy(stream + offset, package->buffer, package->size);
-	package->type = SERIALIZED;
-	package->size = package_size;
-	free(package->buffer);
-	package->buffer = stream;
 }

@@ -34,7 +34,7 @@ void long_term_schedule(t_global_config_kernel* gck) {
 			log_error(gck->logger, "Error al enviar instrucciones a memoria");
 		}
 		t_package* package = socket_receive(gck->socket_memory);
-		if (package->type != OK_INSTRUCTION) {
+		if (package == NULL || package->type != OK_INSTRUCTION) {
 			log_error(gck->logger, "Error al eliminar estructuras del proceso");
 			abort();
 		}

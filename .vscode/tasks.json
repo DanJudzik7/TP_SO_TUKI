@@ -22,7 +22,7 @@
         {
             "label": "Make Consola (delayed)",
             "dependsOrder": "sequence",
-            "dependsOn": ["Delay", "Delay", "Delay", "Make Consola"],
+            "dependsOn": ["Longer Delay", "Make Consola"],
         },
         {
             "label": "Make Consola",
@@ -57,7 +57,7 @@
         {
             "label": "Make Kernel (delayed)",
             "dependsOrder": "sequence",
-            "dependsOn": ["Delay", "Delay", "Make Kernel"],
+            "dependsOn": ["Long Delay", "Make Kernel"],
         },
         {
             "label": "Make Kernel",
@@ -201,6 +201,36 @@
             "command": "sleep 3",
             "windows": {
                 "command": "ping 127.0.0.1 -n 3 > nul"
+            },
+            "group": "none",
+            "presentation": {
+                "reveal": "never",
+                "echo": false,
+                "showReuseMessage": false,
+                "close": true
+            }
+        },
+        {
+            "label": "Long Delay",
+            "type": "shell",
+            "command": "sleep 6",
+            "windows": {
+                "command": "ping 127.0.0.1 -n 6 > nul"
+            },
+            "group": "none",
+            "presentation": {
+                "reveal": "never",
+                "echo": false,
+                "showReuseMessage": false,
+                "close": true
+            }
+        },
+        {
+            "label": "Longer Delay",
+            "type": "shell",
+            "command": "sleep 9",
+            "windows": {
+                "command": "ping 127.0.0.1 -n 9 > nul"
             },
             "group": "none",
             "presentation": {

@@ -2,6 +2,7 @@
 #define HANDLER_CPU_H
 
 #include <math.h>
+#include <unistd.h>
 
 #include "shared_serializer.h"
 #include "shared_socket.h"

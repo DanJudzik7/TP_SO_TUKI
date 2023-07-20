@@ -4,7 +4,6 @@
 #include "shared_serializer.h"
 #include "shared_socket.h"
 
-// ----------------------------- STRUCTS -----------------------------
 // Estructura para cada agujero
 typedef struct hole {
 	void* base;
@@ -19,8 +18,8 @@ typedef struct t_config_memory {
 	size_t memory_size;
 	size_t sg_zero_size;
 	int sg_amount;
-	int mem_delay;
-	int com_delay;
+	int access_delay;
+	int compact_delay;
 	char* algorithm;
 	int remaining_memory;
 } t_config_memory;

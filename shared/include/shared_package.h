@@ -52,6 +52,9 @@ char* package_decode_string(void* source, uint64_t* offset);
 // Deserializa un string a un espacio en memoria existente
 void package_decode_buffer(void* source, void* dest, uint64_t* offset);
 
+// Serializa el paquete especificado reemplazando al original
+void package_close(t_package* package);
+
 // Destruye eliminando de la memoria el paquete especificado
 void package_destroy(t_package* package);
 

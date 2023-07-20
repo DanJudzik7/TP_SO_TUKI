@@ -42,7 +42,7 @@ t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name) {
 		log_error(gck->logger, "El recurso %s no existe", name);
 		return NULL;
 	}
-	log_info(gck->logger, "El recurso requerido es %s", name);
+	log_info(gck->logger, "Se solicitó el recurso %s", name);
 	return dictionary_get(gck->resources, name);
 }
 
@@ -52,9 +52,9 @@ void resource_signal(t_resource* resource, t_log* logger) {
 		resource->assigned_to->state = READY;
 		log_info(logger, "Se desbloqueó el proceso %d", resource->assigned_to->pid);
 	} else {
-		log_info(logger, "Las instancias del recurso aumentaron a %i", resource->available_instances);
 		resource->available_instances++;
 		resource->assigned_to = NULL;
+		log_info(logger, "Las instancias del recurso aumentaron a %i", resource->available_instances);
 	}
 }
 

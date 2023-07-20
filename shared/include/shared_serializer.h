@@ -55,7 +55,4 @@ t_segment* deserialize_segment(t_package* nested);
 // Deserializa todos los segmentos
 t_dictionary* deserialize_all_segments_tables(t_package* package);
 
-// Serializa el paquete especificado reemplazando al original
-void serialize_package(t_package* package);
-
 #endif

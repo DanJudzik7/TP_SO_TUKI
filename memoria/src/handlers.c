@@ -15,17 +15,16 @@ void listen_modules(int server_memory, t_memory_structure* memory_structure) {
 		}
 		memory_thread->mem_structure = memory_structure;
 		pthread_create(&thread, NULL, (void*)handle_modules, memory_thread);
-		pthread_join(thread, NULL);
 	}
 }
 
 // Manejo los receive con cada una de estas funciones
 void handle_modules(t_memory_thread* mt) {
-	log_warning(config_memory.logger, "Se conectó un módulo en el puerto %d", mt->socket);
+	log_warning(config_memory.logger, "Se conectó un módulo en el socket %d", mt->socket);
 	while (1) {
 		t_package* package = socket_receive(mt->socket);
 		if (package == NULL) {
-			log_error(config_memory.logger, "El módulo se desconectó");
+			log_error(config_memory.logger, "El módulo del socket %d desconectó", mt->socket);
 			break;
 		}
 		t_instruction* instruction = deserialize_instruction(package);
@@ -38,12 +37,11 @@ void handle_modules(t_memory_thread* mt) {
 				int offset = atoi(list_get(instruction->args, 1));
 				int size = atoi(list_get(instruction->args, 2));
 				int pid = atoi(list_get(instruction->args, 3));
-				sleep(config_memory.mem_delay);
+				usleep(config_memory.access_delay);
 				char* buffer = read_memory(s_id, offset, size, mt->mem_structure, pid);
-				if (buffer == NULL)	 // devolver seg_fault
-					socket_send(mt->socket, package_new(SEG_FAULT));
-				else  // devolver buffer
-					socket_send(mt->socket, serialize_message(buffer, false));
+				t_package* package = buffer == NULL ? package_new(SEG_FAULT) : serialize_message(buffer, false);
+				if (!socket_send(mt->socket, package))
+					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
 			case MEM_WRITE_ADDRESS: {
@@ -52,11 +50,10 @@ void handle_modules(t_memory_thread* mt) {
 				char* buffer = list_get(instruction->args, 2);
 				int size = strlen(buffer);
 				int pid = atoi(list_get(instruction->args, 3));
-				sleep(config_memory.mem_delay);
-				if (write_memory(s_id, offset, size, buffer, mt->mem_structure, pid))
-					socket_send(mt->socket, package_new(OK_INSTRUCTION));
-				else
-					socket_send(mt->socket, package_new(SEG_FAULT));
+				usleep(config_memory.access_delay);
+				bool success = write_memory(s_id, offset, size, buffer, mt->mem_structure, pid);
+				if (!socket_send(mt->socket, package_new(success ? OK_INSTRUCTION : SEG_FAULT)))
+					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
 			case MEM_INIT_PROCESS: {
@@ -65,7 +62,8 @@ void handle_modules(t_memory_thread* mt) {
 				t_list* segment_table = create_sg_table(mt->mem_structure, pid);
 				log_info(config_memory.logger, "Creación de Proceso PID: %d", pid);
 				// Envío la tabla de segmentos al kernel
-				socket_send(mt->socket, serialize_segments_table(segment_table, SEGMENTS_TABLE, mt->mem_structure->heap));
+				if (!socket_send(mt->socket, serialize_segments_table(segment_table, SEGMENTS_TABLE, mt->mem_structure->heap)))
+					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				// Definir qué recibe Kernel de acá
 				break;
 			}
@@ -73,7 +71,8 @@ void handle_modules(t_memory_thread* mt) {
 				int pid = atoi(list_get(instruction->args, 0));
 				remove_sg_table(mt->mem_structure, pid);
 				log_info(config_memory.logger, "Eliminación de Proceso PID: %d", pid);
-				socket_send(mt->socket, package_new(OK_INSTRUCTION));
+				if (!socket_send(mt->socket, package_new(OK_INSTRUCTION)))
+					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
 			case MEM_CREATE_SEGMENT: {
@@ -81,39 +80,41 @@ void handle_modules(t_memory_thread* mt) {
 				int size = atoi(list_get(instruction->args, 1));
 				int pid = atoi(list_get(instruction->args, 2));
 				int flag = add_segment(mt->mem_structure, pid, size, s_id);
+				t_package* req_package;
 				switch (flag) {
-					case 1:
-						// Devuelvo solicitud de compactación
-						socket_send(mt->socket, package_new(COMPACT_REQUEST));
+					case 1: // Devuelvo solicitud de compactación
+						req_package = package_new(COMPACT_REQUEST);
 						break;
-					case 2:
-						// Devuelvo no hay espacio suficiente
-						socket_send(mt->socket, package_new(NO_SPACE_LEFT));
+					case 2: // Devuelvo no hay espacio suficiente
+						req_package = package_new(NO_SPACE_LEFT);
 						break;
-					default:
-						// Devuelvo la base del segmento creado
-						socket_send(mt->socket, serialize_message(string_itoa(flag), false));
+					default: // Devuelvo la base del segmento creado
+						req_package = serialize_message(string_itoa(flag), false);
 						break;
 				}
+				if (!socket_send(mt->socket, req_package))
+					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
 			case MEM_DELETE_SEGMENT: {
 				int s_id = atoi(list_get(instruction->args, 0));
 				int pid = atoi(list_get(instruction->args, 2));
 				delete_segment(mt->mem_structure, pid, s_id);
-				socket_send(mt->socket, package_new(OK_INSTRUCTION));
+				if (!socket_send(mt->socket, package_new(OK_INSTRUCTION)))
+					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
 			case MEM_COMPACT_ALL: {
 				log_info(config_memory.logger, "Solicitud de compactación");
-				sleep(config_memory.com_delay);
+				usleep(config_memory.compact_delay);
 				compact_memory(mt->mem_structure);
-				socket_send(mt->socket, serialize_all_segments_tables(mt->mem_structure));
+				if (!socket_send(mt->socket, serialize_all_segments_tables(mt->mem_structure)))
+					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
 			default: {
-				log_error(config_memory.logger, "El proceso recibió algo no esperado, finalizando modulo");
-				exit(1);
+				log_error(config_memory.logger, "Paquete inválido recibido, será ignorado");
+				package_destroy(package);
 				break;
 			}
 		}

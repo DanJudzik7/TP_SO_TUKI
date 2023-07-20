@@ -64,7 +64,8 @@
         "tests_console.h": "c",
         "algorithms_kernel.h": "c",
         "utils_cpu.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "unistd.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false

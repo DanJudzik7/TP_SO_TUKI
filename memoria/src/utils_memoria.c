@@ -9,8 +9,8 @@ void setup_config() {
 	config_memory.memory_size = config_get_int_value(config_memory.config, "TAM_MEMORIA");
 	config_memory.sg_zero_size = config_get_int_value(config_memory.config, "TAM_SEGMENTO_0");
 	config_memory.sg_amount = config_get_int_value(config_memory.config, "CANT_SEGMENTOS");
-	config_memory.mem_delay = config_get_int_value(config_memory.config, "RETARDO_MEMORIA");
-	config_memory.com_delay = config_get_int_value(config_memory.config, "RETARDO_COMPACTACION");
+	config_memory.access_delay = config_get_int_value(config_memory.config, "RETARDO_MEMORIA");
+	config_memory.compact_delay = config_get_int_value(config_memory.config, "RETARDO_COMPACTACION");
 	config_memory.algorithm = config_get_string_value(config_memory.config, "ALGORITMO_ASIGNACION");
 	config_memory.remaining_memory = config_memory.memory_size;
 }

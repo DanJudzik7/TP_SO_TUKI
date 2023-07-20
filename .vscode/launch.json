@@ -9,15 +9,6 @@
 				"order": 1
 			},
 			"stopAll": true
-		},
-		{
-			"name": "TUKI Light",
-			"configurations": ["CPU", "Kernel (delayed)", "Consola (delayed)"],
-			"presentation": {
-				"group": "+",
-				"order": 1
-			},
-			"stopAll": true
 		}
 
 	],
@@ -32,9 +23,8 @@
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"presentation": {
-				"hidden": false,
 				"group": "Módulos",
-				"order": 3
+				"order": 5
 			},
 			"suppressMultipleSessionWarning": true,
 			"setupCommands": [
@@ -85,11 +75,6 @@
 			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
-			"presentation": {
-				"hidden": false,
-				"group": "Módulos",
-				"order": 3
-			},
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -113,9 +98,8 @@
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"presentation": {
-				"hidden": false,
 				"group": "Módulos",
-				"order": 2
+				"order": 4
 			},
 			"setupCommands": [
 				{
@@ -165,9 +149,8 @@
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"presentation": {
-				"hidden": false,
 				"group": "Módulos",
-				"order": 1
+				"order": 3
 			},
 			"setupCommands": [
 				{
@@ -217,6 +200,10 @@
 			"cwd": "${workspaceFolder}/filesystem",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"presentation": {
+				"group": "Módulos",
+				"order": 2
+			},
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -287,6 +274,10 @@
 			"cwd": "${workspaceFolder}/memoria",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"presentation": {
+				"group": "Módulos",
+				"order": 1
+			},
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",

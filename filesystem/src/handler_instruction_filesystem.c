@@ -1,17 +1,17 @@
 #include "handler_instruction_filesystem.h"
 
-int handle_kernel(int socket_kernel) {
+int handle_kernel(int* socket_kernel) {
 	while (1) {
-		t_package* package = socket_receive(socket_kernel);
+		t_package* package = socket_receive(*socket_kernel);
 		if (package == NULL) {
-			log_error(config_fs.logger, "El cliente se desconectó");
+			log_error(config_fs.logger, "El kernel del socket %d se desconectó", *socket_kernel);
 			break;
 		}
 
 		t_instruction* instruction = deserialize_instruction(package);
 		log_warning(config_fs.logger, "El código de operación es: %i", instruction->op_code);
 		bool processed = process_instruction(instruction);
-		if (!socket_send(socket_kernel, package_new(processed ? MESSAGE_OK : MESSAGE_FLAW))) {
+		if (!socket_send(*socket_kernel, package_new(processed ? MESSAGE_OK : MESSAGE_FLAW))) {
 			log_warning(config_fs.logger, "Error al enviar el paquete");
 			return -1;
 		}

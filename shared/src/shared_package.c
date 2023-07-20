@@ -21,7 +21,7 @@ t_package* package_new_nested(int32_t key, t_package* value) {
 }
 
 void package_nest(t_package* package, t_package* nested) {
-	serialize_package(nested); // Convierte el package al tipo Serialized
+	package_close(nested); // Convierte el package al tipo Serialized
 	uint64_t offset = package->size;
 	package->size += nested->size;
 	package->buffer = realloc(package->buffer, package->size);
@@ -47,6 +47,11 @@ void package_write(t_package* package, char* value) {
 }
 
 t_package* package_decode(void* source, uint64_t* offset) {
+	bool discarded_offset = offset == NULL;
+	if (discarded_offset) {
+		offset = s_malloc(sizeof(uint64_t));
+		*offset = 0;
+	}
 	t_package* package = s_malloc(sizeof(t_package));
 	memcpy(&(package->size), source + *offset, sizeof(uint64_t));
 	*offset += sizeof(uint64_t);
@@ -55,6 +60,7 @@ t_package* package_decode(void* source, uint64_t* offset) {
 	package->buffer = s_malloc(package->size);
 	memcpy(package->buffer, source + *offset, package->size);
 	*offset += package->size;
+	if (discarded_offset) free(offset);
 	return package;
 }
 
@@ -63,6 +69,11 @@ bool package_decode_isset(t_package* package, uint64_t offset) {
 }
 
 char* package_decode_string(void* buffer, uint64_t* offset) {
+	bool discarded_offset = offset == NULL;
+	if (discarded_offset) {
+		offset = s_malloc(sizeof(uint64_t));
+		*offset = 0;
+	}
 	uint64_t *size = s_malloc(sizeof(uint64_t));
 	memcpy(size, buffer + *offset, sizeof(uint64_t));
 	*offset += sizeof(uint64_t);
@@ -71,16 +82,38 @@ char* package_decode_string(void* buffer, uint64_t* offset) {
 	str[*size] = '\0';
 	*offset += *size;
 	free(size);
+	if (discarded_offset) free(offset);
 	return str;
 }
 
 void package_decode_buffer(void* buffer, void* dest, uint64_t* offset) {
+	bool discarded_offset = offset == NULL;
+	if (discarded_offset) {
+		offset = s_malloc(sizeof(uint64_t));
+		*offset = 0;
+	}
 	uint64_t *size = s_malloc(sizeof(uint64_t));
 	memcpy(size, buffer + *offset, sizeof(uint64_t));
 	*offset += sizeof(uint64_t);
 	memcpy(dest, buffer + *offset, *size);
 	*offset += *size;
 	free(size);
+	if (discarded_offset) free(offset);
+}
+
+void package_close(t_package* package) {
+	uint64_t package_size = sizeof(uint64_t) + sizeof(int32_t) + package->size;
+	void* stream = s_malloc(package_size);
+	uint64_t offset = 0;
+	memcpy(stream + offset, &(package->size), sizeof(uint64_t));
+	offset += sizeof(uint64_t);
+	memcpy(stream + offset, &(package->type), sizeof(int32_t));
+	offset += sizeof(int32_t);
+	memcpy(stream + offset, package->buffer, package->size);
+	package->type = SERIALIZED;
+	package->size = package_size;
+	free(package->buffer);
+	package->buffer = stream;
 }
 
 void package_destroy(t_package* package) {
