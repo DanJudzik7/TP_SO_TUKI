@@ -5,6 +5,7 @@ int main(int argc, char** argv) {
 	t_global_config_kernel* gck = new_global_config_kernel(config);
 	t_helper_file_instruction* hfi = s_malloc(sizeof(t_helper_file_instruction));
 	log_warning(gck->logger, "Iniciando el kernel");
+	gck->alfa = config_get_int_value(config, "HRRN_ALFA");
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
 	gck->server_socket = socket_initialize_server(port);
 	if (gck->server_socket == -1) {
@@ -217,12 +218,16 @@ int main(int argc, char** argv) {
 				break;
 			}
 			case YIELD: {
-				if (gck->algorithm_is_hrrn) {
-					// TODO: calcular un nuevo estimado para su próxima ráfaga utilizando la fórmula de promedio ponderado vista en clases.
-					// if(gck->algorithm_is_hrrn)
-					// pcb->aprox_burst_time =
+				if(gck->algorithm_is_hrrn){
+					//Si nunca se ejecuto antes, va a tener un ultimo tiempo de rafaga en 0
+					if( pcb->last_burst_time == 0)
+						// aprox nueva rafaga =  α . estimador inicial + (1 - α) . ráfagaAnterior
+						pcb->aprox_burst_time = (gck->alfa * gck->default_burst_time)+ ( (1 - gck->alfa ) * pcb->execution_context->last_burst_time);
+					else
+						// aprox nueva rafaga =  α . ultima aproximacion de rafaga + (1 - α) . ráfagaAnterior
+						pcb->aprox_burst_time = (gck->alfa + pcb->aprox_burst_time)	 + ( (1 - gck->alfa ) * pcb->execution_context->last_burst_time);
 				}
-				break;
+				break;	
 			}
 			case WAIT: {
 				t_resource* resource = resource_get(pcb, gck, list_get(kernel_request->args, 0));

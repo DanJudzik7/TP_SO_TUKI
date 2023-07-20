@@ -16,8 +16,10 @@ char* deserialize_message(t_package* package) {
 t_package* serialize_execution_context(t_execution_context* ec) {
 	t_package* package = package_new(EXECUTION_CONTEXT);
 	uint64_t size4 = 4;
+	uint64_t size8 = 8;
 	package_nest(package, serialize_instructions(ec->instructions, true));
 	package_nest(package, package_new_dict(PROGRAM_COUNTER, &(ec->program_counter), &size4));
+	package_nest(package, package_new_dict(LAST_BURST_TIME, &(ec->last_burst_time), &size8));
 	package_nest(package, package_new_dict(PROCESS_PID, &(ec->pid), &size4));
 	package_nest(package, serialize_cpu_registers(ec->cpu_register));
 	package_nest(package, serialize_segments_table(ec->segments_table, SEGMENTS_TABLE, 0));
@@ -38,6 +40,9 @@ t_execution_context* deserialize_execution_context(t_package* package) {
 				break;
 			case PROGRAM_COUNTER:
 				package_decode_buffer(nested_package->buffer, &(ec->program_counter), NULL);
+				break;
+			case LAST_BURST_TIME:
+				package_decode_buffer(nested_package->buffer, &(ec->last_burst_time), NULL);
 				break;
 			case PROCESS_PID:
 				package_decode_buffer(nested_package->buffer, &(ec->pid), NULL);

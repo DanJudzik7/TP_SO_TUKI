@@ -10,7 +10,6 @@ int main(int argc, char** argv) {
 	config_cpu.logger = logger;
 	config_cpu.max_segment_size = config_get_int_value(config, "TAM_MAX_SEGMENTO");
 	config_cpu.instruction_delay = config_get_int_value(config, "RETARDO_INSTRUCCION");
-
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
 	int server_socket = socket_initialize_server(port);
 	if (server_socket == -1) {
@@ -44,6 +43,8 @@ int main(int argc, char** argv) {
 			}
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context");
 			t_execution_context* context = deserialize_execution_context(package);
+			//Inicializo el cronometro del tiempo de rafaga
+			config_cpu.burst_time = temporal_create();
 			bool flag_dislodge = false;
 			// Ejecuto mientras no se tenga que desalojar
 			while (!flag_dislodge) {
@@ -53,7 +54,12 @@ int main(int argc, char** argv) {
 				flag_dislodge = execute(instruction, context, pa);
 				context->program_counter++;
 			}
-
+			//Detengo el cronometro de rafaga
+			temporal_stop(config_cpu.burst_time);
+			//Obtengo su tiempo
+			context->last_burst_time = temporal_gettime(config_cpu.burst_time);
+			//Lo destruyo para liberar memoria
+			temporal_destroy(config_cpu.burst_time);
 			t_package* package_context = serialize_execution_context(context);
 			if (!socket_send(kernel_socket, package_context)) {
 				log_error(config_cpu.logger, "ERROR AL ENVIAR EL CONTEXT AL KERNEL");

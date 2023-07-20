@@ -3,6 +3,7 @@
 
 // Carga librerías varias de utilidades generales
 #include <commons/bitarray.h>
+#include <commons/temporal.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
@@ -94,6 +95,7 @@ typedef struct t_execution_context {
 	uint32_t program_counter;
 	t_registers* cpu_register;
 	t_list* segments_table;
+	int64_t last_burst_time;
 	uint32_t pid;
 	t_instruction* kernel_request;	// Acá la CPU va a guardar si necesita algo de kernel
 } t_execution_context;
@@ -101,6 +103,7 @@ typedef struct t_execution_context {
 typedef enum execution_context_index {
 	EC_INSTRUCTIONS,
 	PROGRAM_COUNTER,
+	LAST_BURST_TIME,
 	PROCESS_PID,
 	CPU_REGISTERS,
 	SEGMENTS_TABLE,
@@ -115,6 +118,7 @@ typedef struct config_cpu {
 	int socket_memory;
 	int max_segment_size;
 	int instruction_delay;
+	t_temporal* burst_time;
 } configuration_cpu;
 
 typedef enum op_code {

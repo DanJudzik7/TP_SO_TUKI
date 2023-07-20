@@ -63,6 +63,7 @@ t_pcb* pcb_new(int pid, int burst_time) {
 	pcb->state = NEW;
 	pcb->pid = pid;
 	pcb->aprox_burst_time = burst_time;
+	pcb->last_burst_time = 0;
 	pcb->last_ready_time = time(NULL);
 	pcb->local_files = dictionary_create();
 	pcb->execution_context = execution_context_new(pcb->pid);
