@@ -32,10 +32,10 @@ void deserialize_instructions(t_package* package, t_queue* instructions);
 t_instruction* deserialize_instruction(t_package* package);
 
 // Serializa los registros de la CPU
-t_package* serialize_cpu_registers(cpu_register* registers);
+t_package* serialize_cpu_registers(t_registers* registers);
 
 // Deserializa los registros de la CPU
-cpu_register* deserialize_cpu_registers(void* source);
+t_registers* deserialize_cpu_registers(void* source);
 
 // Serializa todos las tablas de segmentos en memoria
 t_package* serialize_all_segments_tables(t_memory_structure* mem_struct);

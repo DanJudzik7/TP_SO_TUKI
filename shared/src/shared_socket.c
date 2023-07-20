@@ -65,9 +65,9 @@ t_package* socket_receive(int target_socket) {
 	}
 	package->type = *type;
 	free(type);
-	// Recibe el buffer del cliente
+	// Recibe el buffer del cliente (si no está vacío)
 	package->buffer = s_malloc(package->size);
-	if (recv(target_socket, package->buffer, package->size, MSG_WAITALL) < 1) {
+	if (package->size != 0 && recv(target_socket, package->buffer, package->size, MSG_WAITALL) < 1) {
 		free(package->buffer);
 		free(package);
 		return NULL;

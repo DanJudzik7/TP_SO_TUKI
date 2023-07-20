@@ -20,6 +20,6 @@ t_physical_address* decode(t_instruction* instruction, t_execution_context* ec);
 bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa);
 
 // Establece el valor de un registro
-void set_register(char* register_name, char* value, cpu_register* registers);
+void set_register(char* register_name, char* value, t_registers* registers);
 
 #endif

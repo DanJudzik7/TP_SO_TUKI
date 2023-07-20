@@ -8,7 +8,10 @@
 extern configuration_cpu config_cpu;
 
 // Obtiene la dirección de un registro en base a su nombre en texto
-char* register_pointer(char* name, cpu_register* registers);
+char* register_pointer(char* name, t_registers* registers);
+
+// Obtiene el tamaño de un registro en base a su nombre en texto
+int size_of_register_pointer(char* name, t_registers* registers);
 
 // Traduce la dirección lógica a física
 t_physical_address* mmu(int logical_address, int size, t_execution_context* ec);

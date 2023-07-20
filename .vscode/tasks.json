@@ -16,6 +16,7 @@
                 "isDefault": true
             },
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -36,6 +37,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -51,6 +53,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -71,6 +74,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -86,6 +90,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -106,6 +111,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -126,6 +132,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -141,6 +148,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -156,6 +164,7 @@
             ],
             "group": "build",
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -167,6 +176,7 @@
                 "$gcc"
             ],
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -178,6 +188,7 @@
                 "$gcc"
             ],
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },
@@ -192,6 +203,7 @@
                 "$gcc"
             ],
             "presentation": {
+                "panel": "dedicated",
                 "clear": true
             }
         },

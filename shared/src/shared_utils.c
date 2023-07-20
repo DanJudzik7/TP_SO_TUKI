@@ -55,20 +55,20 @@ void print_execution_context(t_execution_context* execution_context) {
     printf("Execution Context:\n");
     printf(" - Program Counter: %u\n", execution_context->program_counter);
     
-    cpu_register* registers = execution_context->cpu_register;
+    t_registers* registers = execution_context->cpu_register;
     printf(" - CPU Registers:\n");
-    printf("    - AX: %.*s\n", 4, registers->register_4.AX);
-    printf("    - BX: %.*s\n", 4, registers->register_4.BX);
-    printf("    - CX: %.*s\n", 4, registers->register_4.CX);
-    printf("    - DX: %.*s\n", 4, registers->register_4.DX);
-    printf("    - EAX: %.*s\n", 8, registers->register_8.EAX);
-    printf("    - EBX: %.*s\n", 8, registers->register_8.EBX);
-    printf("    - ECX: %.*s\n", 8, registers->register_8.ECX);
-    printf("    - EDX: %.*s\n", 8, registers->register_8.EDX);
-    printf("    - RAX: %.*s\n", 16, registers->register_16.RAX);
-    printf("    - RBX: %.*s\n", 16, registers->register_16.RBX);
-    printf("    - RCX: %.*s\n", 16, registers->register_16.RCX);
-    printf("    - RDX: %.*s\n", 16, registers->register_16.RDX);
+    printf("    - AX: %.*s\n", 4, registers->AX);
+    printf("    - BX: %.*s\n", 4, registers->BX);
+    printf("    - CX: %.*s\n", 4, registers->CX);
+    printf("    - DX: %.*s\n", 4, registers->DX);
+    printf("    - EAX: %.*s\n", 8, registers->EAX);
+    printf("    - EBX: %.*s\n", 8, registers->EBX);
+    printf("    - ECX: %.*s\n", 8, registers->ECX);
+    printf("    - EDX: %.*s\n", 8, registers->EDX);
+    printf("    - RAX: %.*s\n", 16, registers->RAX);
+    printf("    - RBX: %.*s\n", 16, registers->RBX);
+    printf("    - RCX: %.*s\n", 16, registers->RCX);
+    printf("    - RDX: %.*s\n", 16, registers->RDX);
     
 	/* segment_table* segment_table = execution_context->segment_table;
     printf(" - Segment Table - \n");
@@ -108,8 +108,8 @@ t_execution_context* execution_context_new(int pid) {
 	t_execution_context* ec = s_malloc(sizeof(t_execution_context));
 	ec->instructions = queue_create();
 	ec->program_counter = 0;
-	ec->cpu_register = s_malloc(sizeof(cpu_register));
-	memset(ec->cpu_register, 0, sizeof(cpu_register));
+	ec->cpu_register = s_malloc(sizeof(t_registers));
+	memset(ec->cpu_register, 0, sizeof(t_registers));
 	ec->segments_table = list_create();
 	ec->pid = pid;
 	return ec;

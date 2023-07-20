@@ -18,38 +18,23 @@
 #include <time.h>
 #include <unistd.h>
 
-typedef struct cpu_register_4 {
+typedef struct t_registers {
+	// Registros de 4 bytes
 	char AX[4];
 	char BX[4];
 	char CX[4];
 	char DX[4];
-} cpu_register_4;
-
-typedef struct cpu_register_8 {
+	// Registros de 8 bytes
 	char EAX[8];
 	char EBX[8];
 	char ECX[8];
 	char EDX[8];
-} cpu_register_8;
-
-typedef struct cpu_register_16 {
+	// Registros de 16 bytes
 	char RAX[16];
 	char RBX[16];
 	char RCX[16];
 	char RDX[16];
-} cpu_register_16;
-
-typedef struct cpu_register {
-	cpu_register_4 register_4;
-	cpu_register_8 register_8;
-	cpu_register_16 register_16;
-} cpu_register;
-
-typedef struct instruction_memory {
-	uint32_t pid;
-	uint32_t s_id;
-	uint32_t offset;
-} instruction_memory;
+} t_registers;
 
 // Estructura de cada segmento
 typedef struct t_segment {
@@ -65,13 +50,13 @@ typedef struct t_physical_address {
 } t_physical_address;
 
 typedef enum t_memory_op {
-	MEM_INIT_PROCESS,
-	MEM_END_PROCCESS,
-	MEM_READ_ADDRESS,
-	MEM_WRITE_ADDRESS,
-	MEM_CREATE_SEGMENT,
-	MEM_DELETE_SEGMENT,
-	MEM_COMPACT_ALL,
+	MEM_INIT_PROCESS, // 0
+	MEM_END_PROCCESS, // 1
+	MEM_READ_ADDRESS, // 2
+	MEM_WRITE_ADDRESS, // 3
+	MEM_CREATE_SEGMENT, // 4
+	MEM_DELETE_SEGMENT,	// 5
+	MEM_COMPACT_ALL, // 6
 } t_memory_op;
 
 typedef enum t_memory_state {
@@ -107,7 +92,7 @@ typedef struct t_instruction {
 typedef struct t_execution_context {
 	t_queue* instructions;
 	uint32_t program_counter;
-	cpu_register* cpu_register;
+	t_registers* cpu_register;
 	t_list* segments_table;
 	uint32_t pid;
 	t_instruction* kernel_request;	// Acá la CPU va a guardar si necesita algo de kernel

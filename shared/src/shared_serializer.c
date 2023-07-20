@@ -95,45 +95,45 @@ t_instruction* deserialize_instruction(t_package* package) {
 	return instruction;
 }
 
-t_package* serialize_cpu_registers(cpu_register* registers) {
+t_package* serialize_cpu_registers(t_registers* registers) {
 	t_package* package = package_new(CPU_REGISTERS);
 	uint64_t size4 = 4, size8 = 8, size16 = 16;
 	// Registros de 4 bytes
-	package_add(package, &(registers->register_4.AX), &size4);
-	package_add(package, &(registers->register_4.BX), &size4);
-	package_add(package, &(registers->register_4.CX), &size4);
-	package_add(package, &(registers->register_4.DX), &size4);
+	package_add(package, registers->AX, &size4);
+	package_add(package, registers->BX, &size4);
+	package_add(package, registers->CX, &size4);
+	package_add(package, registers->DX, &size4);
 	// Registros de 8 bytes
-	package_add(package, &(registers->register_8.EAX), &size8);
-	package_add(package, &(registers->register_8.EBX), &size8);
-	package_add(package, &(registers->register_8.ECX), &size8);
-	package_add(package, &(registers->register_8.EDX), &size8);
+	package_add(package, registers->EAX, &size8);
+	package_add(package, registers->EBX, &size8);
+	package_add(package, registers->ECX, &size8);
+	package_add(package, registers->EDX, &size8);
 	// Registros de 16 bytes
-	package_add(package, &(registers->register_16.RAX), &size16);
-	package_add(package, &(registers->register_16.RBX), &size16);
-	package_add(package, &(registers->register_16.RCX), &size16);
-	package_add(package, &(registers->register_16.RDX), &size16);
+	package_add(package, registers->RAX, &size16);
+	package_add(package, registers->RBX, &size16);
+	package_add(package, registers->RCX, &size16);
+	package_add(package, registers->RDX, &size16);
 	return package;
 }
 
-cpu_register* deserialize_cpu_registers(void* source) {
+t_registers* deserialize_cpu_registers(void* source) {
 	uint64_t offset = 0;
-	cpu_register* registers = s_malloc(sizeof(cpu_register));
+	t_registers* registers = s_malloc(sizeof(t_registers));
 	// Registros de 4 bytes
-	package_decode_buffer(source, registers->register_4.AX, &offset);
-	package_decode_buffer(source, registers->register_4.BX, &offset);
-	package_decode_buffer(source, registers->register_4.CX, &offset);
-	package_decode_buffer(source, registers->register_4.DX, &offset);
+	package_decode_buffer(source, registers->AX, &offset);
+	package_decode_buffer(source, registers->BX, &offset);
+	package_decode_buffer(source, registers->CX, &offset);
+	package_decode_buffer(source, registers->DX, &offset);
 	// Registros de 8 bytes
-	package_decode_buffer(source, registers->register_8.EAX, &offset);
-	package_decode_buffer(source, registers->register_8.EBX, &offset);
-	package_decode_buffer(source, registers->register_8.ECX, &offset);
-	package_decode_buffer(source, registers->register_8.EDX, &offset);
+	package_decode_buffer(source, registers->EAX, &offset);
+	package_decode_buffer(source, registers->EBX, &offset);
+	package_decode_buffer(source, registers->ECX, &offset);
+	package_decode_buffer(source, registers->EDX, &offset);
 	// Registros de 16 bytes
-	package_decode_buffer(source, registers->register_16.RAX, &offset);
-	package_decode_buffer(source, registers->register_16.RBX, &offset);
-	package_decode_buffer(source, registers->register_16.RCX, &offset);
-	package_decode_buffer(source, registers->register_16.RDX, &offset);
+	package_decode_buffer(source, registers->RAX, &offset);
+	package_decode_buffer(source, registers->RBX, &offset);
+	package_decode_buffer(source, registers->RCX, &offset);
+	package_decode_buffer(source, registers->RDX, &offset);
 	return registers;
 }
 

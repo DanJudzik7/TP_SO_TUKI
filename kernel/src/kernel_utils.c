@@ -32,8 +32,8 @@ t_global_config_kernel* new_global_config_kernel(t_config* config) {
 void handle_pcb_io(t_helper_pcb_io* hpi) {
 	sleep(hpi->time);
 	hpi->pcb->state = READY;
-	free(hpi);
 	log_warning(hpi->logger, "El proceso %d se desbloqueó", hpi->pcb->pid);
+	free(hpi);
 }
 
 t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name) {

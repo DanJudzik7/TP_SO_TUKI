@@ -12,19 +12,19 @@ t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) 
 			break;
 		case MOV_IN: {	// Registro, Dirección Lógica
 			char* register_name = list_get(instruction->args, 0);
-			int* logical_address = list_get(instruction->args, 1);
-			return mmu(*logical_address, sizeof(register_pointer(register_name, ec->cpu_register)), ec);
+			char* logical_address = list_get(instruction->args, 1);
+			return mmu(atoi(logical_address), size_of_register_pointer(register_name, ec->cpu_register), ec);
 		}
 		case MOV_OUT: {	 // Dirección Lógica, Registro
-			int* logical_address = list_get(instruction->args, 0);
+			char* logical_address = list_get(instruction->args, 0);
 			char* register_name = list_get(instruction->args, 1);
-			return mmu(*logical_address, sizeof(register_pointer(register_name, ec->cpu_register)), ec);
+			return mmu(atoi(logical_address), size_of_register_pointer(register_name, ec->cpu_register), ec);
 		}
 		case F_READ:	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
 		case F_WRITE: {	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
-			int* logical_address = list_get(instruction->args, 1);
+			char* logical_address = list_get(instruction->args, 1);
 			int* bytes_count = list_get(instruction->args, 2);
-			return mmu(*logical_address, *bytes_count, ec);
+			return mmu(atoi(logical_address), *bytes_count, ec);
 		}
 	}
 	return NULL;
@@ -37,11 +37,12 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			break;
 		}
 		case MOV_IN: {	// Registro, Dirección Lógica (y associated_pa)
+			if (associated_pa == NULL) break;
 			t_instruction* mem_op = instruction_new(MEM_READ_ADDRESS);
 			list_add(mem_op->args, string_itoa(associated_pa->segment));
 			list_add(mem_op->args, string_itoa(associated_pa->offset));
-			list_add(mem_op->args, string_itoa(sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register))));
-			printf("El tamaño del registro es: %s\n", string_itoa(sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register))));
+			list_add(mem_op->args, string_itoa(size_of_register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
+			printf("El tamaño del registro es: %s\n", string_itoa(size_of_register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
 			list_add(mem_op->args, string_itoa(ec->pid));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
@@ -59,6 +60,7 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			break;
 		}
 		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
+			if (associated_pa == NULL) break;
 			t_instruction* mem_op = instruction_new(MEM_WRITE_ADDRESS);
 			list_add(mem_op->args, string_itoa(associated_pa->segment));
 			list_add(mem_op->args, string_itoa(associated_pa->offset));
@@ -85,6 +87,7 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		}
 		case F_READ:  // filename, logical address, bytes count
 		case F_WRITE: {
+			if (associated_pa == NULL) break;
 			ec->kernel_request = instruction_duplicate(instruction);
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->segment));
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->offset));
@@ -111,7 +114,7 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 	return false;
 }
 
-void set_register(char* register_name, char* value, cpu_register* registers) {
+void set_register(char* register_name, char* value, t_registers* registers) {
 	if (value == NULL) {
 		log_error(config_cpu.logger, "Error: Valor inválido o vacío");
 		return;
@@ -121,13 +124,12 @@ void set_register(char* register_name, char* value, cpu_register* registers) {
 		log_error(config_cpu.logger, "Error: Registro %s inválido", register_name);
 		return;
 	}
-	size_t register_size = sizeof(register_ptr);
+	size_t register_size = size_of_register_pointer(register_name, registers);
 	size_t value_len = strlen(value);
 	if (value_len > register_size) {
 		log_error(config_cpu.logger, "Error: El valor (longitud %lu) excede el tamaño del registro (longitud %lu)", value_len, register_size);
 		return;
 	}
-	strncpy(register_ptr, value, register_size - 1);
-	((char*)register_ptr)[register_size - 1] = '\0';
+	strncpy(register_ptr, value, register_size);
 	log_info(config_cpu.logger, "Execute: Se asignó en %s: %s", register_name, value);
 }
