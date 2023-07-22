@@ -23,7 +23,6 @@ typedef struct config_filesystem {
 	char* PATH_FCB;
 } config_filesystem;
 
-config_filesystem config_fs;
 
 void setup_config();
 

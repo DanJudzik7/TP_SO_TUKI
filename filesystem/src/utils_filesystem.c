@@ -1,5 +1,7 @@
 #include "utils_filesystem.h"
 
+config_filesystem config_fs;
+
 void setup_config() {
     config_fs.logger = start_logger("filesystem");
 	config_fs.config = start_config("filesystem");
@@ -18,7 +20,7 @@ void setup_config() {
     config_fs.block_file = start_block_file();
 	log_warning(config_fs.logger, "Tamaño de bloque: %d, Cantidad de bloques: %d", config_fs.block_size, config_fs.block_count);
 
-	config_fs.socket_memoria = connect_module(config_fs.config, config_fs.logger, "MEMORIA");
+	//config_fs.socket_memoria = connect_module(config_fs.config, config_fs.logger, "MEMORIA");
 }
 
 t_config* start_superblock() {

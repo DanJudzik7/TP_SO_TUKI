@@ -6,8 +6,6 @@
 #include "utils_filesystem.h"
 #include <math.h>
 
-extern config_filesystem config_fs;
-
 int handle_kernel(int* socket_kernel);
 
 bool process_instruction(t_instruction* instruction);
@@ -21,6 +19,6 @@ void resize_block(t_config* fcb_data, int* file_size);
 t_list* get_bf_ip(int PUNTERO_INDIRECTO);
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list);
 void truncate_file(t_instruction* instruction);
-char* read_file(t_instruction* instruction);
+char* interate_block_file(t_instruction* instruction);
 
 #endif
