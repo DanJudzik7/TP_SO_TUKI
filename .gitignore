@@ -6,6 +6,8 @@ memoria/memoria
 filesystem/filesystem
 filesystem/cfg/fcb/*
 !filesystem/cfg/fcb/.gitkeep
+filesystem/cfg/bitmap.dat
+filesystem/cfg/blocks.dat
 *.log
 */test
 

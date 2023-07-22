@@ -29,37 +29,43 @@ bool process_instruction(t_instruction* instruction) {
 		case F_READ: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
 
-			char* miCharPuntero_r = interate_block_file(instruction);
+			char* miCharPuntero_r = iterate_block_file(instruction);
 			list_add(instruction->args, miCharPuntero_r);
-			instruction->op_code = MEM_READ_ADDRESS;
-			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
-				log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
+			t_instruction* mem_request = instruction_duplicate(instruction);
+			mem_request->op_code = MEM_READ_ADDRESS;
+			if (config_fs.socket_memory != -1) {
+				if (!socket_send(config_fs.socket_memory, serialize_instruction(mem_request))) {
+					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
+				}
+				t_package* package = socket_receive(config_fs.socket_memory);
+				if (package->type == SEG_FAULT) {
+					log_error(config_fs.logger, "Segmentation fault al leer el archivo");
+					return false;
+				}
+				if (package->type != MESSAGE_OK) {
+					log_error(config_fs.logger, "Error desconocido al leer el archivo");
+					return false;
+				}
 			}
-			t_package* package = socket_receive(config_fs.socket_memoria);
-			if (package->type == SEG_FAULT) {
-				log_error(config_fs.logger, "Segmentation fault al leer el archivo");
-				return false;
-			}
-			if (package->type != MESSAGE_OK) {
-				log_error(config_fs.logger, "Error desconocido al leer el archivo");
-				return false;
-			}
-			instruction_destroy(instruction);
+			instruction_destroy(mem_request);
 			free(miCharPuntero_r);
 			return true;
 		}
 		case F_WRITE: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
-			instruction->op_code = MEM_WRITE_ADDRESS;
-			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
-				log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
+			t_instruction* mem_request = instruction_duplicate(instruction);
+			mem_request->op_code = MEM_WRITE_ADDRESS;
+			if (config_fs.socket_memory != -1) {
+				if (!socket_send(config_fs.socket_memory, serialize_instruction(mem_request))) {
+					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
+				}
+				t_package* package_receive_memory = socket_receive(config_fs.socket_memory);
+				char* str_write = deserialize_message(package_receive_memory);
+				list_add(instruction->args, str_write);
 			}
-			t_package* package_receive_memory = socket_receive(config_fs.socket_memoria);
-			char* str_write = deserialize_message(package_receive_memory);
-			list_add(instruction->args, str_write);
-			char* result_write = interate_block_file(instruction);  // Esto es correcto?
-			instruction_destroy(instruction);
+			char* result_write = iterate_block_file(instruction);
 			free(result_write);
+			instruction_destroy(mem_request);
 			return true;
 		}
 		case F_OPEN: {
@@ -93,7 +99,7 @@ bool process_instruction(t_instruction* instruction) {
 	}
 }
 
-char* interate_block_file(t_instruction* instruction) {
+char* iterate_block_file(t_instruction* instruction) {
 	if (list_size(instruction->args) < 1) {
 		log_error(config_fs.logger, "Instrucción sin argumentos, se esperaba al menos uno");
 		abort();
@@ -105,8 +111,7 @@ char* interate_block_file(t_instruction* instruction) {
 	if (instruction->op_code == F_READ) {
 		str_read = calloc(size_read + 1, sizeof(char));
 		for (int i = 0; i < 240; i++) {
-			char c = config_fs.block_file[i];
-			printf("Valor en la posición %d: %c\n", i, c);
+			printf("Valor en la posición %d: %c\n", i, config_fs.block_file[i]);
 		}
 	} else {
 		str_read = list_get(instruction->args, 6);
@@ -124,7 +129,7 @@ char* interate_block_file(t_instruction* instruction) {
 	int position_initial_block = (position_read / config_fs.block_size);
 	int blocks_need = (size_read + config_fs.block_size - 1) / config_fs.block_size;
 	int positions_to_read = position_read;
-	int positions_readed = 0;
+	int read_positions = 0;
 	for (int i = position_initial_block; i <= position_initial_block + blocks_need; i++) {
 		int block_number = *(int*)list_get(pi_list, i);
 		int start_position_in_block = block_number * config_fs.block_size;
@@ -133,26 +138,18 @@ char* interate_block_file(t_instruction* instruction) {
 		for (int j = 0; j < (end_position_in_block - start_position_to_read); j++) {
 			if (instruction->op_code == F_READ) {
 				char data = config_fs.block_file[start_position_to_read + j];
-				if (data == '\0') {
-					str_read[positions_readed] = ' ';
-				} else {
-					str_read[positions_readed] = data;
-				}
+				str_read[read_positions] = data != '\0' ? data : ' ';
 			} else {
-				config_fs.block_file[start_position_to_read + j] = str_read[positions_readed];
+				config_fs.block_file[start_position_to_read + j] = str_read[read_positions];
 			}
 			positions_to_read++;
-			positions_readed++;
-			if (positions_readed == size_read) {
-				break;
-			}
+			read_positions++;
+			if (read_positions == size_read) break;
 		}
-		if (positions_readed == size_read) {
-			break;
-		}
+		if (read_positions == size_read) break;
 	}
 	if (instruction->op_code == F_READ) {
-		str_read[positions_readed] = '\0';
+		str_read[read_positions] = '\0';
 		log_info(config_fs.logger, "El valor de la cadena es: %s", str_read);
 	} else {
 		for (int i = 0; i < 240; i++) {
@@ -164,9 +161,6 @@ char* interate_block_file(t_instruction* instruction) {
 	free(full_file_path);
 	config_destroy(fcb_data);
 	list_destroy_and_destroy_elements(pi_list, free);
-	/* if (instruction->op_code == F_READ) {
-		free(str_read);
-	} */
 	return str_read;
 }
 void truncate_file(t_instruction* instruction) {
@@ -176,7 +170,7 @@ void truncate_file(t_instruction* instruction) {
 	}
 	char* file_name = list_get(instruction->args, 0);
 	char* char_file_size = list_get(instruction->args, 1);
-	int file_size = atoi(char_file_size);  // no necesitas hacer s_malloc para un int si lo vas a usar inmediatamente
+	int file_size = atoi(char_file_size);
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
@@ -195,9 +189,9 @@ void truncate_file(t_instruction* instruction) {
 
 void resize_block(t_config* fcb_data, int* file_size) {
 	int TAMANIO_ARCHIVO = config_get_int_value(fcb_data, "TAMANIO_ARCHIVO");
-	char* size_file_char= string_itoa(*file_size);
+	char* size_file_char = string_itoa(*file_size);
 	config_set_value(fcb_data, "TAMANIO_ARCHIVO", size_file_char);
-	if(*file_size!=TAMANIO_ARCHIVO){
+	if (*file_size != TAMANIO_ARCHIVO) {
 		char* puntero_directo_char = config_get_string_value(fcb_data, "PUNTERO_DIRECTO");
 		char* puntero_indirecto_char = config_get_string_value(fcb_data, "PUNTERO_INDIRECTO");
 		int PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
@@ -205,7 +199,7 @@ void resize_block(t_config* fcb_data, int* file_size) {
 
 		t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
 		int list_length = list_size(pi_list);
-		if(*file_size==0){
+		if (*file_size == 0) {
 			if (strcmp(puntero_directo_char, "") != 0) {
 				for (int i = PUNTERO_DIRECTO * config_fs.block_size; i < (PUNTERO_DIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
@@ -228,7 +222,7 @@ void resize_block(t_config* fcb_data, int* file_size) {
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
 				config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
 			}
-		}else if((*file_size)<=config_fs.block_size){
+		} else if ((*file_size) <= config_fs.block_size) {
 			if (strcmp(puntero_directo_char, "") == 0) {
 				char* pd_position_string = string_itoa(next_bit_position());
 				config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
@@ -248,7 +242,7 @@ void resize_block(t_config* fcb_data, int* file_size) {
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
 				config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
 			}
-		}else{
+		} else {
 			if (strcmp(puntero_directo_char, "") == 0) {
 				char* pd_position_string = string_itoa(next_bit_position());
 				config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
@@ -400,8 +394,8 @@ void close_file(t_instruction* instruction) {
 
 int next_bit_position() {
 	for (int i = 0; i < config_fs.block_count; i++) {
-		//bool car = bitarray_test_bit(config_fs.bitmap, i);
-		//printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
+		// bool car = bitarray_test_bit(config_fs.bitmap, i);
+		// printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
 		if (!bitarray_test_bit(config_fs.bitmap, i)) {
 			bitarray_set_bit(config_fs.bitmap, i);
 			return i;

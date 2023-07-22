@@ -1,14 +1,14 @@
 #include "tests_filesystem.h"
 
 int main() {
-    setup_config();
-    printf("Iniciando Tests...\n\n");
+	setup_config(false);
+	printf("Iniciando Tests...\n\n");
 
-	//test_instruction_serializing();
-    //test_bf_ip();
-    test_dynamic_op();
+	test_instruction_serializing();
+	// test_bf_ip();
+	test_full_file_op();
 
-    printf("\n\nTests Completados\n");
+	printf("\n\nTests Completados\n");
 	return 0;
 }
 
@@ -32,42 +32,44 @@ void test_bf_ip() {
 
 void test_instruction_serializing() {
 	t_instruction* instruction = instruction_new(F_WRITE);
-	char* argument0 = strdup("prueba3");
-	list_add(instruction->args, argument0);
-	char* argument1 = strdup("64");
-	list_add(instruction->args, argument1);
-	char* argument2 = strdup("456");
-	list_add(instruction->args, argument2);
-	char* argument4 = strdup("32");
-	list_add(instruction->args, argument4);
+	list_add(instruction->args, strdup("prueba3"));
+	list_add(instruction->args, strdup("64"));
+	list_add(instruction->args, strdup("456"));
+	list_add(instruction->args, strdup("32"));
 
 	t_package* packaged = serialize_instruction(instruction);
 	t_instruction* instruction_deserialized = deserialize_instruction(packaged);
 	printf("Instrucción op_code: %d", instruction_deserialized->op_code);
 }
 
-void test_dynamic_op() {
-	// F_OPEN, F_CLOSE, F_TRUNCATE, F_READ, F_WRITE
-	//t_instruction* instruction = instruction_new(F_OPEN);
-	//t_instruction* instruction = instruction_new(F_TRUNCATE);
-	t_instruction* instruction = instruction_new(F_READ);
-	//t_instruction* instruction = instruction_new(F_WRITE);
+void test_full_file_op() {
+	t_instruction* ins_open = instruction_new(F_OPEN);
+	list_add(ins_open->args, strdup("prueba"));
+	process_instruction(ins_open);
+	instruction_destroy(ins_open);
 
-	instruction->args = list_create();
-	char* argument0 = strdup("prueba");
-	list_add(instruction->args, argument0);
-	char* argument1 = strdup("25");// POSICION LEER/ESCRIBIR
-	list_add(instruction->args, argument1);
-	char* argument2 = strdup("32");// TAMANIO LEER/ESCRIBIR
-	list_add(instruction->args, argument2);
-	char* argument3 = strdup("64"); 
-	list_add(instruction->args, argument3);
-	char* argument4 = strdup("32"); 
-	list_add(instruction->args, argument4);
-	char* argument5 = strdup("32"); 
-	list_add(instruction->args, argument5);
-	char* argument6 = strdup("SonyPlaystation5SonyPlaystation4"); 
-	list_add(instruction->args, argument6); 
+	t_instruction* ins_trunc = instruction_new(F_TRUNCATE);
+	list_add(ins_trunc->args, strdup("prueba"));
+	list_add(ins_trunc->args, strdup("64"));
+	process_instruction(ins_trunc);
+	instruction_destroy(ins_trunc);
 
-	process_instruction(instruction);
+	t_instruction* ins_rw = instruction_new(F_WRITE);
+	list_add(ins_rw->args, strdup("prueba"));
+	list_add(ins_rw->args, strdup("25")); // Posición Read/Write
+	list_add(ins_rw->args, strdup("32")); // Tamaño Read/Write
+	list_add(ins_rw->args, strdup("64"));
+	list_add(ins_rw->args, strdup("32"));
+	list_add(ins_rw->args, strdup("32"));
+	list_add(ins_rw->args, strdup("SonyPlaystation5SonyPlaystation4"));
+	process_instruction(ins_rw);
+
+	ins_rw->op_code = F_READ;
+	process_instruction(ins_rw);
+	instruction_destroy(ins_rw);
+
+	t_instruction* ins_close = instruction_new(F_CLOSE);
+	list_add(ins_close->args, strdup("prueba"));
+	process_instruction(ins_close);
+	instruction_destroy(ins_close);
 }

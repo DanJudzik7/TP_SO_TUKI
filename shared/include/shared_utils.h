@@ -108,7 +108,6 @@ typedef enum execution_context_index {
 	CPU_REGISTERS,
 	SEGMENTS_TABLE,
 	ALL_SEGMENTS_TABLES,
-	F_WRITE_READ,
 	KERNEL_REQUEST
 } execution_context_index;
 

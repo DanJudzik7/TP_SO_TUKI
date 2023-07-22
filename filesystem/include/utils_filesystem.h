@@ -14,7 +14,7 @@ typedef struct config_filesystem {
 	t_config* config;
 	t_bitarray* bitmap;
 	char* block_file;
-	int socket_memoria;
+	int socket_memory;
 	int block_size;
 	int block_count;
 	char* PATH_SUPERBLOQUE;
@@ -23,8 +23,7 @@ typedef struct config_filesystem {
 	char* PATH_FCB;
 } config_filesystem;
 
-
-void setup_config();
+void setup_config(bool useMemory);
 
 t_config* start_superblock();
 

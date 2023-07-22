@@ -10,6 +10,6 @@ void test_instruction_serializing();
 
 void test_bf_ip();
 
-void test_dynamic_op();
+void test_full_file_op();
 
 #endif
