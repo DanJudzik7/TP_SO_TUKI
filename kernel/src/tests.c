@@ -1,5 +1,5 @@
 #include "tests.h"
-int main(){
+int run_tests(){
     CU_initialize_registry();
     CU_pSuite tests = CU_add_suite("kernel Suite",NULL,NULL);
     CU_add_test(tests,"Probar Suma", suma_kernel);

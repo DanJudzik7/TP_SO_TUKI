@@ -43,7 +43,6 @@
         "scheduler.h": "c",
         "dictionary.h": "c",
         "kernel_utils.h": "c",
-        "handler_state.h": "c",
         "utils_memoria.h": "c",
         "conexions.h": "c",
         "handlers.h": "c",
@@ -60,7 +59,13 @@
         "system_error": "c",
         "array": "c",
         "tuple": "c",
-        "utility": "c"
+        "utility": "c",
+        "handler_cpu.h": "c",
+        "tests_console.h": "c",
+        "algorithms_kernel.h": "c",
+        "utils_cpu.h": "c",
+        "math.h": "c",
+        "unistd.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.configureOnOpen": false

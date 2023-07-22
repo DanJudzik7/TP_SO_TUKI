@@ -1,43 +1,79 @@
 #include "kernel_utils.h"
 
-bool no_more_instructions(execution_context* ec){
-	return ec->program_counter>= queue_size(ec->instructions);
+t_global_config_kernel* new_global_config_kernel(t_config* config) {
+	t_global_config_kernel* gck = s_malloc(sizeof(t_global_config_kernel));
+	gck->logger = start_logger("kernel");
+
+	// Obtengo del config el algoritmo a usar
+	char* algorithm = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
+	bool algorithm_is_hrrn = strcmp(algorithm, "HRRN") == 0;
+	if (!algorithm_is_hrrn && strcmp(algorithm, "FIFO") != 0) {
+		log_error(gck->logger, "El algoritmo de planificación no es válido");
+		exit(EXIT_FAILURE);
+	}
+	log_warning(gck->logger, "El algoritmo de planificación es: %s", algorithm);
+
+	gck->new_pcbs = queue_create();		// Cola local de PCBs en NEW
+	gck->active_pcbs = queue_create();	// Cola global de PCBs en READY, EXEC y BLOCK
+	gck->server_socket = -1;
+
+	char* max_multiprogramming = config_get_string_value(config, "GRADO_MAX_MULTIPROGRAMACION");
+	gck->max_multiprogramming = atoi(max_multiprogramming);
+	free(max_multiprogramming);
+	char* default_burst_time = config_get_string_value(config, "ESTIMACION_INICIAL");
+	gck->default_burst_time = atoi(default_burst_time);
+	free(default_burst_time);
+	gck->algorithm_is_hrrn = algorithm_is_hrrn;
+	gck->prioritized_pcb = NULL;
+	gck->resources = dictionary_create();
+	return gck;
 }
 
-void resources_handler(t_pcb* pcb, process_state process_state, t_global_config_kernel* gck){
+void handle_pcb_io(t_helper_pcb_io* hpi) {
+	sleep(hpi->time);
+	hpi->pcb->state = READY;
+	log_warning(hpi->logger, "El proceso %d se desbloqueó", hpi->pcb->pid);
+	free(hpi);
+}
 
-	char* resource_request = get_resource_name(pcb);
-	printf("El recurso requerido es: %s", resource_request);
-	if(!dictionary_has_key(gck->resources,resource_request)){
-		printf("El recurso existe");
+t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name) {
+	if (!dictionary_has_key(gck->resources, name)) {
 		pcb->state = EXIT_PROCESS;
-		return;
+		log_error(gck->logger, "El recurso %s no existe", name);
+		return NULL;
 	}
-	resources_table* resource = (resources_table* ) dictionary_get(gck->resources, resource_request);
-	if(process_state == WAIT){
-		if(resource->instances >= 0) {
-			(resource->instances)--;
-			printf("Las instancias del recurso quedaro reducidas a -> %i", resource->instances);
-		}
-		// SI EL PROCESO ES MENOR A 0 ESTRICTAMENTE, LO MANDO A LA COLA DE BLOQUEADOS DE ESE RECURSO
-		// TODO: NO DICE NADA DE BLOQUEAR, CONSULTAR si pcb->state = BLOCK; aunque da igual.
-		else queue_push(resource->resource_queue, pcb);
-	}
-	if(process_state == SIGNAL){
-		if(resource->instances > 0) {
-			(resource->instances)++;
-			printf("Las instancias del recurso aumentaron a -> %i", resource->instances);
-			// se devuelve la ejecución al proceso que peticionó el SIGNAL.
-			t_pcb* pcb_priority = queue_pop(resource->resource_queue);
-			gck->pcb_priority_helper = pcb_priority;
-		}
-		// TODO: NO DICE NADA DE ESTE SIGNAL, AVERIGUAR ? igual dudo que haga algo
+	log_info(gck->logger, "Se solicitó el recurso %s", name);
+	return dictionary_get(gck->resources, name);
+}
+
+void resource_signal(t_resource* resource, t_log* logger) {
+	if (!queue_is_empty(resource->enqueued_processes)) {
+		resource->assigned_to = queue_pop(resource->enqueued_processes);
+		resource->assigned_to->state = READY;
+		log_info(logger, "Se desbloqueó el proceso %d", resource->assigned_to->pid);
+	} else {
+		resource->available_instances++;
+		resource->assigned_to = NULL;
+		log_info(logger, "Las instancias del recurso aumentaron a %i", resource->available_instances);
 	}
 }
 
-char* get_resource_name(t_pcb* pcb){
-	//Obtengo la instruccion apuntada por el program counter actual
-	t_instruction* instruction =  list_get(pcb->execution_context->instructions->elements, pcb->execution_context->program_counter);
-	//Obtengo el nombre del recurso
-	return list_get(instruction->args, 1);
+t_pcb* pcb_new(int pid, int burst_time) {
+	t_pcb* pcb = s_malloc(sizeof(t_pcb));
+	pcb->state = NEW;
+	pcb->pid = pid;
+	pcb->aprox_burst_time = burst_time;
+	pcb->last_burst_time = 0;
+	pcb->last_ready_time = time(NULL);
+	pcb->local_files = dictionary_create();
+	pcb->execution_context = execution_context_new(pcb->pid);
+	return pcb;
+}
+
+void pcb_destroy(t_pcb* pcb) {
+	execution_context_destroy(pcb->execution_context);
+	dictionary_destroy(pcb->local_files);
+	pcb->local_files = NULL;
+	free(pcb);
+	pcb = NULL;
 }

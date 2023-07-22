@@ -1,98 +1,135 @@
 #include "handler_cpu.h"
 
-t_instruction* fetch(execution_context* ec) {
+t_instruction* fetch(t_execution_context* ec) {
 	if (ec->program_counter >= list_size(ec->instructions->elements)) return NULL;
 	return list_get(ec->instructions->elements, ec->program_counter);
 }
 
-void decode(t_instruction* instruction, execution_context* ec) {
+t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) {
 	switch (instruction->op_code) {
 		case SET:
-			sleep(config_cpu.instruction_delay);
+			usleep(config_cpu.instruction_delay);
 			break;
-		case MOV_IN: // Registro, Dirección Lógica
-			list_replace(instruction->args, 1, mmu(list_get(instruction->args, 1), sizeof(register_pointer(list_get(instruction->args, 0), ec->cpu_register)), ec));
-			break;
-		case MOV_OUT: // Dirección Lógica, Registro
-			list_replace(instruction->args, 0, mmu(list_get(instruction->args, 0), sizeof(register_pointer(list_get(instruction->args, 1), ec->cpu_register)), ec));
-			break;
-		case F_READ: // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
-		case F_WRITE: // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
-			list_replace(instruction->args, 1, mmu(list_get(instruction->args, 1), list_get(instruction->args, 2), ec));
-			break;
+		case MOV_IN: {	// Registro, Dirección Lógica
+			char* register_name = list_get(instruction->args, 0);
+			char* logical_address = list_get(instruction->args, 1);
+			return mmu(atoi(logical_address), size_of_register_pointer(register_name, ec->cpu_register), ec);
+		}
+		case MOV_OUT: {	 // Dirección Lógica, Registro
+			char* logical_address = list_get(instruction->args, 0);
+			char* register_name = list_get(instruction->args, 1);
+			return mmu(atoi(logical_address), size_of_register_pointer(register_name, ec->cpu_register), ec);
+		}
+		case F_READ:	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
+		case F_WRITE: {	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
+			char* logical_address = list_get(instruction->args, 1);
+			int* bytes_count = list_get(instruction->args, 2);
+			return mmu(atoi(logical_address), *bytes_count, ec);
+		}
 	}
+	return NULL;
 }
 
-execution_context* execute(execution_context* execution_context, t_instruction* instruction) {
+bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa) {
 	switch (instruction->op_code) {
-		case SET:
-			execute_set(execution_context, instruction);
+		case SET: {
+			set_register(list_get(instruction->args, 0), list_get(instruction->args, 1), ec->cpu_register);
 			break;
-		case MOV_IN:
-		case MOV_OUT:
+		}
+		case MOV_IN: {	// Registro, Dirección Lógica (y associated_pa)
+			if (associated_pa == NULL) break;
+			t_instruction* mem_op = instruction_new(MEM_READ_ADDRESS);
+			list_add(mem_op->args, string_itoa(associated_pa->segment));
+			list_add(mem_op->args, string_itoa(associated_pa->offset));
+			list_add(mem_op->args, string_itoa(size_of_register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
+			printf("El tamaño del registro es: %s\n", string_itoa(size_of_register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
+			list_add(mem_op->args, string_itoa(ec->pid));
+			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
+				log_error(config_cpu.logger, "Error al enviar operación a memoria");
+				break;
+			}
+			t_package* package = socket_receive(config_cpu.socket_memory);
+			if (package == NULL || package->type != MESSAGE_OK) {
+				log_error(config_cpu.logger, "Error al leer de memoria");
+				break;
+			}
+			char* value = deserialize_message(package);
+			set_register(list_get(instruction->args, 0), value, ec->cpu_register);
+			free(value);
+			log_info(config_cpu.logger, "Execute: Lectura de memoria exitosa");
+			break;
+		}
+		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
+			if (associated_pa == NULL) break;
+			t_instruction* mem_op = instruction_new(MEM_WRITE_ADDRESS);
+			list_add(mem_op->args, string_itoa(associated_pa->segment));
+			list_add(mem_op->args, string_itoa(associated_pa->offset));
+			list_add(mem_op->args, register_pointer(list_get(instruction->args, 1), ec->cpu_register));
+			list_add(mem_op->args, string_itoa(ec->pid));
+			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
+				log_error(config_cpu.logger, "Error al enviar operación a memoria");
+				break;
+			}
+			t_package* package = socket_receive(config_cpu.socket_memory);
+			if (package == NULL) {
+				log_error(config_cpu.logger, "Error al escribir en memoria");
+				break;
+			}
+			if (package->type == SEG_FAULT) {
+				log_error(config_cpu.logger, "Error en memoria: Segmentation Fault");
+				break;
+			} else if (package->type != OK_INSTRUCTION) {
+				log_error(config_cpu.logger, "Error desconocido en memoria");
+				break;
+			}
+			log_info(config_cpu.logger, "Execute: Escritura en memoria exitosa");
+			break;
+		}
+		case F_READ:  // filename, logical address, bytes count
+		case F_WRITE: {
+			if (associated_pa == NULL) break;
+			ec->kernel_request = instruction_duplicate(instruction);
+			list_add(ec->kernel_request->args, string_itoa(associated_pa->segment));
+			list_add(ec->kernel_request->args, string_itoa(associated_pa->offset));
+			log_info(config_cpu.logger, "Execute: Ejecutando instrucción %d y desalojando", instruction->op_code);
+		}
 		case I_O:
 		case F_OPEN:
 		case F_CLOSE:
 		case F_SEEK:
-		case F_READ:
-		case F_WRITE:
 		case F_TRUNCATE:
 		case WAIT:
 		case SIGNAL:
 		case CREATE_SEGMENT:
 		case DELETE_SEGMENT:
-			break;
-		case YIELD:
-			log_warning(config_cpu.logger, "Ejecutando un YIELD");
-			dislodge();
-			break;
 		case EXIT:
-			log_warning(config_cpu.logger, "Ejecutando un EXIT");
-			execute_exit(execution_context);
-			dislodge();
-			break;
+		case YIELD:
+			log_info(config_cpu.logger, "Execute: Ejecutando instrucción %d y desalojando", instruction->op_code);
+			ec->kernel_request = instruction_duplicate(instruction);
+			return true;
 		default:
+			log_error(config_cpu.logger, "Execute: Operación inválida");
 			break;
 	}
-	return execution_context;
+	return false;
 }
 
-void execute_set(execution_context* execution_context, t_instruction* instruction) {
-	// Lo paso a un int con atoi el valor proporcionado en la lista -> APLICA?
-	char* value = list_get(instruction->args, 1);
-    if (value == NULL) {
-		log_info(config_cpu.logger, "Error: Valor inválido o vacío");
+void set_register(char* register_name, char* value, t_registers* registers) {
+	if (value == NULL) {
+		log_error(config_cpu.logger, "Error: Valor inválido o vacío");
 		return;
 	}
-
-	char* name = list_get(instruction->args, 0);
-	char* register_ptr = register_pointer(name, execution_context->cpu_register);
-    if (register_ptr == NULL) {
-        log_info(config_cpu.logger, "Error: Registro %s no válido", name);
-        return;
-    }
-
-	// Comparo el registro y asigno el valor correspondiente
-	log_info(config_cpu.logger, "Asignando en %s: %s", name, value);
-	size_t register_size = sizeof(register_ptr);
+	char* register_ptr = register_pointer(register_name, registers);
+	if (register_ptr == NULL) {
+		log_error(config_cpu.logger, "Error: Registro %s inválido", register_name);
+		return;
+	}
+	size_t register_size = size_of_register_pointer(register_name, registers);
 	size_t value_len = strlen(value);
 	if (value_len > register_size) {
-		log_info(config_cpu.logger, "Error: Tamaño del registro -> %lu", value_len);
-		log_info(config_cpu.logger, "Error: Tamaño del value_len -> %lu", register_size);
-		log_info(config_cpu.logger, "Error: El valor excede el tamaño del registro");
+		log_error(config_cpu.logger, "Error: El valor (longitud %lu) excede el tamaño del registro (longitud %lu)", value_len, register_size);
 		return;
 	}
-	strncpy(register_ptr, value, register_size - 1);
-	((char*)register_ptr)[register_size - 1] = '\0';
+	strncpy(register_ptr, value, register_size);
+	log_info(config_cpu.logger, "Execute: Se asignó en %s: %s", register_name, value);
 }
-
-void execute_exit(execution_context* execution_context) {
-	execution_context->updated_state = EXIT_PROCESS;
-}
-
-
-void dislodge() {
-	log_warning(config_cpu.logger, "Desalojando el Context");
-	// Bloquear el semáforo
-	sem_wait(&config_cpu.flag_dislodge);
-};

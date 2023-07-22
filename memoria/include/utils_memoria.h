@@ -7,8 +7,6 @@
 #include "shared_package.h"
 #include "shared_socket.h"
 
-t_config_memory config_memory;
-
 void setup_config();
 
 t_memory_structure* new_memory_structure(void* memory);

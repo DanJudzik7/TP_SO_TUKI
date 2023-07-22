@@ -2,21 +2,24 @@
 #define HANDLER_CPU_H
 
 #include <math.h>
+#include <unistd.h>
 
-#include "shared_package.h"
+#include "shared_serializer.h"
+#include "shared_socket.h"
 #include "utils_cpu.h"
 
 extern configuration_cpu config_cpu;
 
-t_instruction* fetch(execution_context* execution_context);
+// Obtiene la próxima instrucción a ejecutar
+t_instruction* fetch(t_execution_context* execution_context);
 
-void decode(t_instruction* instruction, execution_context* ec);
+// Decodifica la instrucción. Devuelve la dirección física asociada.
+t_physical_address* decode(t_instruction* instruction, t_execution_context* ec);
 
-execution_context* execute(execution_context* execution_context, t_instruction* instruction);
+// Ejecuta la instrucción. Devuelve True si debe desalojar.
+bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa);
 
-void execute_set(execution_context* execution_context, t_instruction* instruction);
-void execute_exit(execution_context* execution_context);
-
-void dislodge();
+// Establece el valor de un registro
+void set_register(char* register_name, char* value, t_registers* registers);
 
 #endif

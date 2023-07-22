@@ -1,5 +1,7 @@
 #include "memoria.h"
 
+extern t_config_memory config_memory;
+
 // Debería tener una lista de listas, donde cada sub-lista es la tabla de segmentos de cada proceso.
 
 int main() {

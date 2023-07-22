@@ -39,7 +39,7 @@ int socket_accept(int server_socket) {
 }
 
 bool socket_send(int target_socket, t_package* package) {
-	serialize_package(package);
+	package_close(package);
 	bool send_ret = send(target_socket, package->buffer, package->size, MSG_NOSIGNAL) != -1;
 	package_destroy(package);
 	return send_ret;
@@ -65,9 +65,9 @@ t_package* socket_receive(int target_socket) {
 	}
 	package->type = *type;
 	free(type);
-	// Recibe el buffer del cliente
+	// Recibe el buffer del cliente (si no está vacío)
 	package->buffer = s_malloc(package->size);
-	if (recv(target_socket, package->buffer, package->size, MSG_WAITALL) < 1) {
+	if (package->size != 0 && recv(target_socket, package->buffer, package->size, MSG_WAITALL) < 1) {
 		free(package->buffer);
 		free(package);
 		return NULL;
@@ -87,16 +87,12 @@ int connect_module(t_config* config, t_log* logger, char* module) {
 	int module_socket = socket_initialize(module_ip, module_port);
 	free(port);
 	free(ip);
-	free(module_port);
-	free(module_ip);
-	/*if (!socket_send(module_socket, package_new_message("Mensaje de prueba", false))) {
-		printf("Error al enviar mensaje de prueba en %s en %d\n", module, module_socket);
-		return -1;
-	}*/
 	if (module_socket == -1) {
-		log_error(logger, "No se pudo conectar a módulo %s con %s:%s", module, ip, port);
+		log_error(logger, "No se pudo conectar a módulo %s con %s:%s", module, module_ip, module_port);
 		exit(EXIT_FAILURE);
 	}
+	free(module_port);
+	free(module_ip);
 	log_info(logger, "Conectado a módulo %s en socket %d", module, module_socket);
 	return module_socket;
 }

@@ -2,7 +2,7 @@
 #define ALGORITHMS_KERNEL_H
 
 #include "shared_utils.h"
-#include "handler_pcb.h"
+#include "kernel_utils.h"
 
 // Planifica a Corto Plazo con FIFO, devolviendo el próximo PCB a ejecutar en base al algoritmo y los PCBs activos.
 t_pcb* pick_with_fifo(t_queue* queue_global_pcb);

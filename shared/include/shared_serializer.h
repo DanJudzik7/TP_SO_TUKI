@@ -14,10 +14,10 @@ t_package* serialize_message(char* value, bool is_flaw);
 char* deserialize_message(t_package* package);
 
 // Serializa el execution_context a un paquete
-t_package* serialize_execution_context(execution_context* ec);
+t_package* serialize_execution_context(t_execution_context* ec);
 
 // Deserializa un Execution Context desde un paquete
-execution_context* deserialize_execution_context(t_package* package);
+t_execution_context* deserialize_execution_context(t_package* package);
 
 // Serializa una lista de instrucciones
 t_package* serialize_instructions(t_queue* instructions, bool is_ec);
@@ -32,39 +32,27 @@ void deserialize_instructions(t_package* package, t_queue* instructions);
 t_instruction* deserialize_instruction(t_package* package);
 
 // Serializa los registros de la CPU
-t_package* serialize_cpu_registers(cpu_register* registers);
+t_package* serialize_cpu_registers(t_registers* registers);
 
 // Deserializa los registros de la CPU
-cpu_register* deserialize_cpu_registers(void* source);
+t_registers* deserialize_cpu_registers(void* source);
 
-// Serializa un segmento de memoria
-t_package* serialize_segment_table(segment_table* sg);
-// Serializa un segmento de memoria y retorna su buffer
-char* serialize_segment(segment* seg);
+// Serializa todos las tablas de segmentos en memoria
+t_package* serialize_all_segments_tables(t_memory_structure* mem_struct);
 
-// Deserializa un paquete del tipo segmento
-//segment_table* deserialize_segment_table(t_package* package);
-// Deserializa un segmento de memoria
-segment* deserialize_segment(char* buffer);
+// Serializa una tabla de segmentos
+t_package* serialize_segments_table(t_list* segment_table, uint32_t type, void* heap_pointer);
 
-/* // Serializa un segmento de f_write y f_read
-t_package* serialize_segment_read_write(segment_read_write* seg_rw);
+// Serializa un segmento
+t_package* serialize_segment(t_segment* segment, void* heap_pointer);
 
-// Derializa un segmento de f_write y f_read
-segment_read_write* deserialize_segment_read_write(void* source); */
+// Deserializa una tabla de segmentos
+t_list* deserialize_segment_table(t_package* package);
 
-// Serializa un program counter
-t_package* serialize_program_counter(uint32_t *program_counter, uint64_t* value_size);
+// Deserializa un segmento
+t_segment* deserialize_segment(t_package* nested);
 
-// Deserializa un program counter
-uint32_t deserialize_program_counter(void* buffer, void* dest, uint64_t* offset);
-
-// Serializa el paquete especificado reemplazando al original
-void serialize_package(t_package* package);
-
-//Deserializo el buffer de memoria
-memory_buffer* deserialize_memory_buffer(t_package* package);
-//Serializo el buffer de memoria
-t_package* serialize_memory_buffer(uint32_t pid ,char* buffer);
+// Deserializa todos los segmentos
+t_dictionary* deserialize_all_segments_tables(t_package* package);
 
 #endif

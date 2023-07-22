@@ -1,5 +1,7 @@
 #include "utils_filesystem.h"
 
+config_filesystem config_fs;
+
 void setup_config() {
     config_fs.logger = start_logger("filesystem");
 	config_fs.config = start_config("filesystem");

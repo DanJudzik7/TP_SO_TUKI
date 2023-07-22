@@ -3,8 +3,6 @@
 
 #include "memoria.h"
 
-extern t_config_memory config_memory;
-
 int main();
 
 // Crea un segmento

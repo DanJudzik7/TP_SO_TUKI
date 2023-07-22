@@ -1,5 +1,7 @@
 #include "filesystem.h"
 
+extern config_filesystem config_fs;
+
 int main(int argc, char** argv) {
     setup_config();
 	

@@ -3,28 +3,28 @@
 	"compounds": [
 		{
 			"name": "TUKI",
-			"configurations": ["CPU", "Kernel (delayed)", "Console (delayed)"],
+			"configurations": ["Memoria", "Filesystem (delayed)", "CPU (delayed)", "Kernel (delayed)", "Consola (delayed)"],
 			"presentation": {
 				"group": "+",
 				"order": 1
 			},
 			"stopAll": true
 		}
+
 	],
 	"configurations": [
 		{
-			"name": "Console",
+			"name": "Consola",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/consola/consola",
-			"preLaunchTask": "Make Console",
+			"preLaunchTask": "Make Consola",
 			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"presentation": {
-				"hidden": false,
 				"group": "Módulos",
-				"order": 3
+				"order": 5
 			},
 			"suppressMultipleSessionWarning": true,
 			"setupCommands": [
@@ -41,11 +41,11 @@
 			]
 		},
 		{
-			"name": "Console (delayed)",
+			"name": "Consola (delayed)",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/consola/consola",
-			"preLaunchTask": "Make Console (delayed)",
+			"preLaunchTask": "Make Consola (delayed)",
 			"cwd": "${workspaceFolder}/consola",
 			"externalConsole": false,
 			"MIMode": "gdb",
@@ -53,6 +53,28 @@
 				"hidden": true
 			},
 			"suppressMultipleSessionWarning": true,
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Consola Test",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/consola/test",
+			"preLaunchTask": "Make Test Consola",
+			"cwd": "${workspaceFolder}/consola",
+			"externalConsole": false,
+			"MIMode": "gdb",
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -76,9 +98,8 @@
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"presentation": {
-				"hidden": false,
 				"group": "Módulos",
-				"order": 2
+				"order": 4
 			},
 			"setupCommands": [
 				{
@@ -128,10 +149,35 @@
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"presentation": {
-				"hidden": false,
 				"group": "Módulos",
-				"order": 1
+				"order": 3
 			},
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "CPU (delayed)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/cpu/cpu",
+			"preLaunchTask": "Make CPU (delayed)",
+			"cwd": "${workspaceFolder}/cpu",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"presentation": {
+				"hidden": true
+			},
+			"suppressMultipleSessionWarning": true,
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -154,6 +200,36 @@
 			"cwd": "${workspaceFolder}/filesystem",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"presentation": {
+				"group": "Módulos",
+				"order": 2
+			},
+			"setupCommands": [
+				{
+					"description": "Habilitar la impresión con sangría para gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"description": "Establecer tipo de desensamblado en Intel",
+					"text": "-gdb-set disassembly-flavor intel",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Filesystem (delayed)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/filesystem/filesystem",
+			"preLaunchTask": "Make Filesystem (delayed)",
+			"cwd": "${workspaceFolder}/filesystem",
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"presentation": {
+				"hidden": true
+			},
+			"suppressMultipleSessionWarning": true,
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -190,14 +266,18 @@
 			]
 		},
 		{
-			"name": "Memory",
+			"name": "Memoria",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/memoria/memoria",
-			"preLaunchTask": "Make Memory",
+			"preLaunchTask": "Make Memoria",
 			"cwd": "${workspaceFolder}/memoria",
 			"externalConsole": false,
 			"MIMode": "gdb",
+			"presentation": {
+				"group": "Módulos",
+				"order": 1
+			},
 			"setupCommands": [
 				{
 					"description": "Habilitar la impresión con sangría para gdb",
@@ -212,11 +292,11 @@
 			]
 		},
 		{
-			"name": "Memory Test",
+			"name": "Memoria Test",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/memoria/test",
-			"preLaunchTask": "Make Test Memory",
+			"preLaunchTask": "Make Test Memoria",
 			"cwd": "${workspaceFolder}/memoria",
 			"externalConsole": false,
 			"MIMode": "gdb",

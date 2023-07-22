@@ -2,42 +2,34 @@
 #define SHARED_PACKAGE_H
 
 #include "shared_utils.h"
-#include "shared_serializer.h"
 
 // Librería de paquetes
 // Se encarga del manejo de bajo nivel de paquetes de datos
 // Permite interpretar tipos recursivos con facilidad
 
+typedef struct t_package {
+	uint64_t size;
+	int32_t type;
+	void* buffer;
+} t_package;
+
 typedef enum t_package_type {
     SERIALIZED,             // 0
     MESSAGE_OK,             // 1
     MESSAGE_FLAW,           // 2
-    MESSAGE_PCB_FINISHED,   // 3
-    MESSAGE_BUSY,           // 4
-    INSTRUCTIONS,           // 5
-    EXECUTION_CONTEXT,      // 6
-    INSTRUCTION,            // 7
-    SEG_FAULT,              // 11
-    OK_INSTRUCTION,         // 12
-    NO_SPACE_LEFT,          // 15
-    MEMORY_BUFFER_R         // 16
+    MESSAGE_DONE,           // 3
+    INSTRUCTIONS,           // 4
+    EXECUTION_CONTEXT       // 5
 } t_package_type;
-
-typedef enum t_memory_op {
-    MEM_INIT_PROCESS,
-    MEM_END_PROCCESS,
-    MEM_READ_ADDRESS,
-    MEM_WRITE_ADDRESS,
-    MEM_CREATE_SEGMENT,
-    MEM_DELETE_SEGMENT,
-    COMPACT_ALL
-} t_memory_op;
 
 // Crea y retorna un paquete con el código de operación especificado.
 t_package* package_new(int32_t type);
 
-// Crea un paquete de modo key-value
+// Crea un paquete de modo key-value que contiene un valor o buffer
 t_package* package_new_dict(int32_t key, void* value, uint64_t* value_size);
+
+// Crea un paquete de modo key-value que contiene otro paquete
+t_package* package_new_nested(int32_t key, t_package* value);
 
 // Inserta un paquete dentro de otro
 void package_nest(t_package* package, t_package* nested);
@@ -59,6 +51,9 @@ char* package_decode_string(void* source, uint64_t* offset);
 
 // Deserializa un string a un espacio en memoria existente
 void package_decode_buffer(void* source, void* dest, uint64_t* offset);
+
+// Serializa el paquete especificado reemplazando al original
+void package_close(t_package* package);
 
 // Destruye eliminando de la memoria el paquete especificado
 void package_destroy(t_package* package);

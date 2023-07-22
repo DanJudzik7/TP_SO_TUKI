@@ -1,21 +1,23 @@
 #include "handler_instruction_filesystem.h"
 
-int handle_kernel(int socket_kernel) {
+extern config_filesystem config_fs;
+
+int handle_kernel(int* socket_kernel) {
 	while (1) {
-		t_package* package = socket_receive(socket_kernel);
+		t_package* package = socket_receive(*socket_kernel);
 		if (package == NULL) {
-			log_warning(config_fs.logger, "El cliente se desconectó");
+			log_error(config_fs.logger, "El kernel del socket %d se desconectó", *socket_kernel);
 			break;
 		}
 
 		t_instruction* instruction = deserialize_instruction(package);
 		log_warning(config_fs.logger, "El código de operación es: %i", instruction->op_code);
-		if (process_instruction(instruction)) {
-			if (!socket_send(socket_kernel, serialize_message("OK_OPERATION", false))) {
-				log_warning(config_fs.logger, "Error al enviar el paquete");
-				return -1;
-			}
-		} else abort();
+		bool processed = process_instruction(instruction);
+		if (!socket_send(*socket_kernel, package_new(processed ? MESSAGE_OK : MESSAGE_FLAW))) {
+			log_warning(config_fs.logger, "Error al enviar el paquete");
+			return -1;
+		}
+		if (!processed) abort();
 		free(instruction);
 		free(package);
 	}
@@ -26,42 +28,37 @@ bool process_instruction(t_instruction* instruction) {
 	switch (instruction->op_code) {
 		case F_READ: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
-			/*
-				leer recibo: NAME(0) tamaño_leer(1) PID(2) S_ID(3) OFFSET(4) info_escribir(5)
-				miCharPuntero_r=read_file(posicion, tamanio)
-				envio_memoria(S_ID(2) OFFSET(3)info_escribir(4) )*/
 
-			char* miCharPuntero_r = read_file(instruction);
+			char* miCharPuntero_r = interate_block_file(instruction);
 			list_add(instruction->args, miCharPuntero_r);
 			instruction->op_code = MEM_READ_ADDRESS;
 			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
-				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
+				log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 			}
-			t_package* package_receive_memory = socket_receive(config_fs.socket_memoria);
-			char* str_write = deserialize_message(package_receive_memory);
-
-			list_destroy(instruction->args);
-			free(instruction);
+			t_package* package = socket_receive(config_fs.socket_memoria);
+			if (package->type == SEG_FAULT) {
+				log_error(config_fs.logger, "Segmentation fault al leer el archivo");
+				return false;
+			}
+			if (package->type != MESSAGE_OK) {
+				log_error(config_fs.logger, "Error desconocido al leer el archivo");
+				return false;
+			}
+			instruction_destroy(instruction);
 			free(miCharPuntero_r);
-			return strcmp(str_write, "OK_OPERATION") == 0;
+			return true;
 		}
 		case F_WRITE: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
-			/*
-				escribir recibo: NAME(0) posicion(1) tamaño_leer(2) PID(3) S_ID(4) OFFSET(5)
-				miCharPuntero_w=consulto_memoria(tamaño_leer(2) S_ID(3) OFFSET(4))
-				escribir_info(posicion, info)
-				y voy a escribir info en la posicion que recibi*/
 			instruction->op_code = MEM_WRITE_ADDRESS;
 			if (!socket_send(config_fs.socket_memoria, serialize_instruction(instruction))) {
-				log_error(config_fs.logger, "Error al enviar instrucciones al memoria");
+				log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 			}
 			t_package* package_receive_memory = socket_receive(config_fs.socket_memoria);
 			char* str_write = deserialize_message(package_receive_memory);
 			list_add(instruction->args, str_write);
-			char* result_write = read_file(instruction);  // Esto es correcto?
-			list_destroy(instruction->args);
-			free(instruction);
+			char* result_write = interate_block_file(instruction);  // Esto es correcto?
+			instruction_destroy(instruction);
 			free(result_write);
 			return true;
 		}
@@ -78,8 +75,12 @@ bool process_instruction(t_instruction* instruction) {
 		case F_TRUNCATE: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE TRUNCAR UN ARCHIVO\n");
 			truncate_file(instruction);
+			for (int i = 0; i < config_fs.block_count; i++) {
+				bool car = bitarray_test_bit(config_fs.bitmap, i);
+				printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
+			}
 			for (int i = 0; i < 256; i += sizeof(uint32_t)) {
-				uint32_t* number = malloc(sizeof(uint32_t));
+				uint32_t* number = s_malloc(sizeof(uint32_t));
 				memcpy(number, config_fs.block_file + i, sizeof(uint32_t));	 // remove '*'
 				printf("Valor en la posición %d: %u\n", i, *number);
 			}
@@ -92,31 +93,31 @@ bool process_instruction(t_instruction* instruction) {
 	}
 }
 
-char* read_file(t_instruction* instruction) {
+char* interate_block_file(t_instruction* instruction) {
 	if (list_size(instruction->args) < 1) {
 		log_error(config_fs.logger, "Instrucción sin argumentos, se esperaba al menos uno");
 		abort();
 	}
+
 	int size_read;
+	size_read = atoi(list_get(instruction->args, 2));
 	char* str_read;
 	if (instruction->op_code == F_READ) {
-		size_read = atoi(list_get(instruction->args, 1));
 		str_read = calloc(size_read + 1, sizeof(char));
 		for (int i = 0; i < 240; i++) {
 			char c = config_fs.block_file[i];
 			printf("Valor en la posición %d: %c\n", i, c);
 		}
 	} else {
-		str_read = "SonyPlaystation5SonyPlaystation4";
-		size_read = (int)strlen(str_read);
+		str_read = list_get(instruction->args, 6);
 	}
 	char* file_name = list_get(instruction->args, 0);
-	int position_read = atoi(list_get(instruction->args, 2));
+	int position_read = atoi(list_get(instruction->args, 1));
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
 	int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
-	int* PUNTERO_DIRECTO = malloc(sizeof(int));
+	int* PUNTERO_DIRECTO = s_malloc(sizeof(int));
 	*PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
 	t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
 	list_add_in_index(pi_list, 0, PUNTERO_DIRECTO);
@@ -175,7 +176,7 @@ void truncate_file(t_instruction* instruction) {
 	}
 	char* file_name = list_get(instruction->args, 0);
 	char* char_file_size = list_get(instruction->args, 1);
-	int file_size = atoi(char_file_size);  // no necesitas hacer malloc para un int si lo vas a usar inmediatamente
+	int file_size = atoi(char_file_size);  // no necesitas hacer s_malloc para un int si lo vas a usar inmediatamente
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
@@ -193,39 +194,103 @@ void truncate_file(t_instruction* instruction) {
 }
 
 void resize_block(t_config* fcb_data, int* file_size) {
-	int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
-	t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
-	int list_length = list_size(pi_list);
-	int list_size_value = list_size(pi_list);
-	int diferencia = 0;
-	int pi_position;
-	int count_pi_need = ((*file_size + config_fs.block_size - 1) / config_fs.block_size - 1);
-	if ((count_pi_need) > list_length) {
-		diferencia = count_pi_need - list_length;
-		for (int i = 0; i < diferencia; i++) {
-			pi_position = next_bit_position();
-			int* pi_pos_ptr = malloc(sizeof(int));
-			*pi_pos_ptr = pi_position;
-			list_add(pi_list, pi_pos_ptr);
-		}
-		set_bf_ip(PUNTERO_INDIRECTO, pi_list);
-	} else if ((count_pi_need) < list_length) {
-		diferencia = list_length - count_pi_need;
-		for (int i = 0; i < diferencia; i++) {
-			int index = (list_size_value - i - 1);
-			int ip_eliminar = *((int*)list_get(pi_list, index));
-			bitarray_clean_bit(config_fs.bitmap, ip_eliminar);
-			for (int i = (ip_eliminar)*config_fs.block_size; i < ((ip_eliminar)*config_fs.block_size) + config_fs.block_size; i++) {
-				config_fs.block_file[i] = '\0';
+	int TAMANIO_ARCHIVO = config_get_int_value(fcb_data, "TAMANIO_ARCHIVO");
+	char* size_file_char= string_itoa(*file_size);
+	config_set_value(fcb_data, "TAMANIO_ARCHIVO", size_file_char);
+	if(*file_size!=TAMANIO_ARCHIVO){
+		char* puntero_directo_char = config_get_string_value(fcb_data, "PUNTERO_DIRECTO");
+		char* puntero_indirecto_char = config_get_string_value(fcb_data, "PUNTERO_INDIRECTO");
+		int PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
+		int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
+
+		t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
+		int list_length = list_size(pi_list);
+		if(*file_size==0){
+			if (strcmp(puntero_directo_char, "") != 0) {
+				for (int i = PUNTERO_DIRECTO * config_fs.block_size; i < (PUNTERO_DIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
+					config_fs.block_file[i] = '\0';
+				}
+				bitarray_clean_bit(config_fs.bitmap, PUNTERO_DIRECTO);
+				config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
 			}
-			free(list_get(pi_list, index));
-			list_remove(pi_list, index);
+			if (strcmp(puntero_indirecto_char, "") != 0) {
+				for (int i = 0; i < list_length; i++) {
+					int pi_pos = *((int*)list_get(pi_list, i));
+					bitarray_clean_bit(config_fs.bitmap, pi_pos);
+					for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
+						config_fs.block_file[j] = '\0';
+					}
+				}
+				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
+					config_fs.block_file[i] = '\0';
+				}
+				list_destroy(pi_list);
+				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
+				config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
+			}
+		}else if((*file_size)<=config_fs.block_size){
+			if (strcmp(puntero_directo_char, "") == 0) {
+				char* pd_position_string = string_itoa(next_bit_position());
+				config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
+			}
+			if (strcmp(puntero_indirecto_char, "") != 0) {
+				for (int i = 0; i < list_length; i++) {
+					int pi_pos = *((int*)list_get(pi_list, i));
+					bitarray_clean_bit(config_fs.bitmap, pi_pos);
+					for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
+						config_fs.block_file[j] = '\0';
+					}
+				}
+				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
+					config_fs.block_file[i] = '\0';
+				}
+				list_destroy(pi_list);
+				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
+				config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
+			}
+		}else{
+			if (strcmp(puntero_directo_char, "") == 0) {
+				char* pd_position_string = string_itoa(next_bit_position());
+				config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
+				PUNTERO_DIRECTO = atoi(pd_position_string);
+			}
+			if (strcmp(puntero_indirecto_char, "") == 0) {
+				char* pi_position_string = string_itoa(next_bit_position());
+				config_set_value(fcb_data, "PUNTERO_INDIRECTO", pi_position_string);
+				PUNTERO_INDIRECTO = atoi(pi_position_string);
+			}
+			int diferencia = 0;
+			int pi_position;
+			int count_pi_need = ((*file_size + config_fs.block_size - 1) / config_fs.block_size - 1);
+			if ((count_pi_need) > list_length) {
+				diferencia = count_pi_need - list_length;
+				for (int i = 0; i < diferencia; i++) {
+					pi_position = next_bit_position();
+					int* pi_pos_ptr = s_malloc(sizeof(int));
+					*pi_pos_ptr = pi_position;
+					list_add(pi_list, pi_pos_ptr);
+				}
+				set_bf_ip(PUNTERO_INDIRECTO, pi_list);
+			} else if ((count_pi_need) < list_length) {
+				diferencia = list_length - count_pi_need;
+				for (int i = 0; i < diferencia; i++) {
+					int index = (list_length - i - 1);
+					int ip_eliminar = *((int*)list_get(pi_list, index));
+					bitarray_clean_bit(config_fs.bitmap, ip_eliminar);
+					for (int i = (ip_eliminar)*config_fs.block_size; i < ((ip_eliminar)*config_fs.block_size) + config_fs.block_size; i++) {
+						config_fs.block_file[i] = '\0';
+					}
+					free(list_get(pi_list, index));
+					list_remove(pi_list, index);
+				}
+				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
+					config_fs.block_file[i] = '\0';
+				}
+				set_bf_ip(PUNTERO_INDIRECTO, pi_list);
+			}
 		}
-		for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
-			config_fs.block_file[i] = '\0';
-		}
-		set_bf_ip(PUNTERO_INDIRECTO, pi_list);
 	}
+	config_save(fcb_data);
 }
 
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list) {
@@ -240,7 +305,7 @@ void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list) {
 t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 	t_list* pi_list = list_create();
 	for (int i = (PUNTERO_INDIRECTO * config_fs.block_size); i < ((PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size); i += 4) {
-		uint32_t* number = malloc(sizeof(uint32_t));
+		uint32_t* number = s_malloc(sizeof(uint32_t));
 		memcpy(number, config_fs.block_file + i, sizeof(uint32_t));
 		// printf("Valor en la posición %d: %u\n", i, *number);
 		if (*number != 0) {
@@ -252,7 +317,7 @@ t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 void clear_bit_position(t_config* fcb_data) {
 	int PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
 	for (int i = PUNTERO_DIRECTO * config_fs.block_size; i < (PUNTERO_DIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
-		config_fs.block_file[i] = 0;
+		config_fs.block_file[i] = '\0';
 	}
 	int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
 	t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
@@ -260,11 +325,11 @@ void clear_bit_position(t_config* fcb_data) {
 		int pi_pos = *((int*)list_get(pi_list, i));
 		bitarray_clean_bit(config_fs.bitmap, pi_pos);
 		for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
-			config_fs.block_file[j] = 0;
+			config_fs.block_file[j] = '\0';
 		}
 	}
 	for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
-		config_fs.block_file[i] = 0;
+		config_fs.block_file[i] = '\0';
 	}
 	list_destroy(pi_list);
 	bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);  // liberamos el array de strings
@@ -287,10 +352,10 @@ void open_file(t_instruction* instruction) {
 	FILE* fcb = fopen(full_file_path, "r");
 	if (fcb == NULL) {
 		fopen(full_file_path, "w");
-		log_warning(config_fs.logger, "NO existia el archivo");
+		log_warning(config_fs.logger, "No existía el archivo");
 		create_file(full_file_path, file_name);
 	} else {
-		log_warning(config_fs.logger, "Existia el archivo");
+		log_warning(config_fs.logger, "Existía el archivo");
 		fclose(fcb);
 	}
 	free(full_file_path);
@@ -302,21 +367,12 @@ void create_file(char* full_file_path, char* file_name) {
 		log_warning(config_fs.logger, "Error creando FCB");	 // liberamos full_file_path antes de abortar
 		abort();
 	}
-	int pd_position = next_bit_position();
-	char* pd_position_string = malloc(12 * sizeof(char));
-	int pi_position = next_bit_position();
-	char* pi_position_string = malloc(12 * sizeof(char));
-	sprintf(pd_position_string, "%d", pd_position);
-	sprintf(pi_position_string, "%d", pi_position);
-	config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
 	config_set_value(fcb_data, "NOMBRE_ARCHIVO", file_name);
 	config_set_value(fcb_data, "TAMANIO_ARCHIVO", "");
-	config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
-	config_set_value(fcb_data, "PUNTERO_INDIRECTO", pi_position_string);
+	config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
+	config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
 	log_warning(config_fs.logger, "Creo FCB");
 
-	free(pd_position_string);
-	free(pi_position_string);
 	config_save(fcb_data);
 	config_destroy(fcb_data);  // liberamos full_file_path
 }
@@ -344,8 +400,8 @@ void close_file(t_instruction* instruction) {
 
 int next_bit_position() {
 	for (int i = 0; i < config_fs.block_count; i++) {
-		bool car = bitarray_test_bit(config_fs.bitmap, i);
-		printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
+		//bool car = bitarray_test_bit(config_fs.bitmap, i);
+		//printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
 		if (!bitarray_test_bit(config_fs.bitmap, i)) {
 			bitarray_set_bit(config_fs.bitmap, i);
 			return i;
