@@ -155,7 +155,7 @@ t_list* deserialize_segment_table(t_package* package) {
 
 t_segment* deserialize_segment(t_package* nested) {
 	t_instruction* instruction = deserialize_instruction(nested);
-	t_segment* segment = s_malloc(sizeof(segment));
+	t_segment* segment = s_malloc(sizeof(t_segment));
 	int base_value = atoi(list_get(instruction->args, 0));
 	segment->base = malloc(sizeof(int));
 	memcpy(segment->base, &base_value, sizeof(int));
@@ -196,6 +196,7 @@ t_package* serialize_segment(t_segment* segment, void* heap_pointer) {
 	list_add(instruction->args, string_itoa(segment->offset));
 	list_add(instruction->args, string_itoa(segment->s_id));
 	t_package* package = serialize_instruction(instruction);
+	instruction_destroy(instruction);
 	return package;
 }
 

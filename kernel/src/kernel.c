@@ -24,6 +24,7 @@ int main(int argc, char** argv) {
 	for (int i = 0; resources_helper[i] != NULL; i++) {
 		log_info(gck->logger, "Cargando recurso %s con %s instancias", resources_helper[i], inst_resources_helper[i]);
 		t_resource* resource = s_malloc(sizeof(t_resource));
+		resource->assigned_to = NULL;
 		resource->enqueued_processes = queue_create();
 		resource->available_instances = atoi(inst_resources_helper[i]);
 		dictionary_put(gck->resources, resources_helper[i], resource);
@@ -125,7 +126,7 @@ int main(int argc, char** argv) {
 				}
 				t_queue* waiting_pcbs = dictionary_get(hfi->global_files, filename);
 				if (queue_is_empty(waiting_pcbs)) {
-					list_destroy(dictionary_get(hfi->global_files, filename));
+					queue_destroy(waiting_pcbs);
 					dictionary_remove(hfi->global_files, filename);
 				} else
 					((t_pcb*)queue_pop(waiting_pcbs))->state = READY;
@@ -307,5 +308,7 @@ int main(int argc, char** argv) {
 	}
 
 	log_warning(gck->logger, "Finalizando el kernel. Se desconectó un módulo esencial.");
+	log_destroy(gck->logger);
+	config_destroy(config);
 	return 0;
 }

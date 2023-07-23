@@ -16,6 +16,7 @@ t_package* process_instructions() {
 		line[strlen(line) - 1] = '\0';
 		if (strlen(line) > 0) package_nest(package, parse_instruction(line));
 	}
+	free(line);
 	fclose(instructions);
 	return package;
 }
@@ -25,6 +26,8 @@ t_package* parse_instruction(char* instruction) {
 	// Creamos el package con el operation code correspondiente
 	t_package* package = package_new(parse_op_code(parts[0]));
 	for (int i = 1; parts[i] != NULL; i++) package_write(package, parts[i]);
+	string_iterate_lines(parts, (void*) free);
+	free(parts);
 	return package;
 }
 

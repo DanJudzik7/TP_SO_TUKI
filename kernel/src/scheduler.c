@@ -20,7 +20,7 @@ void long_term_schedule(t_global_config_kernel* gck) {
 		for (int i = 0; i < list_size(resources_names); i++) {
 			char* resource_name = list_get(resources_names, i);
 			t_resource* resource = dictionary_get(gck->resources, resource_name);
-			if (resource->assigned_to == pcb) resource_signal(resource, resource_name, gck->logger);
+			if (resource->assigned_to != NULL && resource->assigned_to == pcb) resource_signal(resource, resource_name, gck->logger);
 			t_list* resource_list = resource->enqueued_processes->elements;
 			for (int j = 0; j < list_size(resource_list); j++) {
 				if (list_get(resource_list, j) == pcb) list_remove(resource_list, j);

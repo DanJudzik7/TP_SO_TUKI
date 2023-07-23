@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
 				}
 				t_physical_address* pa = decode(instruction, context);
 				execute(instruction, context, pa);
+				free(pa);
 				context->program_counter++;
 			}
 			//Detengo el cronometro de ráfaga

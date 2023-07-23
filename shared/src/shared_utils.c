@@ -122,7 +122,7 @@ void execution_context_destroy(t_execution_context* ec) {
 	ec->cpu_register = NULL;
 	list_destroy_and_destroy_elements(ec->segments_table, (void*)free);
 	ec->segments_table = NULL;
-	if (ec->kernel_request) instruction_destroy(ec->kernel_request);
+	if (ec->kernel_request != NULL) instruction_destroy(ec->kernel_request);
 	free(ec);
 	ec = NULL;
 }

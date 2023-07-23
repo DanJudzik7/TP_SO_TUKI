@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 		log_info(logger, "< %s", deserialize_message(init_package));
 	else if (init_package->type == MESSAGE_FLAW)
 		log_warning(logger, "< %s", deserialize_message(init_package));
-	else{
+	else {
 		log_warning(logger, "Paquete inválido recibido");
 		return 1;
 	}
@@ -40,16 +40,22 @@ int main(int argc, char** argv) {
 			log_warning(logger, "Ejecución finalizada. Saliendo...");
 			package_destroy(package);
 			break;
-		} else if (package->type == MESSAGE_OK)
-			log_info(logger, "< %s", deserialize_message(package));
-		else if (package->type == MESSAGE_FLAW)
-			log_warning(logger, "< %s", deserialize_message(package));
-		else {
+		} else if (package->type == MESSAGE_OK) {
+			char* message = deserialize_message(package);
+			log_info(logger, "< %s", message);
+			free(message);
+		} else if (package->type == MESSAGE_FLAW) {
+			char* message = deserialize_message(package);
+			log_warning(logger, "< %s", message);
+			free(message);
+		} else {
 			log_warning(logger, "Paquete inválido recibido");
 			package_destroy(package);
 			break;
 		}
 	}
 	log_warning(logger, "El kernel se ha desconectado de esta consola");
+	log_destroy(logger);
+	config_destroy(config);
 	return 0;
 }
