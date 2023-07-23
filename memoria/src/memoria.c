@@ -23,6 +23,7 @@ int main() {
 	// Creo los hilos
 	listen_modules(server_memory, memory_structure);
 
+	log_warning(config_memory.logger, "Finalizando la Memoria");
 	log_destroy(config_memory.logger);
 	config_destroy(config_memory.config);
 	dictionary_clean_and_destroy_elements(memory_structure->table_pid_segments, free);

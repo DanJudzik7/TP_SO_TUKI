@@ -26,45 +26,50 @@ int handle_kernel(int* socket_kernel) {
 
 bool process_instruction(t_instruction* instruction) {
 	switch (instruction->op_code) {
-		case F_READ: {
+		case F_READ: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) -> s_id, offset, buffer, pid
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
-			char* miCharPuntero_r = iterate_block_file(instruction);
-			list_add(instruction->args, miCharPuntero_r);
-			t_instruction* mem_request = instruction_duplicate(instruction);
-			mem_request->op_code = MEM_READ_ADDRESS;
+			char* read_file = iterate_block_file(instruction);
 			if (config_fs.socket_memory != -1) {
+				t_instruction* mem_request = instruction_new(MEM_WRITE_ADDRESS);
+				list_add(mem_request->args, list_get(instruction->args, 4));
+				list_add(mem_request->args, list_get(instruction->args, 5));
+				list_add(mem_request->args, read_file);
+				list_add(mem_request->args, list_get(instruction->args, 3));
 				if (!socket_send(config_fs.socket_memory, serialize_instruction(mem_request))) {
 					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 				}
 				t_package* package = socket_receive(config_fs.socket_memory);
 				if (package->type == SEG_FAULT) {
-					log_error(config_fs.logger, "Segmentation fault al leer el archivo");
+					log_error(config_fs.logger, "Segmentation Fault al leer el archivo");
 					return false;
 				}
 				if (package->type != MESSAGE_OK) {
 					log_error(config_fs.logger, "Error desconocido al leer el archivo");
 					return false;
 				}
+				instruction_destroy(mem_request);
 			}
-			instruction_destroy(mem_request);
-			free(miCharPuntero_r);
+			free(read_file);
 			return true;
 		}
-		case F_WRITE: {
-			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
-			t_instruction* mem_request = instruction_duplicate(instruction);
-			mem_request->op_code = MEM_WRITE_ADDRESS;
+		case F_WRITE: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) -> s_id, offset, size, pid
+			printf("RECIBIMOS UNA INSTRUCCIÓN DE ESCRIBIR ARCHIVO\n");
 			if (config_fs.socket_memory != -1) {
+				t_instruction* mem_request = instruction_new(MEM_READ_ADDRESS);
+				list_add(mem_request->args, list_get(instruction->args, 4));
+				list_add(mem_request->args, list_get(instruction->args, 5));
+				list_add(mem_request->args, list_get(instruction->args, 2));
+				list_add(mem_request->args, list_get(instruction->args, 3));
 				if (!socket_send(config_fs.socket_memory, serialize_instruction(mem_request))) {
 					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 				}
 				t_package* package_receive_memory = socket_receive(config_fs.socket_memory);
-				char* str_write = deserialize_message(package_receive_memory);
-				list_add(instruction->args, str_write);
+				char* to_write = deserialize_message(package_receive_memory);
+				list_add(instruction->args, to_write);
+				instruction_destroy(mem_request);
 			}
 			char* result_write = iterate_block_file(instruction);
 			free(result_write);
-			instruction_destroy(mem_request);
 			return true;
 		}
 		case F_OPEN: {
@@ -104,8 +109,7 @@ char* iterate_block_file(t_instruction* instruction) {
 		abort();
 	}
 
-	int size_read;
-	size_read = atoi(list_get(instruction->args, 2));
+	int size_read = atoi(list_get(instruction->args, 2));
 	char* str_read;
 	if (instruction->op_code == F_READ) {
 		str_read = calloc(size_read + 1, sizeof(char));

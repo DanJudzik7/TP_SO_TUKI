@@ -69,7 +69,6 @@ void test_compact() {
 
 	t_dictionary* all_segments = deserialize_all_segments_tables(package);
 	t_list* segment_table = dictionary_get(all_segments, "0");
-	t_segment* segment = list_get(segment_table, 1);
 	graph_specific_table_pid_segments(segment_table, 0, 0);
 
 }

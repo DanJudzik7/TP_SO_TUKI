@@ -28,7 +28,6 @@ int main(int argc, char** argv) {
 		}
 		while (1) {
 			t_package* package = socket_receive(kernel_socket);
-
 			if (package != NULL && package->type != EXECUTION_CONTEXT) {
 				char* invalid_package = string_from_format("Paquete inválido recibido: %i\n", package->type);
 				socket_send(kernel_socket, serialize_message(invalid_package, true));
@@ -66,12 +65,15 @@ int main(int argc, char** argv) {
 			temporal_destroy(config_cpu.burst_time);
 			t_package* package_context = serialize_execution_context(context);
 			if (!socket_send(kernel_socket, package_context)) {
-				log_error(config_cpu.logger, "ERROR AL ENVIAR EL CONTEXT AL KERNEL");
+				log_error(config_cpu.logger, "Error al enviar el Execution Context al Kernel");
 				break;
 			}
-			log_info(config_cpu.logger, "Context enviado al Kernel");
+			log_info(config_cpu.logger, "Se desalojó y se envió el Execution Context al Kernel");
 			execution_context_destroy(context);
 		}
 		log_warning(config_cpu.logger, "Se desconectó de kernel, abriendo para nuevas conexiones");
 	}
+	log_warning(config_cpu.logger, "CPU ha finalizado su ejecución");
+	log_destroy(logger);
+	config_destroy(config);
 }

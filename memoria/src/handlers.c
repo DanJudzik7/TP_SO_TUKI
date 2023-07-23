@@ -30,9 +30,7 @@ void handle_modules(t_memory_thread* mt) {
 		t_instruction* instruction = deserialize_instruction(package);
 		pthread_mutex_lock(&memory_access);
 		switch ((t_memory_op)instruction->op_code) {
-			// Se debe respetar el orden de los argumentos, si maxi, pero no es este el orden.
-			// EL s_id es el 4 ponele y aca esta en el primero que recibo
-			case MEM_READ_ADDRESS: {
+			case MEM_READ_ADDRESS: { // s_id, offset, size, pid
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
 				int size = atoi(list_get(instruction->args, 2));
@@ -44,7 +42,7 @@ void handle_modules(t_memory_thread* mt) {
 					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
-			case MEM_WRITE_ADDRESS: {
+			case MEM_WRITE_ADDRESS: { // s_id, offset, buffer, pid
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
 				char* buffer = list_get(instruction->args, 2);

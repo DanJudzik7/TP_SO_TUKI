@@ -6,6 +6,10 @@ t_instruction* fetch(t_execution_context* ec) {
 }
 
 t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) {
+	char* args = string_new();
+	for (int i = 0; i < list_size(instruction->args); i++) string_append_with_format(&args, "%s, ", (char*)list_get(instruction->args, i));
+	log_warning(config_cpu.logger, "PID: %d - Ejecutando: %s - %s", ec->pid, read_op_code(instruction->op_code), args);
+	free(args);
 	switch (instruction->op_code) {
 		case SET:
 			usleep(config_cpu.instruction_delay);
@@ -54,8 +58,8 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			}
 			char* value = deserialize_message(package);
 			set_register(list_get(instruction->args, 0), value, ec->cpu_register);
+			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->offset, value);
 			free(value);
-			log_info(config_cpu.logger, "Execute: Lectura de memoria exitosa");
 			break;
 		}
 		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
@@ -63,7 +67,8 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			t_instruction* mem_op = instruction_new(MEM_WRITE_ADDRESS);
 			list_add(mem_op->args, string_itoa(associated_pa->segment));
 			list_add(mem_op->args, string_itoa(associated_pa->offset));
-			list_add(mem_op->args, register_pointer(list_get(instruction->args, 1), ec->cpu_register));
+			char* value = register_pointer(list_get(instruction->args, 1), ec->cpu_register);
+			list_add(mem_op->args, value);
 			list_add(mem_op->args, string_itoa(ec->pid));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
@@ -83,7 +88,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 				log_error(config_cpu.logger, "Error desconocido en memoria");
 				break;
 			}
-			log_info(config_cpu.logger, "Execute: Escritura en memoria exitosa");
+			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->offset, value);
 			break;
 		}
 		case F_READ:  // filename, logical address, bytes count
@@ -95,7 +100,6 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			ec->kernel_request = instruction_duplicate(instruction);
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->segment));
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->offset));
-			log_info(config_cpu.logger, "Execute: Ejecutando instrucción %d y desalojando", instruction->op_code);
 			break;
 		}
 		case I_O:
@@ -109,11 +113,10 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		case DELETE_SEGMENT:
 		case EXIT:
 		case YIELD:
-			log_info(config_cpu.logger, "Execute: Ejecutando instrucción %d y desalojando", instruction->op_code);
 			ec->kernel_request = instruction_duplicate(instruction);
 			break;
 		default:
-			log_error(config_cpu.logger, "Execute: Operación inválida");
+			log_error(config_cpu.logger, "Se ha recibido una operación inválida");
 			break;
 	}
 }

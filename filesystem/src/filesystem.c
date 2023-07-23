@@ -19,4 +19,7 @@ int main(int argc, char** argv) {
 		pthread_create(&thread, NULL, (void*)handle_kernel, &kernel_socket);
 		pthread_join(thread, NULL);
 	}
+	log_warning(config_fs.logger, "Finalizando el Filesystem");
+	log_destroy(config_fs.logger);
+	config_destroy(config_fs.config);
 }
