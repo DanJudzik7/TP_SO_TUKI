@@ -28,7 +28,6 @@ bool process_instruction(t_instruction* instruction) {
 	switch (instruction->op_code) {
 		case F_READ: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
-
 			char* miCharPuntero_r = iterate_block_file(instruction);
 			list_add(instruction->args, miCharPuntero_r);
 			t_instruction* mem_request = instruction_duplicate(instruction);

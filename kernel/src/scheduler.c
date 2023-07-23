@@ -1,6 +1,7 @@
 #include "scheduler.h"
 
 void long_term_schedule(t_global_config_kernel* gck) {
+	pthread_mutex_lock(&(gck->long_term_scheduler_execution));
 	log_info(gck->logger, "Realizando Planificación a Largo Plazo");
 	// Remover PCBs terminados por handle_new_process (o sea, usuario, desconexión, etc)
 	for (int i = 0; i < list_size(gck->active_pcbs->elements); i++) {
@@ -19,12 +20,11 @@ void long_term_schedule(t_global_config_kernel* gck) {
 		for (int i = 0; i < list_size(resources_names); i++) {
 			char* resource_name = list_get(resources_names, i);
 			t_resource* resource = dictionary_get(gck->resources, resource_name);
-			if (resource->assigned_to == pcb) resource_signal(resource, gck->logger);
+			if (resource->assigned_to == pcb) resource_signal(resource, resource_name, gck->logger);
 			t_list* resource_list = resource->enqueued_processes->elements;
 			for (int j = 0; j < list_size(resource_list); j++) {
 				if (list_get(resource_list, j) == pcb) list_remove(resource_list, j);
 			}
-			
 		}
 
 		// Destruyo las estructuras
@@ -48,6 +48,7 @@ void long_term_schedule(t_global_config_kernel* gck) {
 	if (queue_size(gck->active_pcbs) < gck->max_multiprogramming && !queue_is_empty(gck->new_pcbs)) {
 		gck->max_multiprogramming -= 1;
 		t_pcb* pcb = queue_pop(gck->new_pcbs);
+		log_warning(gck->logger, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", pcb->pid);
 		pcb->state = READY;
 
 		// Solicito a Memoria las estructuras necesarias para inicializar
@@ -67,13 +68,15 @@ void long_term_schedule(t_global_config_kernel* gck) {
 		log_info(gck->logger, "El proceso %d ahora está en Ready", pcb->pid);
 	} else
 		log_info(gck->logger, "El planificador de largo plazo no tiene ningún PCB posible para ejecutar");
+	pthread_mutex_unlock(&(gck->long_term_scheduler_execution));
 }
 
 t_pcb* short_term_scheduler(t_global_config_kernel* gck) {
 	if (gck->prioritized_pcb != NULL) {
-		t_pcb* priority_helper = gck->prioritized_pcb;
+		t_pcb* prioritized = gck->prioritized_pcb;
 		gck->prioritized_pcb = NULL;
-		return priority_helper;
+		list_remove_element(gck->active_pcbs->elements, prioritized);
+		return prioritized;
 	} else {
 		// Devuelve el próximo PCB a ejecutar en base al algoritmo y los PCBs activos.
 		return gck->algorithm_is_hrrn ? pick_with_hrrn(gck->active_pcbs) : pick_with_fifo(gck->active_pcbs);

@@ -49,7 +49,8 @@ int main(int argc, char** argv) {
 			sleep(1);
 			continue;
 		}
-		log_warning(gck->logger, "Iniciando nuevo ciclo de ejecución del proceso %d", pcb->pid);
+		log_debug(gck->logger, "Iniciando nuevo ciclo de ejecución %d del proceso %d", pcb->execution_context->program_counter, pcb->pid);
+		log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: EXEC", pcb->pid);
 		pcb->state = EXEC;
 
 		// Mando el PCB al CPU
@@ -71,20 +72,23 @@ int main(int argc, char** argv) {
 		t_instruction* kernel_request = pcb->execution_context->kernel_request;
 		switch (kernel_request ? kernel_request->op_code : -1) {
 			case I_O: {	 // time
-				pcb->state = BLOCK;
 				t_helper_pcb_io* hpi = s_malloc(sizeof(t_helper_pcb_io));
 				hpi->pcb = pcb;
 				hpi->logger = gck->logger;
 				hpi->time = atoi(list_get(kernel_request->args, 0));
+				pcb->state = BLOCK;
+				log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+				log_warning(gck->logger, "PID: %d - Bloqueado por: IO", pcb->pid);
+				log_warning(gck->logger, "PID: %d - Ejecuta IO: %d", pcb->pid, hpi->time);
 				pthread_t thread_io;
 				pthread_create(&thread_io, NULL, (void*)handle_pcb_io, hpi);
-				log_warning(gck->logger, "Proceso %d bloqueado en I/O por %d segundos", pcb->pid, hpi->time);
 				break;
 			}
 			case F_OPEN: {	// filename
 				char* filename = list_get(kernel_request->args, 0);
 				if (dictionary_has_key(hfi->global_files, filename)) {
-					log_error(gck->logger, "Error: El archivo %s ya está abierto", filename);
+					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+					log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, filename);
 					pcb->state = BLOCK;
 					list_add(dictionary_get(hfi->global_files, filename), pcb);
 					break;
@@ -129,11 +133,12 @@ int main(int argc, char** argv) {
 			case F_SEEK: {	// filename, position
 				char* filename = list_get(kernel_request->args, 0);
 				char* position = list_get(kernel_request->args, 1);
-				if (dictionary_has_key(pcb->local_files, filename)) {
-					dictionary_put(pcb->local_files, filename, position);
-					log_info(gck->logger, "Se movió el puntero de %s a %s", filename, position);
-				} else
+				if (!dictionary_has_key(pcb->local_files, filename)) {
 					log_error(gck->logger, "No se encontró el archivo %s", filename);
+					break;
+				}
+				dictionary_put(pcb->local_files, filename, position);
+				log_info(gck->logger, "Se movió el puntero de %s a %s", filename, position);
 				break;
 			}
 			case F_TRUNCATE: {	// filename, bytes count
@@ -142,7 +147,11 @@ int main(int argc, char** argv) {
 					break;
 				}
 				t_package* package = socket_receive(hfi->socket_filesystem);
-				log_error(gck->logger, "El truncate del archivo fue %s", package->type == MESSAGE_OK ? "exitosa" : "fallida");
+				if (package->type != MESSAGE_OK) {
+					log_error(gck->logger, "Error al truncar archivo");
+					break;
+				}
+				log_info(gck->logger, "Se truncó el archivo");
 				break;
 			}
 			case F_READ:  // filename, logical address, bytes count, segment, offset -> NAME(0) posicion(1) tamaño_leer(2) PID(3) S_ID(4) OFFSET(5)
@@ -158,6 +167,8 @@ int main(int argc, char** argv) {
 				}
 				queue_push(hfi->file_instructions, fs_op);
 				pcb->state = BLOCK;
+				log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+				log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, filename);
 				break;
 			}
 			case CREATE_SEGMENT: {
@@ -195,8 +206,9 @@ int main(int argc, char** argv) {
 				}
 				if (package->type == COMPACT_REQUEST) {
 					log_error(gck->logger, "Error: Solicitud de compactación consecutiva");
-				} else if (package->type == NO_SPACE_LEFT) {
-					log_error(gck->logger, "Error del kernel: Out of Memory");
+				} else if (package->type == OUT_OF_MEMORY) {
+					log_warning(gck->logger, "Finaliza el proceso %d - Motivo: OUT_OF_MEMORY", pcb->pid);
+					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: EXIT", pcb->pid);
 					pcb->state = EXIT_PROCESS;
 				} else if (package->type == MESSAGE_OK) {
 					char* s_base = deserialize_message(package);
@@ -218,56 +230,71 @@ int main(int argc, char** argv) {
 				break;
 			}
 			case YIELD: {
-				if(gck->algorithm_is_hrrn){
-					//Si nunca se ejecuto antes, va a tener un ultimo tiempo de rafaga en 0
-					if( pcb->last_burst_time == 0)
-						// aprox nueva rafaga =  α . estimador inicial + (1 - α) . ráfagaAnterior
-						pcb->aprox_burst_time = (gck->alfa * gck->default_burst_time)+ ( (1 - gck->alfa ) * pcb->execution_context->last_burst_time);
+				if (gck->algorithm_is_hrrn) {
+					// Si nunca se ejecuto antes, va a tener un ultimo tiempo de ráfaga en 0
+					if (pcb->last_burst_time == 0)
+						// aprox nueva ráfaga =  α . estimador inicial + (1 - α) . ráfagaAnterior
+						pcb->aprox_burst_time = (gck->alfa * gck->default_burst_time) + ((1 - gck->alfa) * pcb->execution_context->last_burst_time);
 					else
-						// aprox nueva rafaga =  α . ultima aproximacion de rafaga + (1 - α) . ráfagaAnterior
-						pcb->aprox_burst_time = (gck->alfa + pcb->aprox_burst_time)	 + ( (1 - gck->alfa ) * pcb->execution_context->last_burst_time);
+						// aprox nueva ráfaga =  α . ultima aproximación de ráfaga + (1 - α) . ráfagaAnterior
+						pcb->aprox_burst_time = (gck->alfa + pcb->aprox_burst_time) + ((1 - gck->alfa) * pcb->execution_context->last_burst_time);
 				}
-				break;	
+				break;
 			}
 			case WAIT: {
-				t_resource* resource = resource_get(pcb, gck, list_get(kernel_request->args, 0));
+				char* resource_name = list_get(kernel_request->args, 0);
+				t_resource* resource = resource_get(pcb, gck, resource_name);
 				if (resource == NULL) break;
 				if (resource->available_instances >= 0) {
 					resource->assigned_to = pcb;
 					resource->available_instances--;
-					log_info(gck->logger, "Las instancias del recurso se redujeron a %i", resource->available_instances);
+					log_warning(gck->logger, "PID: %d - Wait: %s - Instancias: %d", pcb->pid, resource_name, resource->available_instances);
 					gck->prioritized_pcb = pcb;
 				} else {
 					pcb->state = BLOCK;
+					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+					log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, resource_name);
+					log_info(gck->logger, "El proceso %d se bloqueó ya que el recurso no está disponible aún", pcb->pid);
 					queue_push(resource->enqueued_processes, pcb);
 				}
 				break;
 			}
 			case SIGNAL: {
-				t_resource* resource = resource_get(pcb, gck, list_get(kernel_request->args, 0));
+				char* resource_name = list_get(kernel_request->args, 0);
+				t_resource* resource = resource_get(pcb, gck, resource_name);
 				if (resource == NULL) break;
 				if (resource->assigned_to != pcb) {
-					log_error(gck->logger, "El proceso %d intentó usar un recurso que no tiene asignado", pcb->pid);
+					log_error(gck->logger, "El proceso %d intentó liberar un recurso que no tiene asignado", pcb->pid);
+					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: EXIT", pcb->pid);
 					pcb->state = EXIT_PROCESS;
 					break;
 				}
 				gck->prioritized_pcb = pcb;
-				resource_signal(resource, gck->logger);
+				resource_signal(resource, resource_name, gck->logger);
 				break;
 			}
 			case EXIT: {
+				if (list_size(kernel_request->args) > 0)
+					log_warning(gck->logger, "Finaliza el proceso %d - Motivo: SEG_FAULT", pcb->pid);
+				else
+					log_warning(gck->logger, "Finaliza el proceso %d - Motivo: SUCCESS", pcb->pid);
 				pcb->state = EXIT_PROCESS;
 				break;
 			}
 		}
-		log_warning(gck->logger, "Se ha completado el ciclo de instrucción de %d", pcb->pid);
-		if (pcb->state == EXEC) pcb->state = READY;
-		if (pcb->state == EXIT_PROCESS) long_term_schedule(gck);
-		queue_push(gck->active_pcbs, pcb);
 		if (kernel_request != NULL) {
 			instruction_destroy(kernel_request);
 			pcb->execution_context->kernel_request = NULL;
 		}
+		queue_push(gck->active_pcbs, pcb);
+		if (pcb->state == EXEC) {
+			pcb->state = READY;
+			log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: READY", pcb->pid);
+		}
+		if (pcb->state == EXIT_PROCESS) {
+			log_debug(gck->logger, "Al finalizar %d, ejecutó hasta la instrucción %d", pcb->pid, pcb->execution_context->program_counter - 1);
+			long_term_schedule(gck);
+		} else log_debug(gck->logger, "Se ha completado hasta la instrucción %d de %d", pcb->execution_context->program_counter - 1, pcb->pid);
 	}
 
 	log_warning(gck->logger, "Finalizando el kernel. Se desconectó un módulo esencial.");

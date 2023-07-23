@@ -63,7 +63,7 @@ typedef enum t_memory_op {
 typedef enum t_memory_state {
 	SEG_FAULT,		  // 0
 	OK_INSTRUCTION,	  // 1
-	NO_SPACE_LEFT,	  // 2
+	OUT_OF_MEMORY,	  // 2
 	COMPACT_REQUEST,  // 3
 	SEGMENT,		  // 4
 } t_memory_state;

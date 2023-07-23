@@ -23,8 +23,8 @@ t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) 
 		case F_READ:	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
 		case F_WRITE: {	 // Nombre Archivo, Dirección Lógica, Cantidad de Bytes
 			char* logical_address = list_get(instruction->args, 1);
-			int* bytes_count = list_get(instruction->args, 2);
-			return mmu(atoi(logical_address), *bytes_count, ec);
+			char* bytes_count = list_get(instruction->args, 2);
+			return mmu(atoi(logical_address), atoi(bytes_count), ec);
 		}
 	}
 	return NULL;
@@ -77,6 +77,8 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			}
 			if (package->type == SEG_FAULT) {
 				log_error(config_cpu.logger, "Error en memoria: Segmentation Fault");
+				ec->kernel_request = instruction_new(EXIT);
+				list_add(ec->kernel_request->args, string_itoa(9));
 				break;
 			} else if (package->type != OK_INSTRUCTION) {
 				log_error(config_cpu.logger, "Error desconocido en memoria");
@@ -87,11 +89,15 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		}
 		case F_READ:  // filename, logical address, bytes count
 		case F_WRITE: {
-			if (associated_pa == NULL) break;
+			if (associated_pa == NULL) {
+				log_error(config_cpu.logger, "Error: Dirección lógica inválida");
+				break;
+			}
 			ec->kernel_request = instruction_duplicate(instruction);
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->segment));
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->offset));
 			log_info(config_cpu.logger, "Execute: Ejecutando instrucción %d y desalojando", instruction->op_code);
+			break;
 		}
 		case I_O:
 		case F_OPEN:

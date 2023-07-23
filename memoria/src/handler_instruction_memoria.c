@@ -40,7 +40,7 @@ int add_segment(t_memory_structure* memory_structure, int process_id, int size, 
 		if (segment != NULL) {
 			int dir_base = transform_base_to_decimal(segment->base, memory_structure->segment_zero->base);
 			config_memory.remaining_memory -= size;
-			log_info(config_memory.logger, "|PID: %i | Crear Segmento: %i | Base: %i | Tamaño: %i |", process_id, segment->s_id, dir_base, size);
+			log_info(config_memory.logger, "| PID: %i | Crear Segmento: %i | Base: %i | Tamaño: %i |", process_id, segment->s_id, dir_base, size);
 			return dir_base;  // Segmento creado
 		}
 		// Si el segmento es nulo pero tengo espacio, debo compactar
@@ -84,7 +84,7 @@ void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_d
 		}
 	}
 	int dir_base = transform_base_to_decimal(segment_to_delete->base, memory_structure->segment_zero->base);
-	log_info(config_memory.logger, "|PID: %i | Eliminar Segmento: %i | Base: %i  | Tamaño: %i |", pid, s_id_to_delete, dir_base, segment_to_delete->offset);
+	log_info(config_memory.logger, "| PID: %i | Eliminar Segmento: %i | Base: %i  | Tamaño: %i |", pid, s_id_to_delete, dir_base, segment_to_delete->offset);
 
 	// Caso de que tenga huecos libres aledaños, los deberá consolidar actualizando sus estructuras administrativas.
 	compact_hole_list(memory_structure);
@@ -98,7 +98,7 @@ void compact_hole_list(t_memory_structure* memory_structure) {
 				t_segment* segment_current = list_get(memory_structure->hole_list, i);
 				// agarro su siguiente segmento para comparar
 				t_segment* segment_next = list_get(memory_structure->hole_list, i + 1);
-				// Si el sig segmento comienza dps del anterior los compacto y elimino el sigiente
+				// Si el sig segmento comienza dps del anterior los compacto y elimino el siguiente
 				if (segment_current->base + segment_current->offset == segment_next->base) {
 					segment_current->offset += segment_next->offset;
 					list_remove(memory_structure->hole_list, i + 1);
@@ -128,9 +128,9 @@ void compact_memory(t_memory_structure* memory_structure) {
 	if (size_of_hole > 1) {
 		// Ordeno la lista de hole para tener siempre a mano el mas cercano al heap
 		list_sort(memory_structure->hole_list, more_close_to_heap);
-		// Recorro la memoria ram auxiliar donde estan mis procesos actuales
+		// Recorro la memoria ram auxiliar donde están mis procesos actuales
 		for (int i = 1; i < list_size(memory_structure->ram); i++) {
-			// Agarro la posicion de memoria en la ram
+			// Agarro la posición de memoria en la ram
 			t_segment* ram_segment = list_get(memory_structure->ram, i);
 			// agarro el primer hole que siempre va a ser el mas cercano al heap
 			t_segment* hole_segment = list_get(memory_structure->hole_list, 0);
@@ -154,7 +154,7 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
 	t_segment* segment = get_segment_by_id(s_id, structures, pid);
 	if (segment != NULL) {
 		if (segment->base + offset + size > segment->base + segment->offset) {
-			log_error(config_memory.logger, "Segmentation fault, no se puede leer mas alla del segment");
+			log_error(config_memory.logger, "Segmentation fault, no se puede leer mas allá del segment");
 			return NULL;
 		} else {
 			memcpy(buffer, segment->base + offset, sizeof(size));
@@ -162,7 +162,7 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
 			return buffer;
 		}
 	} else {
-		log_error(config_memory.logger, "No se encontro el segmento solicitado");
+		log_error(config_memory.logger, "No se encontró el segmento solicitado");
 		return NULL;
 	}
 }
@@ -171,14 +171,14 @@ bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structu
 	t_segment* segment = get_segment_by_id(s_id, structures, pid);
 	if (segment != NULL) {
 		if (segment->base + offset + size > segment->base + segment->offset) {
-			log_error(config_memory.logger, "Segmentation fault, no se puede escribir mas alla del segment");
+			log_error(config_memory.logger, "Segmentation fault, no se puede escribir mas allá del segment");
 			return false;
 		} else {
 			memcpy(segment->base + offset, buffer, strlen(buffer) + 1);
 			return true;
 		}
 	} else {
-		log_error(config_memory.logger, "No se encontro el segmento solicitado");
+		log_error(config_memory.logger, "No se encontró el segmento solicitado");
 		return false;
 	}
 }

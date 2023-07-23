@@ -19,7 +19,7 @@ void listen_consoles(t_global_config_kernel* gck) {
 
 void handle_new_process(helper_create_pcb* hcp) {
 	t_pcb* pcb = pcb_new(hcp->connection, hcp->gck->default_burst_time);
-	log_info(hcp->gck->logger, "El proceso %d se creó en NEW", pcb->pid);
+	log_info(hcp->gck->logger, "Se crea el proceso %d en NEW", pcb->pid);
 	char* welcome_message = string_from_format("Bienvenido al kernel. Tu PID es: %i", pcb->pid);
 	if (!socket_send(pcb->pid, serialize_message(welcome_message, true))) {
 		pcb_destroy(pcb);
@@ -72,7 +72,11 @@ void handle_fs(t_helper_file_instruction* hfi) {
 			continue;
 		}
 		t_package* package = socket_receive(hfi->socket_filesystem);
-		printf("La %s del archivo fue %s", fs_op->op_code == F_READ ? "lectura" : "escritura", package->type == MESSAGE_OK ? "exitosa" : "fallida");
+		if (package == NULL || package->type != MESSAGE_OK) {
+			log_error(hfi->logger, "Error al %s del archivo", fs_op->op_code == F_READ ? "leer" : "escribir");
+			continue;
+		}
+		log_info(hfi->logger, "La %s del archivo fue exitosa", fs_op->op_code == F_READ ? "lectura" : "escritura");
 		package_destroy(package);
 		instruction_destroy(fs_op);
 	}

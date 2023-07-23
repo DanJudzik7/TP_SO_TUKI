@@ -1,6 +1,8 @@
 #ifndef KERNEL_UTILS_H
 #define KERNEL_UTILS_H
 
+#include <pthread.h>
+
 #include "shared_serializer.h"
 #include "shared_socket.h"
 
@@ -27,6 +29,7 @@ typedef struct t_global_config_kernel {
 	int connection_cpu;
 	t_pcb* prioritized_pcb;
 	int socket_memory;
+	pthread_mutex_t long_term_scheduler_execution;
 } t_global_config_kernel;
 
 typedef struct t_resource {
@@ -45,10 +48,11 @@ t_global_config_kernel* new_global_config_kernel(t_config* config);
 
 void handle_pcb_io(t_helper_pcb_io* hpi);
 
+// Obtiene un recurso, y si no existe finaliza el proceso
 t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name);
 
 // Libera un recursos y lo asigna al siguiente proceso en queue
-void resource_signal(t_resource* resource, t_log* logger);
+void resource_signal(t_resource* resource, char* resource_name, t_log* logger);
 
 // Inicializa un PCB con los datos recibidos
 t_pcb* pcb_new(int pid, int burst_time);

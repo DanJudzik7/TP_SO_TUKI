@@ -149,7 +149,7 @@ void graph_specific_table_pid_segments(t_list* segment_table, int process_id, vo
 	printf("--------------------------------------\n");
 	for (int i = 0; i < list_size(segment_table); i++) {
 		t_segment* seg = list_get(segment_table, i);
-		printf("|PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+		printf("| PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base), seg->offset);
 	}
 	printf("--------------------------------------\n");
 }

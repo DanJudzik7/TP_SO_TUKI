@@ -58,9 +58,9 @@ void test_full_file_op() {
 	list_add(ins_rw->args, strdup("prueba"));
 	list_add(ins_rw->args, strdup("25")); // Posición Read/Write
 	list_add(ins_rw->args, strdup("32")); // Tamaño Read/Write
-	list_add(ins_rw->args, strdup("64"));
-	list_add(ins_rw->args, strdup("32"));
-	list_add(ins_rw->args, strdup("32"));
+	list_add(ins_rw->args, strdup("64")); // PID
+	list_add(ins_rw->args, strdup("32")); // Segment ID
+	list_add(ins_rw->args, strdup("32")); // Offset
 	list_add(ins_rw->args, strdup("SonyPlaystation5SonyPlaystation4"));
 	process_instruction(ins_rw);
 

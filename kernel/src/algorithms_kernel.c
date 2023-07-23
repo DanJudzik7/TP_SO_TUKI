@@ -5,20 +5,21 @@ t_pcb* pick_with_fifo(t_queue* active_pcbs) {
 	if (queue_is_empty(active_pcbs)) return NULL;
 	// Obtiene el primer elemento READY, lo borra de la queue y lo devuelve
 	// Trabaja a la queue como una list para esto
-	else
-		return list_remove_by_condition(active_pcbs->elements, (void*)pcb_is_available);
+	return list_remove_by_condition(active_pcbs->elements, (void*)pcb_is_ready);
+
 }
 
-bool pcb_is_available(t_pcb* pcb) {
-	return pcb->state == READY && !queue_is_empty(pcb->execution_context->instructions);
+bool pcb_is_ready(t_pcb* pcb) {
+	return pcb->state == READY;
 }
 
 // Esto se tiene que adaptar para no devolver nada con BLOCK
 t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
-	if (queue_is_empty(active_pcbs))
-		return NULL;
-	else if (queue_size(active_pcbs) == 1)
-		return list_remove_by_condition(active_pcbs->elements, (void*)pcb_is_available);
+	if (queue_is_empty(active_pcbs)) return NULL;
+	if (queue_size(active_pcbs) == 1) {
+		t_pcb* pcb = queue_peek(active_pcbs);
+		return pcb->state == READY ? queue_pop(active_pcbs) : NULL;
+	}
 	
 	// Se obtiene la hora actual del sistema
 	time_t current_time = time(NULL);
@@ -49,7 +50,7 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 			highest_response_ratio = response_ratio;
 
 			// Si el PCB siguiente no es nulo, se agrega a la cola temporal
-			if (next_pcb != NULL && pcb_is_available(next_pcb)) {  // Esta línea la modifiqué para que se asegure de que el PCB esté listo
+			if (next_pcb != NULL && pcb_is_ready(next_pcb)) {  // Esta línea la modifiqué para que se asegure de que el PCB esté listo
 				queue_push(queue_temporal, next_pcb);
 			}
 

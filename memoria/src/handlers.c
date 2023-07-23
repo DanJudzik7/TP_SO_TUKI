@@ -86,7 +86,7 @@ void handle_modules(t_memory_thread* mt) {
 						req_package = package_new(COMPACT_REQUEST);
 						break;
 					case 2: // Devuelvo no hay espacio suficiente
-						req_package = package_new(NO_SPACE_LEFT);
+						req_package = package_new(OUT_OF_MEMORY);
 						break;
 					default: // Devuelvo la base del segmento creado
 						req_package = serialize_message(string_itoa(flag), false);
@@ -98,7 +98,7 @@ void handle_modules(t_memory_thread* mt) {
 			}
 			case MEM_DELETE_SEGMENT: {
 				int s_id = atoi(list_get(instruction->args, 0));
-				int pid = atoi(list_get(instruction->args, 2));
+				int pid = atoi(list_get(instruction->args, 1));
 				delete_segment(mt->mem_structure, pid, s_id);
 				if (!socket_send(mt->socket, package_new(OK_INSTRUCTION)))
 					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);

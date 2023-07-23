@@ -112,6 +112,7 @@ t_execution_context* execution_context_new(int pid) {
 	memset(ec->cpu_register, 0, sizeof(t_registers));
 	ec->segments_table = list_create();
 	ec->pid = pid;
+	ec->kernel_request = NULL;
 	return ec;
 }
 

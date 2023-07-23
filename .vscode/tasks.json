@@ -210,9 +210,9 @@
         {
             "label": "Delay",
             "type": "shell",
-            "command": "sleep 3",
+            "command": "sleep 2",
             "windows": {
-                "command": "ping 127.0.0.1 -n 3 > nul"
+                "command": "ping 127.0.0.1 -n 2 > nul"
             },
             "group": "none",
             "presentation": {
@@ -225,9 +225,9 @@
         {
             "label": "Long Delay",
             "type": "shell",
-            "command": "sleep 6",
+            "command": "sleep 4",
             "windows": {
-                "command": "ping 127.0.0.1 -n 6 > nul"
+                "command": "ping 127.0.0.1 -n 4 > nul"
             },
             "group": "none",
             "presentation": {
@@ -240,9 +240,9 @@
         {
             "label": "Longer Delay",
             "type": "shell",
-            "command": "sleep 9",
+            "command": "sleep 6",
             "windows": {
-                "command": "ping 127.0.0.1 -n 9 > nul"
+                "command": "ping 127.0.0.1 -n 6 > nul"
             },
             "group": "none",
             "presentation": {

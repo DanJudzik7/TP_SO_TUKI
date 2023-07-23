@@ -26,31 +26,36 @@ t_global_config_kernel* new_global_config_kernel(t_config* config) {
 	gck->algorithm_is_hrrn = algorithm_is_hrrn;
 	gck->prioritized_pcb = NULL;
 	gck->resources = dictionary_create();
+	pthread_mutex_init(&(gck->long_term_scheduler_execution), NULL);
 	return gck;
 }
 
 void handle_pcb_io(t_helper_pcb_io* hpi) {
 	sleep(hpi->time);
 	hpi->pcb->state = READY;
-	log_warning(hpi->logger, "El proceso %d se desbloqueó", hpi->pcb->pid);
+	log_warning(hpi->logger, "PID: %d - Estado Anterior: BLOCK - Estado Actual: READY", hpi->pcb->pid);
 	free(hpi);
 }
 
 t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name) {
 	if (!dictionary_has_key(gck->resources, name)) {
 		pcb->state = EXIT_PROCESS;
-		log_error(gck->logger, "El recurso %s no existe", name);
+		log_warning(gck->logger, "Finaliza el proceso %d - Motivo: INVALID_RESOURCE", pcb->pid);
+		log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: EXIT", pcb->pid);
+		log_debug(gck->logger, "El recurso %s no existe", name);
 		return NULL;
 	}
 	log_info(gck->logger, "Se solicitó el recurso %s", name);
 	return dictionary_get(gck->resources, name);
 }
 
-void resource_signal(t_resource* resource, t_log* logger) {
+void resource_signal(t_resource* resource, char* resource_name, t_log* logger) {
+	log_warning(logger, "PID: %d - Signal: %s - Instancias: %d", resource->assigned_to->pid, resource_name, resource->available_instances);
 	if (!queue_is_empty(resource->enqueued_processes)) {
 		resource->assigned_to = queue_pop(resource->enqueued_processes);
 		resource->assigned_to->state = READY;
-		log_info(logger, "Se desbloqueó el proceso %d", resource->assigned_to->pid);
+		log_warning(logger, "PID: %d - Wait: %s - Instancias: %d", resource->assigned_to->pid, resource_name, resource->available_instances);
+		log_debug(logger, "Se desbloqueó el proceso %d", resource->assigned_to->pid);
 	} else {
 		resource->available_instances++;
 		resource->assigned_to = NULL;
