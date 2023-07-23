@@ -12,18 +12,24 @@ typedef struct helper_create_pcb {
 	t_global_config_kernel* gck;
 } helper_create_pcb;
 
-typedef struct t_helper_file_instruction {
+typedef struct t_helper_fs_handler {
 	int socket_filesystem;
 	t_log* logger;
 	t_dictionary* global_files; // Key-value: filename - list of waiting pcb
 	t_queue* file_instructions;
-} t_helper_file_instruction;
+} t_helper_fs_handler;
+
+typedef struct t_file_instruction {
+	t_instruction* instruction;
+	int logicalAddress;
+	t_pcb* pcb;
+} t_file_instruction;
 
 // Servidor para Consolas, que genera un PCB para cada una
 void listen_consoles(t_global_config_kernel* gck);
 
 // Administrador de conexiones de lectura y escritura a Filesystem
-void handle_fs(t_helper_file_instruction* hfi);
+void handle_fs(t_helper_fs_handler* hfi);
 
 // Inicializa un proceso en kernel y sus estructuras
 void handle_new_process(helper_create_pcb* hcp);

@@ -25,16 +25,16 @@ int add_segment(t_memory_structure* memory_structure, int process_id, int size, 
 	t_segment* segment;
 
 	if (config_memory.remaining_memory > size) {
-		// Recorro la ram para asignar el segmento segun el algoritmo
-		if (strcmp(config_memory.algorithm, "BEST") == 0) {
+		// Recorro la ram para asignar el segmento según el algoritmo
+		if (strcmp(config_memory.algorithm, "BEST") == 0)
 			segment = best_fit(memory_structure, size, process_id, s_id);
-		} else if (strcmp(config_memory.algorithm, "FIRST") == 0) {
+		else if (strcmp(config_memory.algorithm, "FIRST") == 0)
 			segment = first_fit(memory_structure, size, process_id, s_id);
-		} else if (strcmp(config_memory.algorithm, "WORST") == 0) {
+		else if (strcmp(config_memory.algorithm, "WORST") == 0)
 			segment = worst_fit(memory_structure, size, process_id, s_id);
-		} else {
-			log_error(config_memory.logger, "No se reconoce el algoritmo de planificacion");
-			exit(1);
+		else {
+			log_error(config_memory.logger, "No se reconoce el algoritmo de planificación");
+			abort();
 		}
 		// Si el segmento es nulo pero tengo espacio, debo compactar
 		if (segment != NULL) {
@@ -44,13 +44,11 @@ int add_segment(t_memory_structure* memory_structure, int process_id, int size, 
 			return dir_base;  // Segmento creado
 		}
 		// Si el segmento es nulo pero tengo espacio, debo compactar
-		else {
-			return 1;  // Compactacion
-		}
+		else return -1;  // Compactación
 	} else {
 		log_error(config_memory.logger, "No hay espacio suficiente para crear el segmento");
 		// Manejo el error devolviendo a kernel no hay espacio suficiente
-		return 2;  // No hay espacio
+		return -2;  // No hay espacio
 	}
 }
 void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_delete) {

@@ -82,10 +82,10 @@ void handle_modules(t_memory_thread* mt) {
 				int flag = add_segment(mt->mem_structure, pid, size, s_id);
 				t_package* req_package;
 				switch (flag) {
-					case 1: // Devuelvo solicitud de compactación
+					case -1: // Devuelvo solicitud de compactación
 						req_package = package_new(COMPACT_REQUEST);
 						break;
-					case 2: // Devuelvo no hay espacio suficiente
+					case -2: // Devuelvo no hay espacio suficiente
 						req_package = package_new(OUT_OF_MEMORY);
 						break;
 					default: // Devuelvo la base del segmento creado

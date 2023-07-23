@@ -19,7 +19,7 @@ void remove_sg_table(t_memory_structure* structures, int pid);
 int add_segment(t_memory_structure* memory_structure, int pid, int size, int s_id);
 // Remueve un segmento especifico de un pid en especifico
 void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_delete);
-// Compacta la lista de agujeros libres en caso que esten seguidos sus espacios
+// Compacta la lista de agujeros libres en caso que estén seguidos sus espacios
 void compact_hole_list(t_memory_structure* memory_structure);
 // Lee en memoria en base al segmento y el tamaño a leer de este mismo
 char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid);

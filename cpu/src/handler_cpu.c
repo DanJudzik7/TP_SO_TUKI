@@ -30,7 +30,7 @@ t_physical_address* decode(t_instruction* instruction, t_execution_context* ec) 
 	return NULL;
 }
 
-bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa) {
+void execute(t_instruction* instruction, t_execution_context* ec, t_physical_address* associated_pa) {
 	switch (instruction->op_code) {
 		case SET: {
 			set_register(list_get(instruction->args, 0), list_get(instruction->args, 1), ec->cpu_register);
@@ -112,12 +112,11 @@ bool execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 		case YIELD:
 			log_info(config_cpu.logger, "Execute: Ejecutando instrucción %d y desalojando", instruction->op_code);
 			ec->kernel_request = instruction_duplicate(instruction);
-			return true;
+			break;
 		default:
 			log_error(config_cpu.logger, "Execute: Operación inválida");
 			break;
 	}
-	return false;
 }
 
 void set_register(char* register_name, char* value, t_registers* registers) {

@@ -59,25 +59,34 @@ void handle_new_process(helper_create_pcb* hcp) {
 	long_term_schedule(hcp->gck);
 }
 
-void handle_fs(t_helper_file_instruction* hfi) {
+void handle_fs(t_helper_fs_handler* hfi) {
 	while (1) {
 		while (queue_is_empty(hfi->file_instructions)) sleep(1);
-		t_instruction* fs_op = queue_pop(hfi->file_instructions);
-		if (fs_op->op_code != F_READ && fs_op->op_code != F_WRITE) {
+		t_file_instruction* fi = queue_pop(hfi->file_instructions);
+		if (fi->instruction->op_code != F_READ && fi->instruction->op_code != F_WRITE) {
 			log_error(hfi->logger, "Operación inválida recibida");
 			continue;
 		}
-		if (!socket_send(hfi->socket_filesystem, serialize_instruction(fs_op))) {
+		if (!socket_send(hfi->socket_filesystem, serialize_instruction(fi->instruction))) {
 			log_error(hfi->logger, "Error al enviar operación a filesystem");
 			continue;
 		}
 		t_package* package = socket_receive(hfi->socket_filesystem);
 		if (package == NULL || package->type != MESSAGE_OK) {
-			log_error(hfi->logger, "Error al %s del archivo", fs_op->op_code == F_READ ? "leer" : "escribir");
+			log_error(hfi->logger, "Error al %s del archivo", fi->instruction->op_code == F_READ ? "leer" : "escribir");
 			continue;
 		}
-		log_info(hfi->logger, "La %s del archivo fue exitosa", fs_op->op_code == F_READ ? "lectura" : "escritura");
+		log_warning(hfi->logger, "PID: %d - %s Archivo: %s - Puntero: %s - Dirección Memoria: %d - Tamaño: %s",
+			fi->pcb->pid,
+			fi->instruction->op_code == F_READ ? "Leer" : "Escribir",
+			(char*)list_get(fi->instruction->args, 0),
+			(char*)list_get(fi->instruction->args, 1),
+			fi->logicalAddress,
+			(char*)list_get(fi->instruction->args, 2)
+		);
+		fi->pcb->state = READY;
+		log_warning(hfi->logger, "PID: %d - Estado Anterior: BLOCK - Estado Actual: READY", fi->pcb->pid);
 		package_destroy(package);
-		instruction_destroy(fs_op);
+		instruction_destroy(fi->instruction);
 	}
 }

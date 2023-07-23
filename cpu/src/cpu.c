@@ -42,19 +42,19 @@ int main(int argc, char** argv) {
 				break;
 			}
 			t_execution_context* context = deserialize_execution_context(package);
+			context->kernel_request = NULL;
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context, se va a ejecutar desde la instrucción %d", context->program_counter);
 			//Inicializo el cronometro del tiempo de ráfaga
 			config_cpu.burst_time = temporal_create();
-			bool flag_dislodge = false;
 			// Ejecuto mientras no se tenga que desalojar
-			while (!flag_dislodge) {
+			while (context->kernel_request == NULL) {
 				t_instruction* instruction = fetch(context);
 				if (instruction == NULL) {
 					context->kernel_request = instruction_new(EXIT);
 					break;
 				}
 				t_physical_address* pa = decode(instruction, context);
-				flag_dislodge = execute(instruction, context, pa);
+				execute(instruction, context, pa);
 				context->program_counter++;
 			}
 			//Detengo el cronometro de ráfaga

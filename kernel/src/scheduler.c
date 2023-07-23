@@ -68,6 +68,13 @@ void long_term_schedule(t_global_config_kernel* gck) {
 		log_info(gck->logger, "El proceso %d ahora está en Ready", pcb->pid);
 	} else
 		log_info(gck->logger, "El planificador de largo plazo no tiene ningún PCB posible para ejecutar");
+	char* pids_list = string_new();
+	for (int i = 0; i < queue_size(gck->active_pcbs); i++) {
+		t_pcb* pcb = list_get(gck->active_pcbs->elements, i);
+		string_append_with_format(&pids_list, "%d", pcb->pid);
+		if (i < queue_size(gck->active_pcbs) - 1) string_append(&pids_list, ", ");
+	}
+	log_warning(gck->logger, "Cola Ready %s: [%s]", gck->algorithm_is_hrrn ? "HRRN" : "FIFO", pids_list);
 	pthread_mutex_unlock(&(gck->long_term_scheduler_execution));
 }
 

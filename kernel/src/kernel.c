@@ -3,7 +3,7 @@
 int main(int argc, char** argv) {
 	t_config* config = start_config("kernel");
 	t_global_config_kernel* gck = new_global_config_kernel(config);
-	t_helper_file_instruction* hfi = s_malloc(sizeof(t_helper_file_instruction));
+	t_helper_fs_handler* hfi = s_malloc(sizeof(t_helper_fs_handler));
 	log_warning(gck->logger, "Iniciando el kernel");
 	gck->alfa = config_get_int_value(config, "HRRN_ALFA");
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
 			}
 			case F_OPEN: {	// filename
 				char* filename = list_get(kernel_request->args, 0);
+				log_warning(gck->logger, "PID: %d - Abrir Archivo: %s", pcb->pid, filename);
 				if (dictionary_has_key(hfi->global_files, filename)) {
 					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
 					log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, filename);
@@ -108,6 +109,7 @@ int main(int argc, char** argv) {
 			}
 			case F_CLOSE: {	 // filename
 				char* filename = list_get(kernel_request->args, 0);
+				log_warning(gck->logger, "PID: %d - Cerrar Archivo: %s", pcb->pid, filename);
 				if (!dictionary_has_key(hfi->global_files, filename)) {
 					log_error(gck->logger, "El archivo %s no está abierto", filename);
 					break;
@@ -138,7 +140,7 @@ int main(int argc, char** argv) {
 					break;
 				}
 				dictionary_put(pcb->local_files, filename, position);
-				log_info(gck->logger, "Se movió el puntero de %s a %s", filename, position);
+				log_warning(gck->logger, "PID: %d - Actualizar puntero Archivo: %s - Puntero %s", pcb->pid, filename, position);
 				break;
 			}
 			case F_TRUNCATE: {	// filename, bytes count
@@ -151,21 +153,24 @@ int main(int argc, char** argv) {
 					log_error(gck->logger, "Error al truncar archivo");
 					break;
 				}
-				log_info(gck->logger, "Se truncó el archivo");
+				log_warning(gck->logger, "PID: %d - Truncar Archivo: %s - Tamaño: %s", pcb->pid, (char*)list_get(kernel_request->args, 0), (char*)list_get(kernel_request->args, 1));
 				break;
 			}
-			case F_READ:  // filename, logical address, bytes count, segment, offset -> NAME(0) posicion(1) tamaño_leer(2) PID(3) S_ID(4) OFFSET(5)
+			case F_READ:  // filename, logical address, bytes count, segment, offset -> NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5)
 			case F_WRITE: {
 				char* filename = list_get(kernel_request->args, 0);
-				t_instruction* fs_op = instruction_duplicate(kernel_request);
-				list_replace(fs_op->args, 1, dictionary_get(pcb->local_files, filename));
-				list_add_in_index(fs_op->args, 3, string_itoa(pcb->pid));
 				// Se asegura de que el archivo esté abierto por el proceso
 				if (!dictionary_has_key(pcb->local_files, filename)) {
 					log_error(gck->logger, "El archivo %s no está abierto por el proceso %d", filename, pcb->pid);
 					break;
 				}
-				queue_push(hfi->file_instructions, fs_op);
+				t_file_instruction* fi = s_malloc(sizeof(t_file_instruction));
+				fi->logicalAddress = atoi(list_get(kernel_request->args, 1));
+				fi->pcb = pcb;
+				fi->instruction = instruction_duplicate(kernel_request);
+				list_replace(fi->instruction->args, 1, dictionary_get(pcb->local_files, filename));
+				list_add_in_index(fi->instruction->args, 3, string_itoa(pcb->pid));
+				queue_push(hfi->file_instructions, fi);
 				pcb->state = BLOCK;
 				log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
 				log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, filename);
@@ -180,9 +185,9 @@ int main(int argc, char** argv) {
 				}
 				t_package* package = socket_receive(gck->socket_memory);
 				if (package->type == COMPACT_REQUEST) {
-					log_info(gck->logger, "Solicitud de compactación");
+					if (!queue_is_empty(hfi->file_instructions)) log_warning(gck->logger, "Esperando Fin de Operaciones de FS");
 					while (!queue_is_empty(hfi->file_instructions)) sleep(1);
-					log_info(gck->logger, "Comenzando compactación");
+					log_warning(gck->logger, "Compactación: Se solicitó compactación");
 					t_instruction* mem_op = instruction_new(MEM_COMPACT_ALL);
 					if (!socket_send(gck->socket_memory, serialize_instruction(mem_op))) {
 						log_error(gck->logger, "Error al enviar operación a memoria");
@@ -197,6 +202,8 @@ int main(int argc, char** argv) {
 						list_destroy(pcb->execution_context->segments_table);
 						pcb->execution_context->segments_table = dictionary_get(segment_tables, string_itoa(pcb->pid));
 					}
+					log_warning(gck->logger, "Se finalizó el proceso de compactación");
+					// Volver a intentar
 					if (!socket_send(gck->socket_memory, serialize_instruction(kernel_request))) {
 						log_error(gck->logger, "Error al volver a enviar instrucción a memoria");
 						break;
@@ -212,7 +219,7 @@ int main(int argc, char** argv) {
 					pcb->state = EXIT_PROCESS;
 				} else if (package->type == MESSAGE_OK) {
 					char* s_base = deserialize_message(package);
-					log_info(gck->logger, "El segmento se creó con base %s", s_base);
+					log_warning(gck->logger, "PID: %d - Crear Segmento - Id: %s - Tamaño: %s", pcb->pid, (char*)list_get(kernel_request->args, 0), (char*)list_get(kernel_request->args, 1));
 					free(s_base);
 				} else
 					log_error(gck->logger, "Error desconocido al crear segmento");
@@ -226,7 +233,8 @@ int main(int argc, char** argv) {
 					break;
 				}
 				t_package* package = socket_receive(gck->socket_memory);
-				if (package->type != OK_INSTRUCTION) log_error(gck->logger, "Error al eliminar segmento");
+				if (package == NULL || package->type != OK_INSTRUCTION) log_error(gck->logger, "Error al eliminar segmento");
+				log_warning(gck->logger, "PID: %d - Eliminar Segmento - Id Segmento: %s", pcb->pid, (char*)list_get(kernel_request->args, 0));
 				break;
 			}
 			case YIELD: {
@@ -294,7 +302,8 @@ int main(int argc, char** argv) {
 		if (pcb->state == EXIT_PROCESS) {
 			log_debug(gck->logger, "Al finalizar %d, ejecutó hasta la instrucción %d", pcb->pid, pcb->execution_context->program_counter - 1);
 			long_term_schedule(gck);
-		} else log_debug(gck->logger, "Se ha completado hasta la instrucción %d de %d", pcb->execution_context->program_counter - 1, pcb->pid);
+		} else
+			log_debug(gck->logger, "Se ha completado hasta la instrucción %d de %d", pcb->execution_context->program_counter - 1, pcb->pid);
 	}
 
 	log_warning(gck->logger, "Finalizando el kernel. Se desconectó un módulo esencial.");
