@@ -33,4 +33,5 @@ bool more_close_to_heap(void* segment1, void* segment2);
 void compact_memory(t_memory_structure* memory_structure);
 // Transforma la base dada a un entero para saber su posicion en la ram
 uint32_t transform_base_to_decimal(void* address, void* memory_base);
+int min(int a, int b);
 #endif

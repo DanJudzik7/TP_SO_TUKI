@@ -3,6 +3,7 @@
 extern t_config_memory config_memory;
 
 t_list* create_sg_table(t_memory_structure* memory_structure, int pid) {
+	
 	t_list* segment_table = list_create();
 	list_add(segment_table, memory_structure->segment_zero);
 	char* pid_str = string_itoa(pid);
@@ -148,21 +149,34 @@ void compact_memory(t_memory_structure* memory_structure) {
 }
 
 char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid) {
-	char* buffer = s_malloc(size + 1);
-	t_segment* segment = get_segment_by_id(s_id, structures, pid);
-	if (segment != NULL) {
-		if (segment->base + offset + size > segment->base + segment->offset) {
-			log_error(config_memory.logger, "Segmentation fault, no se puede leer mas allá del segment");
-			return NULL;
-		} else {
-			memcpy(buffer, segment->base + offset, sizeof(size));
-			buffer[size] = '\0';
-			return buffer;
-		}
-	} else {
-		log_error(config_memory.logger, "No se encontró el segmento solicitado");
-		return NULL;
-	}
+    int size_rest = size;
+    char* buffer = s_malloc(size + 1);
+    int count_base = 0;
+    int buffer_offset = 0;
+
+    while (size_rest > 0) {
+        t_segment* segment = get_segment_by_id(s_id, structures, pid);
+
+        if (segment != NULL) {
+            if (segment->base + offset + size > segment->base + segment->offset) {
+                log_error(config_memory.logger, "Segmentation fault, no se puede leer más allá del segmento");
+                return NULL;
+            } else {
+                int copy_size = min(16, size_rest);
+                memcpy(buffer + buffer_offset, segment->base + offset + (count_base * 16), copy_size);
+                buffer_offset += copy_size;
+                size_rest -= copy_size;
+            }
+        } else {
+            log_error(config_memory.logger, "No se encontró el segmento solicitado");
+            return NULL;
+        }
+        count_base += 1;
+    }
+    buffer[buffer_offset] = '\0';
+	log_info(config_memory.logger, "Lectura Solicitada s_id-> %i offset-> %i size-> %i ", s_id , offset, size);
+	log_info(config_memory.logger, "LECTURA -> %s ", buffer);
+    return buffer;
 }
 
 bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structure* structures, int pid) {
@@ -173,6 +187,8 @@ bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structu
 			return false;
 		} else {
 			memcpy(segment->base + offset, buffer, strlen(buffer) + 1);
+			int dir_escritura = transform_base_to_decimal(segment->base + offset, structures->segment_zero->base);
+			log_info(config_memory.logger, "ESCRITURA: %s -> PID: %i | Segmento: %i | Base: %i  | Tamaño: %i |", buffer, pid, s_id, dir_escritura, size);
 			return true;
 		}
 	} else {
@@ -199,4 +215,8 @@ uint32_t transform_base_to_decimal(void* address, void* memory_base) {
 	uintptr_t base = (uintptr_t)memory_base;
 	uintptr_t transformed_value = (uintptr_t)address;
 	return transformed_value - base;
+}
+
+int min(int a, int b) {
+	return (a < b) ? a : b;
 }
