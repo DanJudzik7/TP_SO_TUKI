@@ -26,15 +26,16 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 
 	// Se inicializa la cola temporal
 	t_queue* queue_temporal = queue_create();
+	
 
-	// Se inicializa el valor del response ratio más alto encontrado
-	float highest_response_ratio = 0;
+	// Se inicializan los valores del response ratio
+	float response_ratio = 0.0;
+	float highest_response_ratio = -1.0;
 
 	// Se inicializa el PCB siguiente como nulo
-	t_pcb* next_pcb = s_malloc(sizeof(t_pcb));
-
+	t_pcb* next_pcb = NULL;
 	// Se inicializa el PCB actual como nulo
-	t_pcb* p = s_malloc(sizeof(t_pcb));
+	t_pcb* p = NULL;
 
 	// Se itera sobre la cola global de PCBs
 	while (!queue_is_empty(active_pcbs)) {
@@ -42,7 +43,7 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 		p = queue_peek(active_pcbs);
 
 		// Se calcula el response ratio del proceso actual
-		float response_ratio = (float)(current_time - p->last_ready_time + p->aprox_burst_time) / (float)p->aprox_burst_time;
+		response_ratio = (float)(current_time - p->last_ready_time + p->aprox_burst_time) / (float)p->aprox_burst_time;
 
 		// Si el response ratio del proceso actual es mayor que el response ratio más alto encontrado
 		if (response_ratio > highest_response_ratio) {
@@ -79,5 +80,14 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 	next_pcb->last_ready_time = current_time;
 
 	// Se devuelve el proceso con el mayor response ratio
-	return next_pcb;
+	if (next_pcb != NULL && pcb_is_ready(next_pcb)) {
+		// Actualiza el last_ready_time del proceso seleccionado
+		next_pcb->last_ready_time = current_time;
+		// Devuelve el proceso con el mayor response ratio
+		return next_pcb;
+	} else {
+		// Si next_pcb no es válido o no está listo, asegúrate de liberar la memoria asignada
+		free(next_pcb);
+		return NULL;
+	}
 }

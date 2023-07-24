@@ -1,8 +1,8 @@
 #include "instructions_handler.h"
 
-t_package* process_instructions() {
+t_package* process_instructions(char* instruction_name_file) {
 	char* current_path = getcwd(NULL, 0);
-	char* file_path = string_from_format("%s/cfg/instrucciones", current_path);
+	char* file_path = string_from_format("%s/cfg/%s", current_path, instruction_name_file);
 	FILE* instructions = fopen(file_path, "r");
 	free(file_path);
 	free(current_path);

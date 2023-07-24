@@ -1,6 +1,7 @@
 #include "scheduler.h"
 
 void long_term_schedule(t_global_config_kernel* gck) {
+	sleep(2);
 	pthread_mutex_lock(&(gck->long_term_scheduler_execution));
 	log_info(gck->logger, "Realizando Planificación a Largo Plazo");
 	// Remover PCBs terminados por handle_new_process (o sea, usuario, desconexión, etc)
@@ -68,17 +69,12 @@ void long_term_schedule(t_global_config_kernel* gck) {
 		log_info(gck->logger, "El proceso %d ahora está en Ready", pcb->pid);
 	} else
 		log_info(gck->logger, "El planificador de largo plazo no tiene ningún PCB posible para ejecutar");
-	char* pids_list = string_new();
-	for (int i = 0; i < queue_size(gck->active_pcbs); i++) {
-		t_pcb* pcb = list_get(gck->active_pcbs->elements, i);
-		string_append_with_format(&pids_list, "%d", pcb->pid);
-		if (i < queue_size(gck->active_pcbs) - 1) string_append(&pids_list, ", ");
-	}
-	log_warning(gck->logger, "Cola Ready %s: [%s]", gck->algorithm_is_hrrn ? "HRRN" : "FIFO", pids_list);
+	show_queue_ready(gck);
 	pthread_mutex_unlock(&(gck->long_term_scheduler_execution));
 }
 
 t_pcb* short_term_scheduler(t_global_config_kernel* gck) {
+	sleep(2);
 	if (gck->prioritized_pcb != NULL) {
 		t_pcb* prioritized = gck->prioritized_pcb;
 		gck->prioritized_pcb = NULL;
@@ -88,4 +84,16 @@ t_pcb* short_term_scheduler(t_global_config_kernel* gck) {
 		// Devuelve el próximo PCB a ejecutar en base al algoritmo y los PCBs activos.
 		return gck->algorithm_is_hrrn ? pick_with_hrrn(gck->active_pcbs) : pick_with_fifo(gck->active_pcbs);
 	}
+}
+
+void show_queue_ready(t_global_config_kernel* gck){
+
+	char* pids_list = string_new();
+	for (int i = 0; i < queue_size(gck->active_pcbs); i++) {
+		t_pcb* pcb = list_get(gck->active_pcbs->elements, i);
+		string_append_with_format(&pids_list, "%d", pcb->pid);
+		if (i < queue_size(gck->active_pcbs) - 1) string_append(&pids_list, ", ");
+	}
+	
+	log_warning(gck->logger, "Cola Ready %s: [%s]", gck->algorithm_is_hrrn ? "HRRN" : "FIFO", pids_list);
 }

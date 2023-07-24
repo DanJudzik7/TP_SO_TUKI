@@ -4,6 +4,13 @@ int main(int argc, char** argv) {
 	t_log* logger = start_logger("consola");	 // Inicia el logger
 	t_config* config = start_config("consola");	 // Carga archivo de configuración
 
+	if (argc != 2) {
+        printf("Uso incorrecto. Debes proporcionar el nombre de la instrucciones.\n");
+        return 1;
+    }
+
+	char* instruction_name_file = argv[1];
+
 	// Inicia conexión con kernel
 	char* ip = config_get_string_value(config, "IP_KERNEL");
 	char* port = config_get_string_value(config, "PUERTO_KERNEL");
@@ -25,7 +32,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	if (!socket_send(socket_kernel, process_instructions(socket_kernel))) {
+	if (!socket_send(socket_kernel, process_instructions(instruction_name_file))) {
 		log_error(logger, "Error al precargar instrucciones al kernel");
 		return 1;
 	} else
