@@ -47,6 +47,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			list_add(mem_op->args, string_itoa(associated_pa->offset));
 			list_add(mem_op->args, string_itoa(size_of_register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
 			list_add(mem_op->args, string_itoa(ec->pid));
+			list_add(mem_op->args, "CPU");
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
 				break;
@@ -70,6 +71,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			char* value = register_pointer(list_get(instruction->args, 1), ec->cpu_register);
 			list_add(mem_op->args, value);
 			list_add(mem_op->args, string_itoa(ec->pid));
+			list_add(mem_op->args, "CPU");
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
 				break;

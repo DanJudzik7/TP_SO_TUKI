@@ -26,7 +26,7 @@ int handle_kernel(int* socket_kernel) {
 
 bool process_instruction(t_instruction* instruction) {
 	switch (instruction->op_code) {
-		case F_READ: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) -> s_id, offset, buffer, pid
+		case F_READ: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
 			char* read_file = iterate_block_file(instruction);
 			if (config_fs.socket_memory != -1) {
@@ -35,6 +35,7 @@ bool process_instruction(t_instruction* instruction) {
 				list_add(mem_request->args, list_get(instruction->args, 5));
 				list_add(mem_request->args, read_file);
 				list_add(mem_request->args, list_get(instruction->args, 3));
+				list_add(mem_request->args, "FS");
 				if (!socket_send(config_fs.socket_memory, serialize_instruction(mem_request))) {
 					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 				}
@@ -52,7 +53,7 @@ bool process_instruction(t_instruction* instruction) {
 			free(read_file);
 			return true;
 		}
-		case F_WRITE: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) -> s_id, offset, size, pid
+		case F_WRITE: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE ESCRIBIR ARCHIVO\n");
 			if (config_fs.socket_memory != -1) {
 				t_instruction* mem_request = instruction_new(MEM_READ_ADDRESS);
@@ -60,6 +61,7 @@ bool process_instruction(t_instruction* instruction) {
 				list_add(mem_request->args, list_get(instruction->args, 5));
 				list_add(mem_request->args, list_get(instruction->args, 2));
 				list_add(mem_request->args, list_get(instruction->args, 3));
+				list_add(mem_request->args, "FS");
 				if (!socket_send(config_fs.socket_memory, serialize_instruction(mem_request))) {
 					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 				}

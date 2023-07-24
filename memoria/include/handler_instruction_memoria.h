@@ -22,9 +22,9 @@ void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_d
 // Compacta la lista de agujeros libres en caso que estén seguidos sus espacios
 void compact_hole_list(t_memory_structure* memory_structure);
 // Lee en memoria en base al segmento y el tamaño a leer de este mismo
-char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid);
+char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid, char* origen);
 // Escribe en memoria en base al segmento y el tamaño a escribir a partir de este mismo
-bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structure* structures, int pid);
+bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structure* structures, int pid, char* origen);
 // Devuelve el segmento en base a su id y del proceso correspondiente
 t_segment* get_segment_by_id(int s_id, t_memory_structure* structures, int pid);
 // Devuelve el segmento mas cercano al heap

@@ -43,3 +43,34 @@ t_memory_structure* new_memory_structure(void* memory) {
 	// list_add(memory_structure->ram,hole);
 	return memory_structure;
 }
+
+// Graficar una tabla especifica de tipo table_pid_segments
+void graph_specific_table_pid_segments(t_list* segment_table, int process_id, void* memory_base) {
+	printf("\n|Tabla de segmentos del proceso PID  %i|\n", process_id);
+	printf("--------------------------------------\n");
+	for (int i = 0; i < list_size(segment_table); i++) {
+		t_segment* seg = list_get(segment_table, i);
+		printf("| PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+	}
+	printf("--------------------------------------\n");
+}
+
+
+// Graficar la tabla table_pid_segments
+void graph_table_pid_segments(t_dictionary* table_pid_segments, void* memory_base) {
+	t_list* keys = dictionary_keys(table_pid_segments);
+	for (int i = 1; i < list_size(keys); i++) {
+		char* key = string_duplicate(list_get(keys, i));
+		int process_id = atoi(key);
+		printf("\nObteniendo la tabla de segmentos del PID: %s... ", key);
+		t_list* segment_table = dictionary_get(table_pid_segments, key);
+		if (segment_table == NULL) {
+			free(key);	// Liberar la memoria asignada por string_duplicate
+			continue;	// Pasar a la siguiente clave si no se encuentra la tabla de segmentos
+		}
+		graph_specific_table_pid_segments(segment_table, process_id, memory_base);
+		printf("\n");
+		free(key);	// Liberar la memoria asignada por string_duplicate
+	}
+	list_destroy(keys);
+}
