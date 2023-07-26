@@ -220,6 +220,11 @@ int main(int argc, char** argv) {
 					pcb->state = EXIT_PROCESS;
 				} else if (package->type == MESSAGE_OK) {
 					char* s_base = deserialize_message(package);
+					t_segment* segment = s_malloc(sizeof(t_segment));
+					segment->base = atoi(s_base);
+					segment->s_id = atoi((char*)list_get(kernel_request->args, 0));
+					segment->offset = atoi((char*)list_get(kernel_request->args, 1));
+					list_add(pcb->execution_context->segments_table, segment);
 					log_warning(gck->logger, "PID: %d - Crear Segmento - Id: %s - Tamaño: %s", pcb->pid, (char*)list_get(kernel_request->args, 0), (char*)list_get(kernel_request->args, 1));
 					free(s_base);
 				} else
@@ -254,7 +259,7 @@ int main(int argc, char** argv) {
 				char* resource_name = list_get(kernel_request->args, 0);
 				t_resource* resource = resource_get(pcb, gck, resource_name);
 				if (resource == NULL) break;
-				if (resource->available_instances >= 0) {
+				if (resource->available_instances > 0) {
 					resource->assigned_to = pcb;
 					resource->available_instances--;
 					log_warning(gck->logger, "PID: %d - Wait: %s - Instancias: %d", pcb->pid, resource_name, resource->available_instances);
@@ -272,12 +277,12 @@ int main(int argc, char** argv) {
 				char* resource_name = list_get(kernel_request->args, 0);
 				t_resource* resource = resource_get(pcb, gck, resource_name);
 				if (resource == NULL) break;
-				if (resource->assigned_to != pcb) {
+				/*if (resource->assigned_to != pcb) {
 					log_error(gck->logger, "El proceso %d intentó liberar un recurso que no tiene asignado", pcb->pid);
 					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: EXIT", pcb->pid);
 					pcb->state = EXIT_PROCESS;
 					break;
-				}
+				}*/
 				gck->prioritized_pcb = pcb;
 				resource_signal(resource, resource_name, gck->logger);
 				break;

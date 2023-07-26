@@ -41,7 +41,12 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			break;
 		}
 		case MOV_IN: {	// Registro, Dirección Lógica (y associated_pa)
-			if (associated_pa == NULL) break;
+			// Aca deberia devolver el seg_fault
+			if (associated_pa == NULL) {
+				ec->kernel_request = instruction_new(EXIT);
+				list_add(ec->kernel_request->args, string_itoa(9));
+				break;
+			}
 			t_instruction* mem_op = instruction_new(MEM_READ_ADDRESS);
 			list_add(mem_op->args, string_itoa(associated_pa->segment));
 			list_add(mem_op->args, string_itoa(associated_pa->offset));
@@ -64,7 +69,11 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			break;
 		}
 		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
-			if (associated_pa == NULL) break;
+			if (associated_pa == NULL){
+				ec->kernel_request = instruction_new(EXIT);
+				list_add(ec->kernel_request->args, string_itoa(9));
+				break;
+			}
 			t_instruction* mem_op = instruction_new(MEM_WRITE_ADDRESS);
 			list_add(mem_op->args, string_itoa(associated_pa->segment));
 			list_add(mem_op->args, string_itoa(associated_pa->offset));

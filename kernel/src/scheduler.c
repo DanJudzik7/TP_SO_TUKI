@@ -88,6 +88,7 @@ void show_queue_ready(t_global_config_kernel* gck){
 	char* pids_list = string_new();
 	for (int i = 0; i < queue_size(gck->active_pcbs); i++) {
 		t_pcb* pcb = list_get(gck->active_pcbs->elements, i);
+		if (pcb->state != READY) continue;
 		string_append_with_format(&pids_list, "%d", pcb->pid);
 		if (i < queue_size(gck->active_pcbs) - 1) string_append(&pids_list, ", ");
 	}
