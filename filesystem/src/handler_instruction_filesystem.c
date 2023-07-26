@@ -87,7 +87,7 @@ bool process_instruction(t_instruction* instruction) {
 		case F_TRUNCATE: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE TRUNCAR UN ARCHIVO\n");
 			truncate_file(instruction);
-			for (int i = 0; i < config_fs.block_count; i++) {
+			/*for (int i = 0; i < config_fs.block_count; i++) {
 				bool car = bitarray_test_bit(config_fs.bitmap, i);
 				printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
 			}
@@ -95,7 +95,7 @@ bool process_instruction(t_instruction* instruction) {
 				uint32_t* number = s_malloc(sizeof(uint32_t));
 				memcpy(number, config_fs.block_file + i, sizeof(uint32_t));	 // remove '*'
 				printf("Valor en la posición %d: %u\n", i, *number);
-			}
+			}*/
 			return true;
 		}
 		default: {
@@ -115,11 +115,12 @@ char* iterate_block_file(t_instruction* instruction) {
 	char* str_read;
 	if (instruction->op_code == F_READ) {
 		str_read = calloc(size_read + 1, sizeof(char));
-		for (int i = 0; i < 240; i++) {
+		/*for (int i = 0; i < 240; i++) {
 			printf("Valor en la posición %d: %c\n", i, config_fs.block_file[i]);
-		}
+		}*/
 	} else {
 		str_read = list_get(instruction->args, 6);
+		log_info(config_fs.logger, "El valor de la cadena a escribir es: %s", str_read);
 	}
 	char* file_name = list_get(instruction->args, 0);
 	int position_read = atoi(list_get(instruction->args, 1));
@@ -155,7 +156,7 @@ char* iterate_block_file(t_instruction* instruction) {
 	}
 	if (instruction->op_code == F_READ) {
 		str_read[read_positions] = '\0';
-		log_info(config_fs.logger, "El valor de la cadena es: %s", str_read);
+		log_info(config_fs.logger, "El valor de la cadena leida es: %s", str_read);
 	} else {
 		for (int i = 0; i < 240; i++) {
 			char c = config_fs.block_file[i];
@@ -383,7 +384,7 @@ void close_file(t_instruction* instruction) {
 	t_config* fcb_data = config_create(full_file_path);
 	clear_bit_position(fcb_data);
 
-	int remove_status = remove(full_file_path);
+	/*int remove_status = remove(full_file_path);
 	if (remove_status == 0) {
 		log_info(config_fs.logger, "El archivo %s ha sido cerrado exitosamente", full_file_path);
 	} else {
@@ -391,7 +392,7 @@ void close_file(t_instruction* instruction) {
 		config_destroy(fcb_data);  // liberamos fcb_data antes de abortar
 		free(full_file_path);	   // liberamos full_file_path antes de abortar
 		abort();
-	}
+	}*/
 	config_destroy(fcb_data);  // liberamos fcb_data
 	free(full_file_path);	   // liberamos full_file_path
 	free(directorio);		   // liberamos directorio

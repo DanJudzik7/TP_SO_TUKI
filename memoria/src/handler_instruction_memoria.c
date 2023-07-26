@@ -25,7 +25,7 @@ void remove_sg_table(t_memory_structure* memory_structure, int pid) {
 int add_segment(t_memory_structure* memory_structure, int process_id, int size, int s_id) {
 	t_segment* segment;
 
-	if (config_memory.remaining_memory > size) {
+	if (config_memory.remaining_memory >= size) {
 		// Recorro la ram para asignar el segmento según el algoritmo
 		if (strcmp(config_memory.algorithm, "BEST") == 0)
 			segment = best_fit(memory_structure, size, process_id, s_id);
