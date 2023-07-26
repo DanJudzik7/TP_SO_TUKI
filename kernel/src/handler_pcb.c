@@ -53,7 +53,6 @@ void handle_new_process(helper_create_pcb* hcp) {
 	}
 
 	deserialize_instructions(package, pcb->execution_context->instructions);
-	sleep(1);
 	queue_push(hcp->gck->new_pcbs, pcb);
 	package_destroy(package);
 

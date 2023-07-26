@@ -1,7 +1,6 @@
 #include "scheduler.h"
 
 void long_term_schedule(t_global_config_kernel* gck) {
-	sleep(2);
 	pthread_mutex_lock(&(gck->long_term_scheduler_execution));
 	log_info(gck->logger, "Realizando Planificación a Largo Plazo");
 	// Remover PCBs terminados por handle_new_process (o sea, usuario, desconexión, etc)
@@ -41,13 +40,11 @@ void long_term_schedule(t_global_config_kernel* gck) {
 		}
 		pcb->execution_context->segments_table = deserialize_segment_table(package);
 
-		gck->max_multiprogramming += 1;
 		pcb_destroy(pcb);
 	}
 
 	// Revisa en base a la multiprogramación si puede agregar más procesos a la cola de Active
 	if (queue_size(gck->active_pcbs) < gck->max_multiprogramming && !queue_is_empty(gck->new_pcbs)) {
-		gck->max_multiprogramming -= 1;
 		t_pcb* pcb = queue_pop(gck->new_pcbs);
 		log_warning(gck->logger, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", pcb->pid);
 		pcb->state = READY;
