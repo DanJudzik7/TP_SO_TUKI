@@ -30,7 +30,7 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 
     // Se inicializan los valores del response ratio
     float response_ratio = 0.0;
-    float lowest_response_ratio = 99; // Inicializar con un valor alto para asegurar que cualquier valor sea menor
+    float highest_response_ratio = 0.0; // Inicializar con un valor bajo para asegurar que cualquier valor sea el mayor
 
     // Se inicializa el PCB siguiente como nulo
     t_pcb* next_pcb = NULL;
@@ -44,11 +44,10 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 
         // Se calcula el response ratio del proceso actual
         response_ratio = (float)(current_time - p->last_ready_time + p->aprox_burst_time) / (float)p->aprox_burst_time;
-
-        // Si el response ratio del proceso actual es menor que el response ratio más bajo encontrado
-        if (response_ratio < lowest_response_ratio) {
-            // Se actualiza el response ratio más bajo encontrado
-            lowest_response_ratio = response_ratio;
+        // Si el response ratio del proceso actual es menor que el response ratio más alto encontrado
+        if (response_ratio > highest_response_ratio) {
+            // Se actualiza el response ratio más alto encontrado
+            highest_response_ratio = response_ratio;
 
             // Si el PCB siguiente no es nulo, se agrega a la cola temporal
             if (next_pcb != NULL && pcb_is_ready(next_pcb)) {
@@ -57,11 +56,11 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
 
             // El siguiente PCB es el proceso actual
             next_pcb = p;
-        } else if (response_ratio == lowest_response_ratio) {
-            // Si el response ratio del proceso actual es igual al response ratio más bajo encontrado, desempatar usando FIFO
+        } else if (response_ratio == highest_response_ratio) {
+            // Si el response ratio del proceso actual es igual al response ratio más alto encontrado, desempatar usando FIFO
             queue_push(queue_fifo, p);
         } else {
-            // Si el response ratio del proceso actual no es menor que el response ratio más bajo encontrado, se agrega a la cola temporal
+            // Si el response ratio del proceso actual no es menor que el response ratio más alto encontrado, se agrega a la cola temporal
             queue_push(queue_temporal, p);
         }
 
@@ -95,7 +94,7 @@ t_pcb* pick_with_hrrn(t_queue* active_pcbs) {
         return next_pcb;
     } else {
         // Si next_pcb no es válido o no está listo, asegúrate de liberar la memoria asignada
-        free(next_pcb);
+        //free(next_pcb);
         return NULL;
     }
 }

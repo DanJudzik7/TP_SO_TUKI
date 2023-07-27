@@ -22,7 +22,7 @@ typedef struct t_global_config_kernel {
 	t_queue* active_pcbs;
 	t_dictionary* resources;
 	bool algorithm_is_hrrn;
-	int alfa;
+	float alfa;
 	int max_multiprogramming;
 	int default_burst_time;
 	int server_socket;

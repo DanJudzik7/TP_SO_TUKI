@@ -45,19 +45,19 @@ t_memory_structure* new_memory_structure(void* memory) {
 }
 
 // Graficar una tabla especifica de tipo table_pid_segments
-void graph_specific_table_pid_segments(t_list* segment_table, int process_id, void* memory_base) {
+void graph_specific_table_pid_segments(t_list* segment_table, int process_id, t_memory_structure* memory_base) {
 	printf("\n|Tabla de segmentos del proceso PID  %i|\n", process_id);
 	printf("--------------------------------------\n");
 	for (int i = 0; i < list_size(segment_table); i++) {
 		t_segment* seg = list_get(segment_table, i);
-		printf("| PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base), seg->offset);
+		printf("| PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base->segment_zero->base), seg->offset);
 	}
 	printf("--------------------------------------\n");
 }
 
 
 // Graficar la tabla table_pid_segments
-void graph_table_pid_segments(t_dictionary* table_pid_segments, void* memory_base) {
+void graph_table_pid_segments(t_dictionary* table_pid_segments, t_memory_structure* memory_base) {
 	t_list* keys = dictionary_keys(table_pid_segments);
 	for (int i = 1; i < list_size(keys); i++) {
 		char* key = string_duplicate(list_get(keys, i));

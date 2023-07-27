@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 	t_global_config_kernel* gck = new_global_config_kernel(config);
 	t_helper_fs_handler* hfi = s_malloc(sizeof(t_helper_fs_handler));
 	log_warning(gck->logger, "Iniciando el kernel");
-	gck->alfa = config_get_int_value(config, "HRRN_ALFA");
+	gck->alfa = atof(config_get_string_value(config, "HRRN_ALFA"));
 	char* port = config_get_string_value(config, "PUERTO_ESCUCHA");
 	gck->server_socket = socket_initialize_server(port);
 	if (gck->server_socket == -1) {
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 				hpi->logger = gck->logger;
 				hpi->time = atoi(list_get(kernel_request->args, 0));
 				pcb->state = BLOCK;
-				log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+				log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK", pcb->pid);
 				log_warning(gck->logger, "PID: %d - Bloqueado por: IO", pcb->pid);
 				log_warning(gck->logger, "PID: %d - Ejecuta IO: %d", pcb->pid, hpi->time);
 				pthread_t thread_io;
@@ -89,10 +89,11 @@ int main(int argc, char** argv) {
 				char* filename = list_get(kernel_request->args, 0);
 				log_warning(gck->logger, "PID: %d - Abrir Archivo: %s", pcb->pid, filename);
 				if (dictionary_has_key(hfi->global_files, filename)) {
-					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+					log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK", pcb->pid);
 					log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, filename);
 					pcb->state = BLOCK;
-					list_add(dictionary_get(hfi->global_files, filename), pcb);
+					t_queue* aux_queue = dictionary_get(hfi->global_files, filename);
+					queue_push(aux_queue, pcb);
 					break;
 				}
 				if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
@@ -104,7 +105,8 @@ int main(int argc, char** argv) {
 					log_error(gck->logger, "Error al abrir archivo");
 					break;
 				}
-				dictionary_put(hfi->global_files, filename, queue_create());
+				t_queue* empty_queue = queue_create();
+				dictionary_put(hfi->global_files, filename, empty_queue);
 				dictionary_put(pcb->local_files, filename, 0);
 				break;
 			}
@@ -115,7 +117,7 @@ int main(int argc, char** argv) {
 					log_error(gck->logger, "El archivo %s no está abierto", filename);
 					break;
 				}
-				/*if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
+				if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
 					log_error(gck->logger, "Error al enviar operación a filesystem");
 					break;
 				}
@@ -123,13 +125,15 @@ int main(int argc, char** argv) {
 				if (package->type != MESSAGE_OK) {
 					log_error(gck->logger, "Error al cerrar archivo");
 					break;
-				}*/
+				}
 				t_queue* waiting_pcbs = dictionary_get(hfi->global_files, filename);
 				if (queue_is_empty(waiting_pcbs)) {
 					queue_destroy(waiting_pcbs);
 					dictionary_remove(hfi->global_files, filename);
-				} else
+				} else {
+					printf("Hay %d procesos esperando por el archivo %s\n", queue_size(waiting_pcbs), filename);
 					((t_pcb*)queue_pop(waiting_pcbs))->state = READY;
+				}
 				dictionary_remove(pcb->local_files, filename);
 				break;
 			}
@@ -173,7 +177,7 @@ int main(int argc, char** argv) {
 				list_add_in_index(fi->instruction->args, 3, string_itoa(pcb->pid));
 				queue_push(hfi->file_instructions, fi);
 				pcb->state = BLOCK;
-				log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+				log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK", pcb->pid);
 				log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, filename);
 				break;
 			}
@@ -221,7 +225,7 @@ int main(int argc, char** argv) {
 				} else if (package->type == MESSAGE_OK) {
 					char* s_base = deserialize_message(package);
 					t_segment* segment = s_malloc(sizeof(t_segment));
-					segment->base = atoi(s_base);
+					segment->base = (void*)atoi(s_base);
 					segment->s_id = atoi((char*)list_get(kernel_request->args, 0));
 					segment->offset = atoi((char*)list_get(kernel_request->args, 1));
 					list_add(pcb->execution_context->segments_table, segment);
@@ -266,7 +270,7 @@ int main(int argc, char** argv) {
 					gck->prioritized_pcb = pcb;
 				} else {
 					pcb->state = BLOCK;
-					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: BLOCK", pcb->pid);
+					log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK", pcb->pid);
 					log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, resource_name);
 					log_info(gck->logger, "El proceso %d se bloqueó ya que el recurso no está disponible aún", pcb->pid);
 					queue_push(resource->enqueued_processes, pcb);
