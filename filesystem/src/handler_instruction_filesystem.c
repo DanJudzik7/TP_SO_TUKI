@@ -111,23 +111,30 @@ char* iterate_block_file(t_instruction* instruction) {
 		abort();
 	}
 
+	char* file_name = list_get(instruction->args, 0);
+	int position_read = atoi(list_get(instruction->args, 1));
 	int size_read = atoi(list_get(instruction->args, 2));
+	char* direccion_memoria = list_get(instruction->args, 6);
 	char* str_read;
 	if (instruction->op_code == F_READ) {
+		log_info(config_fs.logger, "Leer Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
 		str_read = calloc(size_read + 1, sizeof(char));
 		/*for (int i = 0; i < 240; i++) {
 			printf("Valor en la posición %d: %c\n", i, config_fs.block_file[i]);
 		}*/
 	} else {
-		str_read = list_get(instruction->args, 6);
+		log_info(config_fs.logger, "Escribir Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
+		str_read = list_get(instruction->args, 7);
 		log_info(config_fs.logger, "El valor de la cadena a escribir es: %s", str_read);
 	}
-	char* file_name = list_get(instruction->args, 0);
-	int position_read = atoi(list_get(instruction->args, 1));
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
 	int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
+	char* puntero_indirecto_char = config_get_string_value(fcb_data, "PUNTERO_INDIRECTO");
+	if (strcmp(puntero_indirecto_char, "") != 0) {
+		log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: %i - Bloque File System: %i ", file_name, PUNTERO_INDIRECTO, PUNTERO_INDIRECTO);
+	}
 	int* PUNTERO_DIRECTO = s_malloc(sizeof(int));
 	*PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
 	t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
@@ -138,6 +145,7 @@ char* iterate_block_file(t_instruction* instruction) {
 	int read_positions = 0;
 	for (int i = position_initial_block; i <= position_initial_block + blocks_need; i++) {
 		int block_number = *(int*)list_get(pi_list, i);
+		log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: %i - Bloque File System: %i ", file_name, block_number, block_number);
 		int start_position_in_block = block_number * config_fs.block_size;
 		int end_position_in_block = start_position_in_block + config_fs.block_size;
 		int start_position_to_read = (positions_to_read - (i * config_fs.block_size)) + start_position_in_block;
@@ -158,13 +166,16 @@ char* iterate_block_file(t_instruction* instruction) {
 		str_read[read_positions] = '\0';
 		log_info(config_fs.logger, "El valor de la cadena leida es: %s", str_read);
 	} else {
+		log_info(config_fs.logger, "Escribio correctamente el Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
 		for (int i = 0; i < 240; i++) {
 			char c = config_fs.block_file[i];
 			printf("Valor en la posición %d: %c\n", i, c);
 		}
 	}
+	free(file_name);
 	free(directorio);
 	free(full_file_path);
+	free(direccion_memoria);
 	config_destroy(fcb_data);
 	list_destroy_and_destroy_elements(pi_list, free);
 	return str_read;
@@ -180,6 +191,7 @@ void truncate_file(t_instruction* instruction) {
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
+	log_info(config_fs.logger, "Truncar Archivo: %s - Tamaño: %i",file_name, file_size);
 	if (fcb_data == NULL) {
 		open_file(instruction);
 		truncate_file(instruction);
@@ -188,6 +200,7 @@ void truncate_file(t_instruction* instruction) {
 		// set_bit_position(fcb_data,&file_size);
 		// free(PUNTERO_DIRECTO);
 	}
+	log_info(config_fs.logger, "Archivo truncado: %s",file_name);
 	free(directorio);  // liberar la memoria del getcwd
 	free(full_file_path);
 	config_destroy(fcb_data);  // usar config_destroy en lugar de free
@@ -210,13 +223,18 @@ void resize_block(t_config* fcb_data, int* file_size) {
 				for (int i = PUNTERO_DIRECTO * config_fs.block_size; i < (PUNTERO_DIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
 				}
+
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO",PUNTERO_DIRECTO);
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_DIRECTO);
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE",PUNTERO_DIRECTO);
 				config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
 			}
 			if (strcmp(puntero_indirecto_char, "") != 0) {
 				for (int i = 0; i < list_length; i++) {
 					int pi_pos = *((int*)list_get(pi_list, i));
+					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", pi_pos);
 					bitarray_clean_bit(config_fs.bitmap, pi_pos);
+					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", pi_pos);
 					for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
 						config_fs.block_file[j] = '\0';
 					}
@@ -225,7 +243,9 @@ void resize_block(t_config* fcb_data, int* file_size) {
 					config_fs.block_file[i] = '\0';
 				}
 				list_destroy(pi_list);
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_INDIRECTO);
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_INDIRECTO);
 				config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
 			}
 		} else if ((*file_size) <= config_fs.block_size) {
@@ -236,7 +256,9 @@ void resize_block(t_config* fcb_data, int* file_size) {
 			if (strcmp(puntero_indirecto_char, "") != 0) {
 				for (int i = 0; i < list_length; i++) {
 					int pi_pos = *((int*)list_get(pi_list, i));
+					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", pi_pos);
 					bitarray_clean_bit(config_fs.bitmap, pi_pos);
+					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", pi_pos);
 					for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
 						config_fs.block_file[j] = '\0';
 					}
@@ -245,7 +267,9 @@ void resize_block(t_config* fcb_data, int* file_size) {
 					config_fs.block_file[i] = '\0';
 				}
 				list_destroy(pi_list);
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_INDIRECTO);
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_INDIRECTO);
 				config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
 			}
 		} else {
@@ -276,7 +300,9 @@ void resize_block(t_config* fcb_data, int* file_size) {
 				for (int i = 0; i < diferencia; i++) {
 					int index = (list_length - i - 1);
 					int ip_eliminar = *((int*)list_get(pi_list, index));
+					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", ip_eliminar);
 					bitarray_clean_bit(config_fs.bitmap, ip_eliminar);
+					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", ip_eliminar);
 					for (int i = (ip_eliminar)*config_fs.block_size; i < ((ip_eliminar)*config_fs.block_size) + config_fs.block_size; i++) {
 						config_fs.block_file[i] = '\0';
 					}
@@ -323,7 +349,9 @@ void clear_bit_position(t_config* fcb_data) {
 	t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
 	for (int i = 0; i < list_size(pi_list); i++) {
 		int pi_pos = *((int*)list_get(pi_list, i));
+		log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", pi_pos);
 		bitarray_clean_bit(config_fs.bitmap, pi_pos);
+		log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", pi_pos);
 		for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
 			config_fs.block_file[j] = '\0';
 		}
@@ -332,8 +360,12 @@ void clear_bit_position(t_config* fcb_data) {
 		config_fs.block_file[i] = '\0';
 	}
 	list_destroy(pi_list);
-	bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);  // liberamos el array de strings
+	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_INDIRECTO);
+	bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
+	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_INDIRECTO);
+	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_DIRECTO);  // liberamos el array de strings
 	bitarray_clean_bit(config_fs.bitmap, PUNTERO_DIRECTO);
+	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_DIRECTO);
 	config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
 	config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
 	config_save(fcb_data);
@@ -349,6 +381,7 @@ void open_file(t_instruction* instruction) {
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 
+	log_info(config_fs.logger, "Abrir Archivo: %s",file_name);
 	FILE* fcb = fopen(full_file_path, "r");
 	if (fcb == NULL) {
 		fopen(full_file_path, "w");
@@ -358,20 +391,22 @@ void open_file(t_instruction* instruction) {
 		log_warning(config_fs.logger, "Existía el archivo");
 		fclose(fcb);
 	}
+	log_info(config_fs.logger, "Archivo abierto: %s",file_name);
 	free(full_file_path);
 	free(directorio);  // liberamos directorio
 }
 void create_file(char* full_file_path, char* file_name) {
+	log_info(config_fs.logger, "Crear Archivo: %s",file_name);
 	t_config* fcb_data = config_create(full_file_path);
 	if (fcb_data == NULL) {
 		log_warning(config_fs.logger, "Error creando FCB");	 // liberamos full_file_path antes de abortar
 		abort();
 	}
+	log_info(config_fs.logger, "Archivo creado: %s",file_name);
 	config_set_value(fcb_data, "NOMBRE_ARCHIVO", file_name);
 	config_set_value(fcb_data, "TAMANIO_ARCHIVO", "");
 	config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
 	config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
-	log_warning(config_fs.logger, "Creo FCB");
 
 	config_save(fcb_data);
 	config_destroy(fcb_data);  // liberamos full_file_path
@@ -403,8 +438,12 @@ int next_bit_position() {
 		// bool car = bitarray_test_bit(config_fs.bitmap, i);
 		// printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
 		if (!bitarray_test_bit(config_fs.bitmap, i)) {
+			log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", i);
 			bitarray_set_bit(config_fs.bitmap, i);
+			log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", i);
 			return i;
+		}else{
+			log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", i);
 		}
 	}
 	return -1;

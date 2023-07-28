@@ -81,7 +81,7 @@ void handle_fs(t_helper_fs_handler* hfi) {
 			fi->instruction->op_code == F_READ ? "Leer" : "Escribir",
 			(char*)list_get(fi->instruction->args, 0),
 			(char*)list_get(fi->instruction->args, 1),
-			fi->logicalAddress,
+			atoi(list_get(fi->instruction->args, 6)),
 			(char*)list_get(fi->instruction->args, 2)
 		);
 		fi->pcb->state = READY;

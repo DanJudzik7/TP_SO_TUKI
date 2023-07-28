@@ -70,7 +70,7 @@ void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_d
 			list_remove_and_destroy_element(segment_table, i, free);
 			break;
 		}
-	free(pid_str);
+	//free(pid_str);
 	}
 
 	// Recorro la RAM para eliminarla
@@ -79,7 +79,7 @@ void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_d
 		// Si tiene la misma base que el segmento a eliminar
 		if (segment_ram->base == segment_to_delete->base) {
 			// Elimino justo esa posición
-			list_remove_and_destroy_element(memory_structure->ram, i, free);
+			list_remove(memory_structure->ram, i);
 			break;
 		}
 	}

@@ -48,6 +48,7 @@ typedef struct t_segment {
 typedef struct t_physical_address {
 	int segment;
 	int offset;
+	int adress;
 } t_physical_address;
 
 typedef enum t_memory_op {

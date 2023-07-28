@@ -102,7 +102,7 @@ void destroy_element(void* element) {
 }
 
 void instruction_destroy(t_instruction* instruction) {
-	list_destroy_and_destroy_elements(instruction->args, destroy_element);
+	list_destroy(instruction->args);
 	free(instruction);
 	instruction = NULL;
 }

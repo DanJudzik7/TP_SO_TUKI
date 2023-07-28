@@ -53,6 +53,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			list_add(mem_op->args, string_itoa(size_of_register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
 			list_add(mem_op->args, string_itoa(ec->pid));
 			list_add(mem_op->args, "CPU");
+			list_add(mem_op->args, string_itoa(associated_pa->adress));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
 				break;
@@ -64,7 +65,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			}
 			char* value = deserialize_message(package);
 			set_register(list_get(instruction->args, 0), value, ec->cpu_register);
-			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->offset, value);
+			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
 			free(value);
 			break;
 		}
@@ -81,6 +82,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			list_add(mem_op->args, value);
 			list_add(mem_op->args, string_itoa(ec->pid));
 			list_add(mem_op->args, "CPU");
+			list_add(mem_op->args, string_itoa(associated_pa->adress));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
 				break;
@@ -99,7 +101,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 				log_error(config_cpu.logger, "Error desconocido en memoria");
 				break;
 			}
-			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->offset, value);
+			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
 			break;
 		}
 		case F_READ:  // filename, logical address, bytes count
@@ -111,6 +113,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			ec->kernel_request = instruction_duplicate(instruction);
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->segment));
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->offset));
+			list_add(ec->kernel_request->args, string_itoa(associated_pa->adress));
 			break;
 		}
 		case I_O:

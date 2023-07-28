@@ -69,6 +69,7 @@ t_physical_address* mmu(int logical_address, int size, t_execution_context* ec) 
 	t_physical_address* physical_address = s_malloc(sizeof(t_physical_address));
 	physical_address->segment = floor(logical_address / config_cpu.max_segment_size);
 	physical_address->offset = logical_address % config_cpu.max_segment_size;
+	physical_address->adress = (int) list_get_by_sid(ec->segments_table, physical_address->segment)->base + physical_address->offset;
 	log_info(config_cpu.logger, "tamaño lista segmentos: %d", list_size(ec->segments_table));
 	if (physical_address->offset + size > list_get_by_sid(ec->segments_table, physical_address->segment)->offset) {
 		log_error(config_cpu.logger, "PID: %d - Error SEG_FAULT- Segmento: %d - Offset: %d - Tamaño: %d", ec->pid, physical_address->segment, physical_address->offset, size);

@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
 				log_warning(gck->logger, "PID: %d - Truncar Archivo: %s - Tamaño: %s", pcb->pid, (char*)list_get(kernel_request->args, 0), (char*)list_get(kernel_request->args, 1));
 				break;
 			}
-			case F_READ:  // filename, logical address, bytes count, segment, offset -> NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5)
+			case F_READ:  // filename, logical address, bytes count, segment, offset, direcfisica -> NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ADRESS (6)
 			case F_WRITE: {
 				char* filename = list_get(kernel_request->args, 0);
 				// Se asegura de que el archivo esté abierto por el proceso
