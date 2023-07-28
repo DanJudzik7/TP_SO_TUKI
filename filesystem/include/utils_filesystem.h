@@ -21,6 +21,7 @@ typedef struct config_filesystem {
 	char* PATH_BITMAP;
 	char* PATH_BLOQUES;
 	char* PATH_FCB;
+	int RETARDO_ACCESO;
 } config_filesystem;
 
 void setup_config(bool useMemory);

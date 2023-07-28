@@ -10,6 +10,7 @@ void setup_config(bool useMemory) {
 	config_fs.PATH_BITMAP = config_get_string_value(config_fs.config, "PATH_BITMAP");
 	config_fs.PATH_BLOQUES = config_get_string_value(config_fs.config, "PATH_BLOQUES");
 	config_fs.PATH_FCB = config_get_string_value(config_fs.config, "PATH_FCB");
+	config_fs.block_count = config_get_int_value(config_fs.config, "RETARDO_ACCESO_BLOQUE");
 	log_warning(config_fs.logger, "Iniciando el filesystem");
 
 	t_config* superblock = start_superblock();
