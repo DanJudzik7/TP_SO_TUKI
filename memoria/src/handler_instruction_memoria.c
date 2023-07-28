@@ -14,12 +14,13 @@ t_list* create_sg_table(t_memory_structure* memory_structure, int pid) {
 void remove_sg_table(t_memory_structure* memory_structure, int pid) {
 	char* pid_str = string_itoa(pid);
 	t_list* segment_table_delete = dictionary_get(memory_structure->table_pid_segments, pid_str);
-	for (int i = 1; i < list_size(segment_table_delete); i++) {
+	int i = list_size(segment_table_delete) - 1;
+	while(list_size(segment_table_delete) > 1) {
 		t_segment* segment = list_get(segment_table_delete, i);
 		delete_segment(memory_structure, pid, segment->s_id);
+		i--;
 	}
-	dictionary_remove_and_destroy(memory_structure->table_pid_segments, pid_str, free);
-	free(pid_str);
+	dictionary_remove(memory_structure->table_pid_segments, pid_str);
 }
 
 int add_segment(t_memory_structure* memory_structure, int process_id, int size, int s_id) {
@@ -67,11 +68,11 @@ void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_d
 			segment_to_delete->offset = segment_pid->offset;
 			config_memory.remaining_memory += segment_pid->offset;
 			list_add(memory_structure->hole_list, segment_pid);
-			list_remove_and_destroy_element(segment_table, i, free);
+			list_remove(segment_table, i);
 			break;
 		}
-	//free(pid_str);
 	}
+	free(pid_str);
 
 	// Recorro la RAM para eliminarla
 	for (int i = 1; i < list_size(memory_structure->ram); i++) {
@@ -108,7 +109,7 @@ void compact_hole_list(t_memory_structure* memory_structure) {
 			}
 		}
 	}
-	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure);
+	//graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure);
 }
 
 void swap(t_segment* a, t_segment* b) {
@@ -148,6 +149,7 @@ void compact_memory(t_memory_structure* memory_structure) {
 		}
 	}
 	compact_hole_list(memory_structure);
+	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure);
 }
 
 char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid, char* origen) {

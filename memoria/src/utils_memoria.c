@@ -27,7 +27,7 @@ t_memory_structure* new_memory_structure(void* memory) {
 
 	// Creo el segmento 0 y lo agrego al diccionario y a la memoria auxiliar ram
 	memory_structure->segment_zero->base = memory;
-	memory_structure->segment_zero->offset = (int)config_memory.sg_zero_size;
+	memory_structure->segment_zero->offset = config_memory.sg_zero_size;
 	memory_structure->segment_zero->s_id = 0;
 	dictionary_put(memory_structure->table_pid_segments, (char*)&memory_structure->segment_zero->s_id, memory_structure->segment_zero);
 	list_add(memory_structure->ram, memory_structure->segment_zero);
@@ -50,6 +50,7 @@ void graph_specific_table_pid_segments(t_list* segment_table, int process_id, t_
 	printf("--------------------------------------\n");
 	for (int i = 0; i < list_size(segment_table); i++) {
 		t_segment* seg = list_get(segment_table, i);
+		printf("Segmento: %d", seg->s_id);
 		printf("| PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base->segment_zero->base), seg->offset);
 	}
 	printf("--------------------------------------\n");

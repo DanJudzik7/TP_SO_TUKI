@@ -69,8 +69,8 @@ void handle_modules(t_memory_thread* mt) {
 			}
 			case MEM_END_PROCCESS: {
 				int pid = atoi(list_get(instruction->args, 0));
-				remove_sg_table(mt->mem_structure, pid);
 				log_warning(config_memory.logger, "Eliminación de Proceso PID: %d", pid);
+				remove_sg_table(mt->mem_structure, pid);
 				if (!socket_send(mt->socket, package_new(OK_INSTRUCTION)))
 					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
