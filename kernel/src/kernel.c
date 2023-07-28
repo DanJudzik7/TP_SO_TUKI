@@ -92,8 +92,7 @@ int main(int argc, char** argv) {
 					log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK", pcb->pid);
 					log_warning(gck->logger, "PID: %d - Bloqueado por: %s", pcb->pid, filename);
 					pcb->state = BLOCK;
-					t_queue* aux_queue = dictionary_get(hfi->global_files, filename);
-					queue_push(aux_queue, pcb);
+					queue_push(dictionary_get(hfi->global_files, filename), pcb);
 					break;
 				}
 				if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
@@ -105,8 +104,7 @@ int main(int argc, char** argv) {
 					log_error(gck->logger, "Error al abrir archivo");
 					break;
 				}
-				t_queue* empty_queue = queue_create();
-				dictionary_put(hfi->global_files, filename, empty_queue);
+				dictionary_put(hfi->global_files, filename, queue_create());
 				dictionary_put(pcb->local_files, filename, 0);
 				break;
 			}
@@ -132,7 +130,9 @@ int main(int argc, char** argv) {
 					dictionary_remove(hfi->global_files, filename);
 				} else {
 					printf("Hay %d procesos esperando por el archivo %s\n", queue_size(waiting_pcbs), filename);
-					((t_pcb*)queue_pop(waiting_pcbs))->state = READY;
+					t_pcb* pcb_unlocked = queue_pop(waiting_pcbs);
+					dictionary_put(pcb_unlocked->local_files, filename, 0);
+					pcb_unlocked->state = READY;
 				}
 				dictionary_remove(pcb->local_files, filename);
 				break;

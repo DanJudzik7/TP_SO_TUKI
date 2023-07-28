@@ -81,7 +81,7 @@ bool process_instruction(t_instruction* instruction) {
 		}
 		case F_CLOSE: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE CERRAR UN ARCHIVO\n");
-			close_file(instruction);
+			//close_file(instruction);
 			return true;
 		}
 		case F_TRUNCATE: {
