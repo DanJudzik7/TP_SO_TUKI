@@ -76,12 +76,12 @@ void handle_fs(t_helper_fs_handler* hfi) {
 			log_error(hfi->logger, "Error al %s del archivo", fi->instruction->op_code == F_READ ? "leer" : "escribir");
 			continue;
 		}
-		log_warning(hfi->logger, "PID: %d - %s Archivo: %s - Puntero: %s - Dirección Memoria: %d - Tamaño: %s",
+		log_warning(hfi->logger, "PID: %d - %s Archivo: %s - Puntero: %s - Dirección Memoria: %s - Tamaño: %s",
 			fi->pcb->pid,
 			fi->instruction->op_code == F_READ ? "Leer" : "Escribir",
 			(char*)list_get(fi->instruction->args, 0),
 			(char*)list_get(fi->instruction->args, 1),
-			atoi(list_get(fi->instruction->args, 6)),
+			(char*)list_get(fi->instruction->args, 6),
 			(char*)list_get(fi->instruction->args, 2)
 		);
 		fi->pcb->state = READY;
