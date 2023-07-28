@@ -65,7 +65,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			}
 			char* value = deserialize_message(package);
 			set_register(list_get(instruction->args, 0), value, ec->cpu_register);
-			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
+			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
 			free(value);
 			break;
 		}
@@ -101,7 +101,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 				log_error(config_cpu.logger, "Error desconocido en memoria");
 				break;
 			}
-			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %d - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
+			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
 			break;
 		}
 		case F_READ:  // filename, logical address, bytes count, sid, offset, adrress

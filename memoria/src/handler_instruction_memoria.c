@@ -139,9 +139,11 @@ void compact_memory(t_memory_structure* memory_structure) {
 			// Si el segmento en ram esta mas abajo que el hueco (osea tengo un hueco arriba en ram), hago el swap
 			if (ram_segment->base > hole_segment->base) {
 				t_segment temp;
+				int s_id = ram_segment->s_id;
 				memcpy(&temp, hole_segment, sizeof(t_segment));
 				memcpy(hole_segment, ram_segment, sizeof(t_segment));
 				memcpy(ram_segment, &temp, sizeof(t_segment));
+				ram_segment->s_id = s_id;
 
 				i--;  // Disminuyo el índice para mantenerlo en la posición correcta en el siguiente ciclo
 			}
@@ -157,9 +159,9 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
     char* buffer = s_malloc(size + 1);
     int count_base = 0;
     int buffer_offset = 0;
-
+	t_segment* segment;
     while (size_rest > 0) {
-        t_segment* segment = get_segment_by_id(s_id, structures, pid);
+         segment = get_segment_by_id(s_id, structures, pid);
 
         if (segment != NULL) {
             if (segment->base + offset + size > segment->base + segment->offset) {
@@ -170,8 +172,7 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
                 memcpy(buffer + buffer_offset, segment->base + offset + (count_base * 16), copy_size);
                 buffer_offset += copy_size;
                 size_rest -= copy_size;
-				int dir_escritura = transform_base_to_decimal(segment->base + offset , structures->segment_zero->base);
-				log_info(config_memory.logger, "PID: %i | Accion: Escribir | Dirreccion fisica: %i | Tanaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
+				
             }
         } else {
             log_error(config_memory.logger, "No se encontró el segmento solicitado");
@@ -179,6 +180,8 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
         }
         count_base += 1;
     }
+	int dir_escritura = transform_base_to_decimal(segment->base + offset , structures->segment_zero->base);
+	log_info(config_memory.logger, "PID: %i | Accion: Escribir | Dirreccion fisica: %i | Tanaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
     buffer[buffer_offset] = '\0';
 	log_warning(config_memory.logger, "LECTURA -> %s ", buffer);
     return buffer;
