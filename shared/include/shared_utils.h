@@ -165,6 +165,8 @@ t_instruction* instruction_new(int32_t op_code);
 // Duplica una instrucción
 t_instruction* instruction_duplicate(t_instruction* source);
 
+//destuye un elemento
+void destroy_element(void* element);
 // Elimina una instrucción
 void instruction_destroy(t_instruction* instruction);
 

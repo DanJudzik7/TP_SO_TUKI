@@ -18,8 +18,8 @@ void remove_sg_table(t_memory_structure* memory_structure, int pid) {
 		t_segment* segment = list_get(segment_table_delete, i);
 		delete_segment(memory_structure, pid, segment->s_id);
 	}
-
-	dictionary_remove(memory_structure->table_pid_segments, pid_str);
+	dictionary_remove_and_destroy(memory_structure->table_pid_segments, pid_str, free);
+	free(pid_str);
 }
 
 int add_segment(t_memory_structure* memory_structure, int process_id, int size, int s_id) {
@@ -67,9 +67,10 @@ void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_d
 			segment_to_delete->offset = segment_pid->offset;
 			config_memory.remaining_memory += segment_pid->offset;
 			list_add(memory_structure->hole_list, segment_pid);
-			list_remove(segment_table, i);
+			list_remove_and_destroy_element(segment_table, i, free);
 			break;
 		}
+	free(pid_str);
 	}
 
 	// Recorro la RAM para eliminarla
@@ -78,7 +79,7 @@ void delete_segment(t_memory_structure* memory_structure, int pid, int s_id_to_d
 		// Si tiene la misma base que el segmento a eliminar
 		if (segment_ram->base == segment_to_delete->base) {
 			// Elimino justo esa posición
-			list_remove(memory_structure->ram, i);
+			list_remove_and_destroy_element(memory_structure->ram, i, free);
 			break;
 		}
 	}

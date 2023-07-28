@@ -97,9 +97,12 @@ t_instruction* instruction_duplicate(t_instruction* source) {
 	instruction->args = list_duplicate(source->args);
 	return instruction;
 }
+void destroy_element(void* element) {
+	free(element);
+}
 
 void instruction_destroy(t_instruction* instruction) {
-	list_destroy(instruction->args);
+	list_destroy_and_destroy_elements(instruction->args, destroy_element);
 	free(instruction);
 	instruction = NULL;
 }

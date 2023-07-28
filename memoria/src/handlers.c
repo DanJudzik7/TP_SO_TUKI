@@ -114,10 +114,12 @@ void handle_modules(t_memory_thread* mt) {
 			}
 			default: {
 				log_error(config_memory.logger, "Paquete inválido recibido, será ignorado");
-				package_destroy(package);
 				break;
 			}
 		}
+		package_destroy(package);
+		list_clean_and_destroy_elements(instruction->args, destroy_element);
+		free(instruction);
 		pthread_mutex_unlock(&memory_access);
 	}
 }

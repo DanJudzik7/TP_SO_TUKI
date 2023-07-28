@@ -27,17 +27,17 @@ t_memory_structure* new_memory_structure(void* memory) {
 
 	// Creo el segmento 0 y lo agrego al diccionario y a la memoria auxiliar ram
 	memory_structure->segment_zero->base = memory;
-	memory_structure->segment_zero->offset = config_memory.sg_zero_size;
+	memory_structure->segment_zero->offset = (int)config_memory.sg_zero_size;
 	memory_structure->segment_zero->s_id = 0;
 	dictionary_put(memory_structure->table_pid_segments, (char*)&memory_structure->segment_zero->s_id, memory_structure->segment_zero);
 	list_add(memory_structure->ram, memory_structure->segment_zero);
 	config_memory.remaining_memory -= config_memory.sg_zero_size;
 
 	// Creo el agujero inicial
-	hole* hole = s_malloc(sizeof(hole));
-	hole->base = memory + config_memory.sg_zero_size;
-	hole->size = config_memory.memory_size - config_memory.sg_zero_size;
-	list_add(memory_structure->hole_list, hole);
+	hole* h = s_malloc(sizeof(hole));
+	h->base = memory + config_memory.sg_zero_size;
+	h->size = config_memory.memory_size - config_memory.sg_zero_size;
+	list_add(memory_structure->hole_list, h);
 	// No es necesario cargar el hole en la ram,
 	// Cargamos procesos y si eliminamos uno lo mandamos a hole_list pero sigue en la ram hasta que borremos y compactemos
 	// list_add(memory_structure->ram,hole);
