@@ -102,7 +102,7 @@
         {
             "label": "Make Filesystem",
             "type": "shell",
-            "command": "make",
+            "command": "rm -f cfg/bitmap.dat cfg/blocks.dat && make",
             "options": {
                 "cwd": "${workspaceFolder}/filesystem"
             },

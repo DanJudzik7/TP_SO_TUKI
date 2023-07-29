@@ -15,7 +15,6 @@ int next_bit_position();
 void open_file(t_instruction* instruction);
 void close_file(t_instruction* instruction);
 void create_file(char* full_file_path, char* file_name);
-void clear_bit_position(t_config* fcb_data);
 void resize_block(t_config* fcb_data, int* file_size, char* file_name);
 t_list* get_bf_ip(int PUNTERO_INDIRECTO);
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list);
