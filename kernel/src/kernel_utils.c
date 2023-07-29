@@ -51,8 +51,8 @@ t_resource* resource_get(t_pcb* pcb, t_global_config_kernel* gck, char* name) {
 
 void resource_signal(t_resource* resource, char* resource_name, t_log* logger) {
 	if (!queue_is_empty(resource->enqueued_processes)) {
-		log_warning(logger, "PID: %d - Signal: %s - Instancias: %d", resource->assigned_to->pid, resource_name, resource->available_instances);
 		resource->assigned_to = queue_pop(resource->enqueued_processes);
+		log_warning(logger, "PID: %d - Signal: %s - Instancias: %d", resource->assigned_to->pid, resource_name, resource->available_instances);
 		resource->assigned_to->state = READY;
 		log_warning(logger, "PID: %d - Wait: %s - Instancias: %d", resource->assigned_to->pid, resource_name, resource->available_instances);
 		log_debug(logger, "Se desbloqueó el proceso %d", resource->assigned_to->pid);
