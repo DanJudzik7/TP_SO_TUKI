@@ -7,7 +7,7 @@
 #include "shared_package.h"
 #include "shared_socket.h"
 
-void setup_config();
+void setup_config(char* config_path);
 
 t_memory_structure* new_memory_structure(void* memory);
 void graph_specific_table_pid_segments(t_list* segment_table, int process_id, t_memory_structure* memory_base);

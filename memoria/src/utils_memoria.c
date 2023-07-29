@@ -2,9 +2,9 @@
 
 t_config_memory config_memory;
 
-void setup_config() {
+void setup_config(char* config_path) {
 	config_memory.logger = start_logger("memoria");
-	config_memory.config = start_config("memoria");
+	config_memory.config = start_config(config_path);
 	config_memory.port = config_get_string_value(config_memory.config, "PUERTO_ESCUCHA");
 	config_memory.memory_size = config_get_int_value(config_memory.config, "TAM_MEMORIA");
 	config_memory.sg_zero_size = config_get_int_value(config_memory.config, "TAM_SEGMENTO_0");

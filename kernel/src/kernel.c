@@ -1,7 +1,8 @@
 #include "kernel.h"
 
 int main(int argc, char** argv) {
-	t_config* config = start_config("kernel");
+	char* config_path = argv[1];
+	t_config* config = start_config(config_path);
 	t_global_config_kernel* gck = new_global_config_kernel(config);
 	t_helper_fs_handler* hfi = s_malloc(sizeof(t_helper_fs_handler));
 	log_warning(gck->logger, "Iniciando el kernel");

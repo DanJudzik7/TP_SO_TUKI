@@ -4,7 +4,8 @@ configuration_cpu config_cpu;
 
 int main(int argc, char** argv) {
 	t_log* logger = start_logger("cpu");
-	t_config* config = start_config("cpu");
+	char* config_path = argv[1];
+	t_config* config = start_config(config_path);
 
 	log_warning(logger, "Iniciando la CPU");
 	config_cpu.logger = logger;

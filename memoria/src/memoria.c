@@ -2,8 +2,9 @@
 
 extern t_config_memory config_memory;
 
-int main() {
-	setup_config();
+int main(int argc, char** argv) {
+	char* config_path = argv[1];
+	setup_config(config_path);
 	log_info(config_memory.logger, "Iniciando Memoria...");
 	int server_memory = socket_initialize_server(config_memory.port);  // Inicializo el socket en el puerto cargado por la config
 	if (server_memory == -1) {
