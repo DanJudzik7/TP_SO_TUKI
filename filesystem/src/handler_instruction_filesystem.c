@@ -79,23 +79,9 @@ bool process_instruction(t_instruction* instruction) {
 			open_file(instruction);
 			return true;
 		}
-		case F_CLOSE: {
-			printf("RECIBIMOS UNA INSTRUCCIÓN DE CERRAR UN ARCHIVO\n");
-			//close_file(instruction);
-			return true;
-		}
 		case F_TRUNCATE: {
 			printf("RECIBIMOS UNA INSTRUCCIÓN DE TRUNCAR UN ARCHIVO\n");
 			truncate_file(instruction);
-			/*for (int i = 0; i < config_fs.block_count; i++) {
-				bool car = bitarray_test_bit(config_fs.bitmap, i);
-				printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
-			}
-			for (int i = 0; i < 256; i += sizeof(uint32_t)) {
-				uint32_t* number = s_malloc(sizeof(uint32_t));
-				memcpy(number, config_fs.block_file + i, sizeof(uint32_t));	 // remove '*'
-				printf("Valor en la posición %d: %u\n", i, *number);
-			}*/
 			return true;
 		}
 		default: {
@@ -119,9 +105,6 @@ char* iterate_block_file(t_instruction* instruction) {
 	if (instruction->op_code == F_READ) {
 		log_info(config_fs.logger, "Leer Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
 		str_read = calloc(size_read + 1, sizeof(char));
-		/*for (int i = 0; i < 240; i++) {
-			printf("Valor en la posición %d: %c\n", i, config_fs.block_file[i]);
-		}*/
 	} else {
 		log_info(config_fs.logger, "Escribir Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
 		str_read = list_get(instruction->args, 7);
@@ -177,10 +160,6 @@ char* iterate_block_file(t_instruction* instruction) {
 		log_info(config_fs.logger, "El valor de la cadena leida es: %s", str_read);
 	} else {
 		log_info(config_fs.logger, "Escribio correctamente el Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
-		/*for (int i = 0; i < 240; i++) {
-			char c = config_fs.block_file[i];
-			printf("Valor en la posición %d: %c\n", i, c);
-		}*/
 	}
 	free(file_name);
 	free(directorio);
@@ -207,13 +186,11 @@ void truncate_file(t_instruction* instruction) {
 		truncate_file(instruction);
 	} else {
 		resize_block(fcb_data, &file_size, file_name);
-		// set_bit_position(fcb_data,&file_size);
-		// free(PUNTERO_DIRECTO);
 	}
 	log_info(config_fs.logger, "Archivo truncado: %s",file_name);
-	free(directorio);  // liberar la memoria del getcwd
+	free(directorio); 
 	free(full_file_path);
-	config_destroy(fcb_data);  // usar config_destroy en lugar de free
+	config_destroy(fcb_data); 
 }
 
 void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
@@ -372,7 +349,6 @@ t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 	for (int i = (PUNTERO_INDIRECTO * config_fs.block_size); i < ((PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size); i += 4) {
 		uint32_t* number = s_malloc(sizeof(uint32_t));
 		memcpy(number, config_fs.block_file + i, sizeof(uint32_t));
-		// printf("Valor en la posición %d: %u\n", i, *number);
 		if (*number != 0) {
 			list_add(pi_list, number);
 		}else{
@@ -380,36 +356,6 @@ t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 		}
 	}
 	return pi_list;
-}
-void clear_bit_position(t_config* fcb_data) {
-	/*int PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
-	for (int i = PUNTERO_DIRECTO * config_fs.block_size; i < (PUNTERO_DIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
-		config_fs.block_file[i] = '\0';
-	}
-	int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
-	t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
-	for (int i = 0; i < list_size(pi_list); i++) {
-		int pi_pos = *((int*)list_get(pi_list, i));
-		log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", pi_pos);
-		bitarray_clean_bit(config_fs.bitmap, pi_pos);
-		log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", pi_pos);
-		for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
-			config_fs.block_file[j] = '\0';
-		}
-	}
-	for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
-		config_fs.block_file[i] = '\0';
-	}
-	list_destroy(pi_list);
-	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_INDIRECTO);
-	bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
-	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_INDIRECTO);
-	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_DIRECTO);  // liberamos el array de strings
-	bitarray_clean_bit(config_fs.bitmap, PUNTERO_DIRECTO);
-	log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_DIRECTO);
-	config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
-	config_set_value(fcb_data, "PUNTERO_INDIRECTO", "");
-	config_save(fcb_data);*/
 }
 
 void open_file(t_instruction* instruction) {
@@ -460,15 +406,6 @@ void close_file(t_instruction* instruction) {
 	t_config* fcb_data = config_create(full_file_path);
 	clear_bit_position(fcb_data);
 
-	/*int remove_status = remove(full_file_path);
-	if (remove_status == 0) {
-		log_info(config_fs.logger, "El archivo %s ha sido cerrado exitosamente", full_file_path);
-	} else {
-		log_error(config_fs.logger, "Error al intentar cerrar el archivo %s", full_file_path);
-		config_destroy(fcb_data);  // liberamos fcb_data antes de abortar
-		free(full_file_path);	   // liberamos full_file_path antes de abortar
-		abort();
-	}*/
 	config_destroy(fcb_data);  // liberamos fcb_data
 	free(full_file_path);	   // liberamos full_file_path
 	free(directorio);		   // liberamos directorio
@@ -476,8 +413,6 @@ void close_file(t_instruction* instruction) {
 
 int next_bit_position() {
 	for (int i = 0; i < config_fs.block_count; i++) {
-		// bool car = bitarray_test_bit(config_fs.bitmap, i);
-		// printf("BIT:%i %s\n", i, car ? "Verdadero" : "Falso");
 		if (!bitarray_test_bit(config_fs.bitmap, i)) {
 			log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", i);
 			bitarray_set_bit(config_fs.bitmap, i);
