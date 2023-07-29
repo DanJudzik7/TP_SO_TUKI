@@ -30,7 +30,7 @@ t_segment* get_segment_by_id(int s_id, t_memory_structure* structures, int pid);
 // Devuelve el segmento mas cercano al heap
 bool more_close_to_heap(void* segment1, void* segment2);
 // Compacta la memoria
-void compact_memory(t_memory_structure* memory_structure);
+void compact_memory(t_memory_structure* memory_structure, int remaining_size);
 
 int min(int a, int b);
 #endif

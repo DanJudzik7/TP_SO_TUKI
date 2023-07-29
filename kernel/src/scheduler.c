@@ -71,7 +71,7 @@ void long_term_schedule(t_global_config_kernel* gck) {
 }
 
 t_pcb* short_term_scheduler(t_global_config_kernel* gck) {
-	sleep(2);
+	sleep(1);
 	if (gck->prioritized_pcb != NULL) {
 		t_pcb* prioritized = gck->prioritized_pcb;
 		gck->prioritized_pcb = NULL;

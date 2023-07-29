@@ -16,6 +16,7 @@ int main() {
 
 	// Inicializo la memoria (ESTA ES LA MEMORIA REAL, O SEA MI HEAP)
 	void* memory = s_malloc(config_memory.memory_size);
+	memset(memory, 0, config_memory.memory_size);
 	log_info(config_memory.logger, "Memoria inicializada correctamente");
 	t_memory_structure* memory_structure = new_memory_structure(memory);
 

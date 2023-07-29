@@ -57,7 +57,7 @@ void test_compact() {
 	write_memory(0, 1, 4, "hola", memory_structure, 1, "Test");
 	graph_ram(memory_structure, memory);
 
-	compact_memory(memory_structure);
+	//compact_memory(memory_structure);
 	char* buffer = read_memory(0, 1, 4, memory_structure, 1,"Test");
 	printf("El valor leído es: %s \n", buffer);
 	

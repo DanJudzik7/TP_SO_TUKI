@@ -107,7 +107,7 @@ void handle_modules(t_memory_thread* mt) {
 			case MEM_COMPACT_ALL: {
 				log_warning(config_memory.logger, "Solicitud de compactación");
 				usleep(config_memory.compact_delay);
-				compact_memory(mt->mem_structure);
+				compact_memory(mt->mem_structure, config_memory.remaining_memory);
 				if (!socket_send(mt->socket, serialize_all_segments_tables(mt->mem_structure)))
 					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;

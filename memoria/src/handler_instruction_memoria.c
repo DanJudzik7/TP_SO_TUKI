@@ -125,33 +125,36 @@ bool more_close_to_heap(void* segment1, void* segment2) {
 	return seg1->base < seg2->base;
 }
 
-void compact_memory(t_memory_structure* memory_structure) {
-	int size_of_hole = list_size(memory_structure->hole_list);
-	if (size_of_hole > 1) {
-		// Ordeno la lista de hole para tener siempre a mano el mas cercano al heap
-		list_sort(memory_structure->hole_list, more_close_to_heap);
-		// Recorro la memoria ram auxiliar donde están mis procesos actuales
-		for (int i = 1; i < list_size(memory_structure->ram); i++) {
-			// Agarro la posición de memoria en la ram
-			t_segment* ram_segment = list_get(memory_structure->ram, i);
-			// agarro el primer hole que siempre va a ser el mas cercano al heap
-			t_segment* hole_segment = list_get(memory_structure->hole_list, 0);
-			// Si el segmento en ram esta mas abajo que el hueco (osea tengo un hueco arriba en ram), hago el swap
-			if (ram_segment->base > hole_segment->base) {
-				t_segment temp;
-				int s_id = ram_segment->s_id;
-				memcpy(&temp, hole_segment, sizeof(t_segment));
-				memcpy(hole_segment, ram_segment, sizeof(t_segment));
-				memcpy(ram_segment, &temp, sizeof(t_segment));
-				ram_segment->s_id = s_id;
+void compact_memory(t_memory_structure* memory_structure, int remaining_size) {
+	list_sort(memory_structure->ram, more_close_to_heap );
+    t_segment* seg_aux = list_get(memory_structure->ram, 1);
+	char* buffer_aux = s_malloc(seg_aux->offset);
+	memcpy(buffer_aux, seg_aux->base, seg_aux->offset);
+    seg_aux->base = memory_structure->segment_zero->base + memory_structure->segment_zero->offset;
+	memcpy(seg_aux->base,buffer_aux,  seg_aux->offset);
+	free(buffer_aux);
+    for (int i = 1; i < list_size(memory_structure->ram) - 1; i++) {
 
-				i--;  // Disminuyo el índice para mantenerlo en la posición correcta en el siguiente ciclo
-			}
-			list_sort(memory_structure->hole_list, more_close_to_heap);
-		}
-	}
-	compact_hole_list(memory_structure);
-	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure);
+            t_segment* ram_segment = list_get(memory_structure->ram, i);
+			int dir_ram_segment = transform_base_to_decimal(ram_segment->base , memory_structure->segment_zero->base);
+            t_segment* ram_next_segment = list_get(memory_structure->ram, i + 1);
+			int dir_ram_next_segment = transform_base_to_decimal(ram_next_segment->base , memory_structure->segment_zero->base);
+            char* buffer = s_malloc(ram_next_segment->offset);
+			memcpy(buffer, ram_next_segment->base, ram_next_segment->offset);
+			ram_next_segment->base = (void*)((intptr_t)ram_segment->base + ram_segment->offset);
+			int dir = transform_base_to_decimal(ram_next_segment->base , memory_structure->segment_zero->base);
+            memcpy(ram_next_segment->base, buffer, ram_next_segment->offset);
+			memcpy(buffer, ram_next_segment->base, ram_next_segment->offset);
+            free(buffer);
+    }
+
+    t_segment* last_segment = list_get(memory_structure->ram, list_size(memory_structure->ram) - 1);
+    list_clean(memory_structure->hole_list);
+    t_segment* new_hole = s_malloc(sizeof(t_segment));
+    new_hole->base = (void*)((intptr_t)last_segment->base + last_segment->offset + 1);
+    new_hole->offset = remaining_size;
+    list_add(memory_structure->hole_list, new_hole);
+    graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure);
 }
 
 char* read_memory(int s_id, int offset, int size, t_memory_structure* structures, int pid, char* origen) {
@@ -181,7 +184,7 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
         count_base += 1;
     }
 	int dir_escritura = transform_base_to_decimal(segment->base + offset , structures->segment_zero->base);
-	log_info(config_memory.logger, "PID: %i | Accion: Escribir | Dirreccion fisica: %i | Tanaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
+	log_info(config_memory.logger, "PID: %i | Accion: LECTURA | Dirreccion fisica: %i | Tanaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
     buffer[buffer_offset] = '\0';
 	log_warning(config_memory.logger, "LECTURA -> %s ", buffer);
     return buffer;
