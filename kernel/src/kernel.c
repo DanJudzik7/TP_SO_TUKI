@@ -87,6 +87,7 @@ int main(int argc, char** argv) {
 			}
 			case F_OPEN: {	// filename
 				char* filename = list_get(kernel_request->args, 0);
+				list_add(kernel_request->args, strdup("0"));
 				log_warning(gck->logger, "PID: %d - Abrir Archivo: %s", pcb->pid, filename);
 				if (dictionary_has_key(hfi->global_files, filename)) {
 					log_warning(gck->logger, "PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK", pcb->pid);
@@ -100,7 +101,26 @@ int main(int argc, char** argv) {
 					break;
 				}
 				t_package* package = socket_receive(hfi->socket_filesystem);
-				if (package == NULL || package->type != MESSAGE_OK) {
+				if (package == NULL) {
+					log_error(gck->logger, "Se desconectó filesystem");
+					break;
+				}
+				
+				if(package->type == MESSAGE_FLAW) {
+					log_warning(gck->logger, "Archivo no estaba creado, se va a crear");
+					list_replace(kernel_request->args, 1, strdup("1"));
+					if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
+						log_error(gck->logger, "Error al enviar operación a filesystem");
+						break;
+					}
+					package_destroy(package);
+					package = socket_receive(hfi->socket_filesystem);
+					if (package == NULL) {
+						log_error(gck->logger, "Se desconectó filesystem");
+						break;
+					}
+				}
+				if (package->type != MESSAGE_OK) {
 					log_error(gck->logger, "Error al abrir archivo");
 					break;
 				}
@@ -282,12 +302,6 @@ int main(int argc, char** argv) {
 				char* resource_name = list_get(kernel_request->args, 0);
 				t_resource* resource = resource_get(pcb, gck, resource_name);
 				if (resource == NULL) break;
-				/*if (resource->assigned_to != pcb) {
-					log_error(gck->logger, "El proceso %d intentó liberar un recurso que no tiene asignado", pcb->pid);
-					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: EXIT", pcb->pid);
-					pcb->state = EXIT_PROCESS;
-					break;
-				}*/
 				gck->prioritized_pcb = pcb;
 				resource_signal(resource, resource_name, gck->logger);
 				break;

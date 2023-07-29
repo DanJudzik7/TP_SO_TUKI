@@ -17,7 +17,6 @@ int handle_kernel(int* socket_kernel) {
 			log_warning(config_fs.logger, "Error al enviar el paquete");
 			return -1;
 		}
-		if (!processed) abort();
 		instruction_destroy(instruction);
 		package_destroy(package);
 	}
@@ -81,8 +80,7 @@ bool process_instruction(t_instruction* instruction) {
 			return true;
 		}
 		case F_OPEN: {
-			open_file(instruction);
-			return true;
+			return open_file(instruction);
 		}
 		case F_TRUNCATE: {
 			truncate_file(instruction);
@@ -134,12 +132,12 @@ char* iterate_block_file(t_instruction* instruction) {
 	int block_number_file;
 	for (int i = position_initial_block; i <= position_initial_block + blocks_need; i++) {
 		int block_number = *(int*)list_get(pi_list, i);
-		if (i > 0) {
-			block_number_file = i;
+		if (*PUNTERO_DIRECTO==block_number) {
+			block_number_file = 0;
 		} else {
 			block_number_file = i + 1;
 		}
-		log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+		log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", block_number);
 		usleep(config_fs.RETARDO_ACCESO * 1000);
 		log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: %i - Bloque File System: %i ", file_name, block_number_file, block_number);
 		int start_position_in_block = block_number * config_fs.block_size;
@@ -184,12 +182,7 @@ void truncate_file(t_instruction* instruction) {
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
 	log_info(config_fs.logger, "Truncar Archivo: %s - Tamaño: %i", file_name, file_size);
-	if (fcb_data == NULL) {
-		open_file(instruction);
-		truncate_file(instruction);
-	} else {
-		resize_block(fcb_data, &file_size, file_name);
-	}
+	resize_block(fcb_data, &file_size, file_name);
 	log_info(config_fs.logger, "Archivo truncado: %s", file_name);
 	free(directorio);
 	free(full_file_path);
@@ -364,29 +357,37 @@ t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 	return pi_list;
 }
 
-void open_file(t_instruction* instruction) {
+bool open_file(t_instruction* instruction) {
 	if (list_size(instruction->args) < 1) {
 		log_error(config_fs.logger, "Instrucción sin argumentos, se esperaba al menos uno");
 		abort();
 	}
 	char* file_name = list_get(instruction->args, 0);
+	bool can_create = strcmp(list_get(instruction->args, 1), "1") == 0;
 
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
-
+	free(directorio);  // liberamos directorio
+	
 	log_info(config_fs.logger, "Abrir Archivo: %s", file_name);
 	FILE* fcb = fopen(full_file_path, "r");
 	if (fcb == NULL) {
-		fopen(full_file_path, "w");
-		log_warning(config_fs.logger, "No existía el archivo");
-		create_file(full_file_path, file_name);
+		if(can_create) {
+			log_warning(config_fs.logger, "Iniciando creación de archivo");
+			fopen(full_file_path, "w");
+			create_file(full_file_path, file_name);
+		} else {
+			log_warning(config_fs.logger, "No existía el archivo, se va a pedir crearlo");
+			free(full_file_path);
+			return false;
+		}
 	} else {
 		log_warning(config_fs.logger, "Existía el archivo");
 		fclose(fcb);
 	}
 	log_info(config_fs.logger, "Archivo abierto: %s", file_name);
 	free(full_file_path);
-	free(directorio);  // liberamos directorio
+	return true;
 }
 void create_file(char* full_file_path, char* file_name) {
 	log_info(config_fs.logger, "Crear Archivo: %s", file_name);
