@@ -17,7 +17,6 @@ void test_rw();
 void test_instruction_memory();
 // Test de buffer de memoria
 void test_buffer();
-
 // Función para graficar la RAM
 void graph_ram(t_memory_structure* memory_structure, void* memory_base);
 // Función para graficar una tabla especifica de tipo table_pid_segments

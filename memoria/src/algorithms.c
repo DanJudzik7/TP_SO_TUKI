@@ -54,23 +54,23 @@ t_segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int
 		hole* current_hole = list_get(memory_structure->hole_list, i);
 		// Si el hueco actual es lo suficientemente grande para alojar el segmento...
 		if (current_hole->size >= size) {
-			// ...y si no tenemos un "mejor hueco" aún, o si el hueco actual es más pequeño que el "mejor hueco"...
+			// si no tenemos un mejor hueco, o si el hueco actual es más pequeño que el mejor hueco...
 			if (best_hole == NULL || current_hole->size < best_hole->size) {
-				// ...entonces el hueco actual se convierte en el "mejor hueco".
+				// entonces el hueco actual se convierte en el mejor hueco.
 				best_hole = current_hole;
 			}
 		}
 	}
 
-	// Si encontramos un "mejor hueco" adecuado...
+	// Si encontramos un mejor hueco adecuado
 	if (best_hole != NULL) {
-		// ...creamos un nuevo segmento y lo ubicamos en ese hueco.
+		// creamos un nuevo segmento y lo ubicamos en ese hueco
 		t_segment* new_segment = s_malloc(sizeof(t_segment));
 		new_segment->base = best_hole->base;
 		new_segment->offset = size;
 		new_segment->s_id = s_id;
 
-		// Agregamos el nuevo segmento a la lista de todos los segmentos.
+		// Agregamos el nuevo segmento a la lista de todos los segmentos
 		t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
 		list_add(segment_table, new_segment);
 		list_add(memory_structure->ram, new_segment);
@@ -79,12 +79,12 @@ t_segment* best_fit(t_memory_structure* memory_structure, int size, int pid, int
 		best_hole->base += size;
 		best_hole->size -= size;
 
-		// Si el hueco se ha vaciado, lo eliminamos de la lista.
+		// Si el hueco se ha vaciado, lo eliminamos de la lista
 		if (best_hole->size == 0) {
 			list_remove_by_condition(memory_structure->hole_list, (bool (*)(void*))is_hole_empty);
 		}
 		return new_segment;
-	} else return NULL; // Si no encontramos un hueco lo suficientemente grande, devolvemos NULL.
+	} else return NULL; // Si no encontramos un hueco lo suficientemente grande, devolvemos NULL
 }
 
 t_segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, int s_id) {
@@ -93,34 +93,34 @@ t_segment* worst_fit(t_memory_structure* memory_structure, int size, int pid, in
 	// Iteramos a través de la lista de huecos.
 	for (int i = 0; i < list_size(memory_structure->hole_list); i++) {
 		hole* current_hole = list_get(memory_structure->hole_list, i);
-		// Si el hueco actual es lo suficientemente grande para alojar el segmento...
+		// Si el hueco actual es lo suficientemente grande para alojar el segmento
 		if (current_hole->size >= size) {
-			// ...y si no tenemos un "peor hueco" aún, o si el hueco actual es más grande que el "peor hueco"...
+			// si no tenemos un "peor hueco" aún, o si el hueco actual es más grande que el peor hueco
 			if (worst_hole == NULL || current_hole->size > worst_hole->size) {
-				// ...entonces el hueco actual se convierte en el "peor hueco".
+				// entonces el hueco actual se convierte en el peor hueco
 				worst_hole = current_hole;
 			}
 		}
 	}
 
-	// Si encontramos un "peor hueco" adecuado...
+	// Si encontramos un peor hueco adecuado
 	if (worst_hole != NULL) {
-		// ...creamos un nuevo segmento y lo ubicamos en ese hueco.
+		// creamos un nuevo segmento y lo ubicamos en ese hueco
 		t_segment* new_segment = s_malloc(sizeof(t_segment));
 		new_segment->base = worst_hole->base;
 		new_segment->offset = size;
-		new_segment->s_id = s_id;  // Asumiendo que hay un contador global para los IDs de segmentos.
+		new_segment->s_id = s_id;
 
 		// Agregamos el nuevo segmento a la lista de todos los segmentos.
 		t_list* segment_table = dictionary_get(memory_structure->table_pid_segments, pid_str);
 		list_add(segment_table, new_segment);
 		list_add(memory_structure->ram, new_segment);
 
-		// Actualizamos la información del hueco.
+		// Actualizamos la información del hueco
 		worst_hole->base += size;
 		worst_hole->size -= size;
 
-		// Si el hueco se ha vaciado, lo eliminamos de la lista.
+		// Si el hueco se ha vaciado, lo eliminamos de la lista
 		if (worst_hole->size == 0) {
 			list_remove_by_condition(memory_structure->hole_list, (bool (*)(void*))is_hole_empty);
 		}

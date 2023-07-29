@@ -21,7 +21,6 @@ t_memory_structure* new_memory_structure(void* memory) {
 	memory_structure->hole_list = list_create();
 	memory_structure->table_pid_segments = dictionary_create();
 	memory_structure->segment_zero = s_malloc(sizeof(t_segment));
-	// Recordemos que la ram es una t_list unicamente de ayuda, que apunta a las direcciones de memoria [dir_segment_zer, sig dirección, etc ]
 	memory_structure->ram = list_create();
 	memory_structure->heap = memory;
 
@@ -38,9 +37,7 @@ t_memory_structure* new_memory_structure(void* memory) {
 	h->base = memory + config_memory.sg_zero_size;
 	h->size = config_memory.memory_size - config_memory.sg_zero_size;
 	list_add(memory_structure->hole_list, h);
-	// No es necesario cargar el hole en la ram,
-	// Cargamos procesos y si eliminamos uno lo mandamos a hole_list pero sigue en la ram hasta que borremos y compactemos
-	// list_add(memory_structure->ram,hole);
+	
 	return memory_structure;
 }
 
@@ -50,7 +47,6 @@ void graph_specific_table_pid_segments(t_list* segment_table, int process_id, t_
 	printf("--------------------------------------\n");
 	for (int i = 0; i < list_size(segment_table); i++) {
 		t_segment* seg = list_get(segment_table, i);
-		printf("Segmento: %d", seg->s_id);
 		printf("| PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base->segment_zero->base), seg->offset);
 	}
 	printf("--------------------------------------\n");
@@ -63,7 +59,6 @@ void graph_table_pid_segments(t_dictionary* table_pid_segments, t_memory_structu
 	for (int i = 1; i < list_size(keys); i++) {
 		char* key = string_duplicate(list_get(keys, i));
 		int process_id = atoi(key);
-		printf("\nObteniendo la tabla de segmentos del PID: %s... ", key);
 		t_list* segment_table = dictionary_get(table_pid_segments, key);
 		if (segment_table == NULL) {
 			free(key);	// Liberar la memoria asignada por string_duplicate
