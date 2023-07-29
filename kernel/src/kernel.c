@@ -115,15 +115,6 @@ int main(int argc, char** argv) {
 					log_error(gck->logger, "El archivo %s no está abierto", filename);
 					break;
 				}
-				if (!socket_send(hfi->socket_filesystem, serialize_instruction(kernel_request))) {
-					log_error(gck->logger, "Error al enviar operación a filesystem");
-					break;
-				}
-				t_package* package = socket_receive(hfi->socket_filesystem);
-				if (package->type != MESSAGE_OK) {
-					log_error(gck->logger, "Error al cerrar archivo");
-					break;
-				}
 				t_queue* waiting_pcbs = dictionary_get(hfi->global_files, filename);
 				if (queue_is_empty(waiting_pcbs)) {
 					queue_destroy(waiting_pcbs);
