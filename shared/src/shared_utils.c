@@ -129,3 +129,42 @@ void execution_context_destroy(t_execution_context* ec) {
 	free(ec);
 	ec = NULL;
 }
+
+char* read_op_code(op_code code) {
+	switch (code) {
+		case F_READ:
+			return "F_READ";
+		case F_WRITE:
+			return "F_WRITE";
+		case SET:
+			return "SET";
+		case MOV_IN:
+			return "MOV_IN";
+		case MOV_OUT:
+			return "MOV_OUT";
+		case F_TRUNCATE:
+			return "F_TRUNCATE";
+		case F_SEEK:
+			return "F_SEEK";
+		case CREATE_SEGMENT:
+			return "CREATE_SEGMENT";
+		case I_O:
+			return "I/O";
+		case WAIT:
+			return "WAIT";
+		case SIGNAL:
+			return "SIGNAL";
+		case F_OPEN:
+			return "F_OPEN";
+		case F_CLOSE:
+			return "F_CLOSE";
+		case DELETE_SEGMENT:
+			return "DELETE_SEGMENT";
+		case EXIT:
+			return "EXIT";
+		case YIELD:
+			return "YIELD";
+		default:
+			return "INVALID";
+	}
+}

@@ -48,7 +48,7 @@ typedef struct t_segment {
 typedef struct t_physical_address {
 	int segment;
 	int offset;
-	intptr_t adress;
+	intptr_t address;
 } t_physical_address;
 
 typedef enum t_memory_op {
@@ -166,8 +166,9 @@ t_instruction* instruction_new(int32_t op_code);
 // Duplica una instrucción
 t_instruction* instruction_duplicate(t_instruction* source);
 
-//destuye un elemento
+// Destruye un elemento
 void destroy_element(void* element);
+
 // Elimina una instrucción
 void instruction_destroy(t_instruction* instruction);
 
@@ -176,5 +177,8 @@ t_execution_context* execution_context_new(int pid);
 
 // Limpia un Execution Context de la memoria
 void execution_context_destroy(t_execution_context* ec);
+
+// Obtiene el nombre del operation code
+char* read_op_code(op_code code);
 
 #endif

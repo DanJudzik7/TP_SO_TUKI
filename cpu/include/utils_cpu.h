@@ -19,7 +19,4 @@ t_physical_address* mmu(int logical_address, int size, t_execution_context* ec);
 // Obtener segmento por id del segmento
 t_segment* list_get_by_sid(t_list* list, int id);
 
-// Obtiene el nombre del operation code
-char* read_op_code(op_code code);
-
 #endif

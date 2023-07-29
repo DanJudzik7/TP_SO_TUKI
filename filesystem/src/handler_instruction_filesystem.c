@@ -11,7 +11,7 @@ int handle_kernel(int* socket_kernel) {
 		}
 
 		t_instruction* instruction = deserialize_instruction(package);
-		log_warning(config_fs.logger, "El código de operación es: %i", instruction->op_code);
+		log_warning(config_fs.logger, "Se recibió la operación: %s", read_op_code(instruction->op_code));
 		bool processed = process_instruction(instruction);
 		if (!socket_send(*socket_kernel, package_new(processed ? MESSAGE_OK : MESSAGE_FLAW))) {
 			log_warning(config_fs.logger, "Error al enviar el paquete");
@@ -27,7 +27,6 @@ int handle_kernel(int* socket_kernel) {
 bool process_instruction(t_instruction* instruction) {
 	switch (instruction->op_code) {
 		case F_READ: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
-			printf("RECIBIMOS UNA INSTRUCCIÓN DE LEER ARCHIVO\n");
 			char* read_file = iterate_block_file(instruction);
 			if (config_fs.socket_memory != -1) {
 				t_instruction* mem_request = instruction_new(MEM_WRITE_ADDRESS);
@@ -54,7 +53,6 @@ bool process_instruction(t_instruction* instruction) {
 			return true;
 		}
 		case F_WRITE: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
-			printf("RECIBIMOS UNA INSTRUCCIÓN DE ESCRIBIR ARCHIVO\n");
 			if (config_fs.socket_memory != -1) {
 				t_instruction* mem_request = instruction_new(MEM_READ_ADDRESS);
 				list_add(mem_request->args, list_get(instruction->args, 4));
@@ -75,17 +73,14 @@ bool process_instruction(t_instruction* instruction) {
 			return true;
 		}
 		case F_OPEN: {
-			printf("RECIBIMOS UNA INSTRUCCIÓN DE ABRIR ARCHIVO\n");
 			open_file(instruction);
 			return true;
 		}
 		case F_TRUNCATE: {
-			printf("RECIBIMOS UNA INSTRUCCIÓN DE TRUNCAR UN ARCHIVO\n");
 			truncate_file(instruction);
 			return true;
 		}
 		default: {
-			printf("Error al recibir código de operación\n");
 			return false;
 		}
 	}
@@ -100,13 +95,13 @@ char* iterate_block_file(t_instruction* instruction) {
 	char* file_name = list_get(instruction->args, 0);
 	int position_read = atoi(list_get(instruction->args, 1));
 	int size_read = atoi(list_get(instruction->args, 2));
-	char* direccion_memoria = list_get(instruction->args, 6);
+	char* memory_address = list_get(instruction->args, 6);
 	char* str_read;
 	if (instruction->op_code == F_READ) {
-		log_info(config_fs.logger, "Leer Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
+		log_info(config_fs.logger, "Leer Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read) ;
 		str_read = calloc(size_read + 1, sizeof(char));
 	} else {
-		log_info(config_fs.logger, "Escribir Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
+		log_info(config_fs.logger, "Escribir Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read) ;
 		str_read = list_get(instruction->args, 7);
 		log_info(config_fs.logger, "El valor de la cadena a escribir es: %s", str_read);
 	}
@@ -157,14 +152,14 @@ char* iterate_block_file(t_instruction* instruction) {
 	}
 	if (instruction->op_code == F_READ) {
 		str_read[read_positions] = '\0';
-		log_info(config_fs.logger, "El valor de la cadena leida es: %s", str_read);
+		log_info(config_fs.logger, "El valor de la cadena leída es: %s", str_read);
 	} else {
-		log_info(config_fs.logger, "Escribio correctamente el Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
+		log_info(config_fs.logger, "Escribió correctamente el Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read) ;
 	}
 	free(file_name);
 	free(directorio);
 	free(full_file_path);
-	free(direccion_memoria);
+	free(memory_address);
 	config_destroy(fcb_data);
 	list_destroy_and_destroy_elements(pi_list, free);
 	return str_read;

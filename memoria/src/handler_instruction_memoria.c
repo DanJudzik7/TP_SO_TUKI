@@ -136,13 +136,10 @@ void compact_memory(t_memory_structure* memory_structure, int remaining_size) {
     for (int i = 1; i < list_size(memory_structure->ram) - 1; i++) {
 
             t_segment* ram_segment = list_get(memory_structure->ram, i);
-			int dir_ram_segment = transform_base_to_decimal(ram_segment->base , memory_structure->segment_zero->base);
             t_segment* ram_next_segment = list_get(memory_structure->ram, i + 1);
-			int dir_ram_next_segment = transform_base_to_decimal(ram_next_segment->base , memory_structure->segment_zero->base);
             char* buffer = s_malloc(ram_next_segment->offset);
 			memcpy(buffer, ram_next_segment->base, ram_next_segment->offset);
 			ram_next_segment->base = (void*)((intptr_t)ram_segment->base + ram_segment->offset);
-			int dir = transform_base_to_decimal(ram_next_segment->base , memory_structure->segment_zero->base);
             memcpy(ram_next_segment->base, buffer, ram_next_segment->offset);
 			memcpy(buffer, ram_next_segment->base, ram_next_segment->offset);
             free(buffer);
@@ -184,7 +181,7 @@ char* read_memory(int s_id, int offset, int size, t_memory_structure* structures
         count_base += 1;
     }
 	int dir_escritura = transform_base_to_decimal(segment->base + offset , structures->segment_zero->base);
-	log_info(config_memory.logger, "PID: %i | Accion: LECTURA | Dirreccion fisica: %i | Tanaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
+	log_info(config_memory.logger, "PID: %i | Acción: LECTURA | Dirección física: %i | Tamaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
     buffer[buffer_offset] = '\0';
 	log_warning(config_memory.logger, "LECTURA -> %s ", buffer);
     return buffer;
@@ -199,7 +196,7 @@ bool write_memory(int s_id, int offset, int size, char* buffer, t_memory_structu
 		} else {
 			memcpy(segment->base + offset, buffer, strlen(buffer) + 1);
 			int dir_escritura = transform_base_to_decimal(segment->base + offset, structures->segment_zero->base);
-			log_info(config_memory.logger, "PID: %i | Accion: Escribir | Dirreccion fisica: %i | Tanaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
+			log_info(config_memory.logger, "PID: %i | Acción: Escribir | Dirección física: %i | Tamaño: %i | Origen: %s ", pid, dir_escritura, size, origen);
 			log_warning(config_memory.logger, "Escritura -> %s ", buffer);
 			return true;
 		}

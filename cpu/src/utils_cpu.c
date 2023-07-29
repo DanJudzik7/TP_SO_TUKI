@@ -69,8 +69,7 @@ t_physical_address* mmu(int logical_address, int size, t_execution_context* ec) 
 	t_physical_address* physical_address = s_malloc(sizeof(t_physical_address));
 	physical_address->segment = floor(logical_address / config_cpu.max_segment_size);
 	physical_address->offset = logical_address % config_cpu.max_segment_size;
-	physical_address->adress = (intptr_t) (list_get_by_sid(ec->segments_table, physical_address->segment)->base + physical_address->offset - list_get_by_sid(ec->segments_table, 0)->base);
-	//log_info(config_cpu.logger, "PID: %d - Accion: MMU - Segmento: %d - Offset: %d - Tamaño: %d - Dirección física: %li", ec->pid, physical_address->segment, physical_address->offset, size, physical_address->adress);
+	physical_address->address = (intptr_t) (list_get_by_sid(ec->segments_table, physical_address->segment)->base + physical_address->offset - list_get_by_sid(ec->segments_table, 0)->base);
 	if (physical_address->offset + size > list_get_by_sid(ec->segments_table, physical_address->segment)->offset) {
 		log_error(config_cpu.logger, "PID: %d - Error SEG_FAULT- Segmento: %d - Offset: %d - Tamaño: %d", ec->pid, physical_address->segment, physical_address->offset, size);
 		free(physical_address);
@@ -87,43 +86,4 @@ t_segment* list_get_by_sid(t_list* list, int id) {
 		i++;
 	}
 	return NULL;
-}
-
-char* read_op_code(op_code code) {
-	switch (code) {
-		case F_READ:
-			return "F_READ";
-		case F_WRITE:
-			return "F_WRITE";
-		case SET:
-			return "SET";
-		case MOV_IN:
-			return "MOV_IN";
-		case MOV_OUT:
-			return "MOV_OUT";
-		case F_TRUNCATE:
-			return "F_TRUNCATE";
-		case F_SEEK:
-			return "F_SEEK";
-		case CREATE_SEGMENT:
-			return "CREATE_SEGMENT";
-		case I_O:
-			return "I/O";
-		case WAIT:
-			return "WAIT";
-		case SIGNAL:
-			return "SIGNAL";
-		case F_OPEN:
-			return "F_OPEN";
-		case F_CLOSE:
-			return "F_CLOSE";
-		case DELETE_SEGMENT:
-			return "DELETE_SEGMENT";
-		case EXIT:
-			return "EXIT";
-		case YIELD:
-			return "YIELD";
-		default:
-			return "INVALID";
-	}
 }

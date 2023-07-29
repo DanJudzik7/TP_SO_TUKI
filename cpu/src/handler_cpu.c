@@ -41,7 +41,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			break;
 		}
 		case MOV_IN: {	// Registro, Dirección Lógica (y associated_pa)
-			// Aca deberia devolver el seg_fault
+			// Aca debería devolver el seg_fault
 			if (associated_pa == NULL) {
 				ec->kernel_request = instruction_new(EXIT);
 				list_add(ec->kernel_request->args, string_itoa(9));
@@ -53,7 +53,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			list_add(mem_op->args, string_itoa(size_of_register_pointer(list_get(instruction->args, 0), ec->cpu_register)));
 			list_add(mem_op->args, string_itoa(ec->pid));
 			list_add(mem_op->args, "CPU");
-			list_add(mem_op->args, string_itoa(associated_pa->adress));
+			list_add(mem_op->args, string_itoa(associated_pa->address));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
 				break;
@@ -65,7 +65,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			}
 			char* value = deserialize_message(package);
 			set_register(list_get(instruction->args, 0), value, ec->cpu_register);
-			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
+			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->address, value);
 			free(value);
 			break;
 		}
@@ -82,7 +82,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			list_add(mem_op->args, value);
 			list_add(mem_op->args, string_itoa(ec->pid));
 			list_add(mem_op->args, "CPU");
-			list_add(mem_op->args, string_itoa(associated_pa->adress));
+			list_add(mem_op->args, string_itoa(associated_pa->address));
 			if (!socket_send(config_cpu.socket_memory, serialize_instruction(mem_op))) {
 				log_error(config_cpu.logger, "Error al enviar operación a memoria");
 				break;
@@ -101,10 +101,10 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 				log_error(config_cpu.logger, "Error desconocido en memoria");
 				break;
 			}
-			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->adress, value);
+			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->address, value);
 			break;
 		}
-		case F_READ:  // filename, logical address, bytes count, sid, offset, adrress
+		case F_READ:  // filename, logical address, bytes count, sid, offset, address
 		case F_WRITE: {
 			if (associated_pa == NULL) {
 				log_error(config_cpu.logger, "Error: Dirección lógica inválida");
@@ -113,7 +113,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			ec->kernel_request = instruction_duplicate(instruction);
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->segment));
 			list_add(ec->kernel_request->args, string_itoa(associated_pa->offset));
-			list_add(ec->kernel_request->args, string_itoa(associated_pa->adress));
+			list_add(ec->kernel_request->args, string_itoa(associated_pa->address));
 			break;
 		}
 		case I_O:
