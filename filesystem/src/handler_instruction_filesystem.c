@@ -18,8 +18,8 @@ int handle_kernel(int* socket_kernel) {
 			return -1;
 		}
 		if (!processed) abort();
-		free(instruction);
-		free(package);
+		instruction_destroy(instruction);
+		package_destroy(package);
 	}
 	return 0;
 }
@@ -196,19 +196,21 @@ void truncate_file(t_instruction* instruction) {
 void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 	int TAMANIO_ARCHIVO = config_get_int_value(fcb_data, "TAMANIO_ARCHIVO");
 	char* size_file_char = string_itoa(*file_size);
+	char* pd_position_string = NULL;
+	char* pi_position_string = NULL;
 	config_set_value(fcb_data, "TAMANIO_ARCHIVO", size_file_char);
+	t_list* pi_list = NULL;
 	if (*file_size != TAMANIO_ARCHIVO) {
 		char* puntero_directo_char = config_get_string_value(fcb_data, "PUNTERO_DIRECTO");
 		char* puntero_indirecto_char = config_get_string_value(fcb_data, "PUNTERO_INDIRECTO");
 		int PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
 		int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
-
 		if (strcmp(puntero_indirecto_char, "") != 0) {
 			log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
 			usleep(config_fs.RETARDO_ACCESO  * 1000);
 			log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 1- Bloque File System: %i ", file_name, PUNTERO_INDIRECTO);
 		}
-		t_list* pi_list = get_bf_ip(PUNTERO_INDIRECTO);
+		pi_list = get_bf_ip(PUNTERO_INDIRECTO);
 		int list_length = list_size(pi_list);
 		if (*file_size == 0) {
 			if (strcmp(puntero_directo_char, "") != 0) {
@@ -242,7 +244,6 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
 				}
-				list_destroy(pi_list);
 				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_INDIRECTO);
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
 				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_INDIRECTO);
@@ -250,7 +251,7 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 			}
 		} else if ((*file_size) <= config_fs.block_size) {
 			if (strcmp(puntero_directo_char, "") == 0) {
-				char* pd_position_string = string_itoa(next_bit_position());
+				pd_position_string = string_itoa(next_bit_position());
 				config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
 			}
 			if (strcmp(puntero_indirecto_char, "") != 0) {
@@ -272,7 +273,6 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
 				}
-				list_destroy(pi_list);
 				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_INDIRECTO);
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_INDIRECTO);
 				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_INDIRECTO);
@@ -280,12 +280,12 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 			}
 		} else {
 			if (strcmp(puntero_directo_char, "") == 0) {
-				char* pd_position_string = string_itoa(next_bit_position());
+				pd_position_string = string_itoa(next_bit_position());
 				config_set_value(fcb_data, "PUNTERO_DIRECTO", pd_position_string);
 				PUNTERO_DIRECTO = atoi(pd_position_string);
 			}
 			if (strcmp(puntero_indirecto_char, "") == 0) {
-				char* pi_position_string = string_itoa(next_bit_position());
+				pi_position_string = string_itoa(next_bit_position());
 				config_set_value(fcb_data, "PUNTERO_INDIRECTO", pi_position_string);
 				PUNTERO_INDIRECTO = atoi(pi_position_string);
 			}
@@ -333,6 +333,9 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 	}
 	config_save(fcb_data);
 	free(size_file_char);
+	if(pd_position_string!=NULL) free(pd_position_string);
+	if(pi_position_string!=NULL) free(pi_position_string);
+	if(pi_list!=NULL) list_destroy_and_destroy_elements(pi_list, free);
 }
 
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list) {
@@ -399,17 +402,6 @@ void create_file(char* full_file_path, char* file_name) {
 	config_destroy(fcb_data);  // liberamos full_file_path
 }
 
-void close_file(t_instruction* instruction) {
-	char* file_name = list_get(instruction->args, 0);
-	char* directorio = getcwd(NULL, 0);
-	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
-	t_config* fcb_data = config_create(full_file_path);
-	clear_bit_position(fcb_data);
-
-	config_destroy(fcb_data);  // liberamos fcb_data
-	free(full_file_path);	   // liberamos full_file_path
-	free(directorio);		   // liberamos directorio
-}
 
 int next_bit_position() {
 	for (int i = 0; i < config_fs.block_count; i++) {

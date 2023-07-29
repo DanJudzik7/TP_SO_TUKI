@@ -13,7 +13,6 @@ bool process_instruction(t_instruction* instruction);
 
 int next_bit_position();
 void open_file(t_instruction* instruction);
-void close_file(t_instruction* instruction);
 void create_file(char* full_file_path, char* file_name);
 void resize_block(t_config* fcb_data, int* file_size, char* file_name);
 t_list* get_bf_ip(int PUNTERO_INDIRECTO);
