@@ -26,7 +26,7 @@ int handle_kernel(int* socket_kernel) {
 
 bool process_instruction(t_instruction* instruction) {
 	switch (instruction->op_code) {
-		case F_READ: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
+		case F_READ: {	// NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
 			char* read_file = iterate_block_file(instruction);
 			if (config_fs.socket_memory != -1) {
 				t_instruction* mem_request = instruction_new(MEM_WRITE_ADDRESS);
@@ -39,6 +39,10 @@ bool process_instruction(t_instruction* instruction) {
 					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 				}
 				t_package* package = socket_receive(config_fs.socket_memory);
+				if (package == NULL) {
+					log_error(config_fs.logger, "Se desconectó memoria");
+					return false;
+				}
 				if (package->type == SEG_FAULT) {
 					log_error(config_fs.logger, "Segmentation Fault al leer el archivo");
 					return false;
@@ -52,7 +56,7 @@ bool process_instruction(t_instruction* instruction) {
 			free(read_file);
 			return true;
 		}
-		case F_WRITE: { // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
+		case F_WRITE: {	 // NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ORIGEN(6)-> s_id, offset, size, pid, origen
 			if (config_fs.socket_memory != -1) {
 				t_instruction* mem_request = instruction_new(MEM_READ_ADDRESS);
 				list_add(mem_request->args, list_get(instruction->args, 4));
@@ -63,8 +67,12 @@ bool process_instruction(t_instruction* instruction) {
 				if (!socket_send(config_fs.socket_memory, serialize_instruction(mem_request))) {
 					log_error(config_fs.logger, "Error al enviar instrucciones a memoria");
 				}
-				t_package* package_receive_memory = socket_receive(config_fs.socket_memory);
-				char* to_write = deserialize_message(package_receive_memory);
+				t_package* package = socket_receive(config_fs.socket_memory);
+				if (package == NULL) {
+					log_error(config_fs.logger, "Se desconectó memoria");
+					return false;
+				}
+				char* to_write = deserialize_message(package);
 				list_add(instruction->args, to_write);
 				instruction_destroy(mem_request);
 			}
@@ -98,10 +106,10 @@ char* iterate_block_file(t_instruction* instruction) {
 	char* memory_address = list_get(instruction->args, 6);
 	char* str_read;
 	if (instruction->op_code == F_READ) {
-		log_info(config_fs.logger, "Leer Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read) ;
+		log_info(config_fs.logger, "Leer Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read);
 		str_read = calloc(size_read + 1, sizeof(char));
 	} else {
-		log_info(config_fs.logger, "Escribir Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read) ;
+		log_info(config_fs.logger, "Escribir Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read);
 		str_read = list_get(instruction->args, 7);
 		log_info(config_fs.logger, "El valor de la cadena a escribir es: %s", str_read);
 	}
@@ -111,8 +119,8 @@ char* iterate_block_file(t_instruction* instruction) {
 	int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
 	char* puntero_indirecto_char = config_get_string_value(fcb_data, "PUNTERO_INDIRECTO");
 	if (strcmp(puntero_indirecto_char, "") != 0) {
-		log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
-		usleep(config_fs.RETARDO_ACCESO  * 1000);
+		log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+		usleep(config_fs.RETARDO_ACCESO * 1000);
 		log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 1 - Bloque File System: %i ", file_name, PUNTERO_INDIRECTO);
 	}
 	int* PUNTERO_DIRECTO = s_malloc(sizeof(int));
@@ -126,13 +134,13 @@ char* iterate_block_file(t_instruction* instruction) {
 	int block_number_file;
 	for (int i = position_initial_block; i <= position_initial_block + blocks_need; i++) {
 		int block_number = *(int*)list_get(pi_list, i);
-		if(i>0){
-			block_number_file=i;
-		}else{
-			block_number_file=i+1;
+		if (i > 0) {
+			block_number_file = i;
+		} else {
+			block_number_file = i + 1;
 		}
-		log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
-		usleep(config_fs.RETARDO_ACCESO  * 1000);
+		log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+		usleep(config_fs.RETARDO_ACCESO * 1000);
 		log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: %i - Bloque File System: %i ", file_name, block_number_file, block_number);
 		int start_position_in_block = block_number * config_fs.block_size;
 		int end_position_in_block = start_position_in_block + config_fs.block_size;
@@ -154,7 +162,7 @@ char* iterate_block_file(t_instruction* instruction) {
 		str_read[read_positions] = '\0';
 		log_info(config_fs.logger, "El valor de la cadena leída es: %s", str_read);
 	} else {
-		log_info(config_fs.logger, "Escribió correctamente el Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read) ;
+		log_info(config_fs.logger, "Escribió correctamente el Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, memory_address, size_read);
 	}
 	free(file_name);
 	free(directorio);
@@ -175,17 +183,17 @@ void truncate_file(t_instruction* instruction) {
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 	t_config* fcb_data = config_create(full_file_path);
-	log_info(config_fs.logger, "Truncar Archivo: %s - Tamaño: %i",file_name, file_size);
+	log_info(config_fs.logger, "Truncar Archivo: %s - Tamaño: %i", file_name, file_size);
 	if (fcb_data == NULL) {
 		open_file(instruction);
 		truncate_file(instruction);
 	} else {
 		resize_block(fcb_data, &file_size, file_name);
 	}
-	log_info(config_fs.logger, "Archivo truncado: %s",file_name);
-	free(directorio); 
+	log_info(config_fs.logger, "Archivo truncado: %s", file_name);
+	free(directorio);
 	free(full_file_path);
-	config_destroy(fcb_data); 
+	config_destroy(fcb_data);
 }
 
 void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
@@ -201,30 +209,30 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 		int PUNTERO_DIRECTO = config_get_int_value(fcb_data, "PUNTERO_DIRECTO");
 		int PUNTERO_INDIRECTO = config_get_int_value(fcb_data, "PUNTERO_INDIRECTO");
 		if (strcmp(puntero_indirecto_char, "") != 0) {
-			log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
-			usleep(config_fs.RETARDO_ACCESO  * 1000);
+			log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+			usleep(config_fs.RETARDO_ACCESO * 1000);
 			log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 1- Bloque File System: %i ", file_name, PUNTERO_INDIRECTO);
 		}
 		pi_list = get_bf_ip(PUNTERO_INDIRECTO);
 		int list_length = list_size(pi_list);
 		if (*file_size == 0) {
 			if (strcmp(puntero_directo_char, "") != 0) {
-				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_DIRECTO);
-				usleep(config_fs.RETARDO_ACCESO  * 1000);
+				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_DIRECTO);
+				usleep(config_fs.RETARDO_ACCESO * 1000);
 				log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 0 - Bloque File System: %i ", file_name, PUNTERO_DIRECTO);
 				for (int i = PUNTERO_DIRECTO * config_fs.block_size; i < (PUNTERO_DIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
 				}
-				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO",PUNTERO_DIRECTO);
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", PUNTERO_DIRECTO);
 				bitarray_clean_bit(config_fs.bitmap, PUNTERO_DIRECTO);
-				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE",PUNTERO_DIRECTO);
+				log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", PUNTERO_DIRECTO);
 				config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
 			}
 			if (strcmp(puntero_indirecto_char, "") != 0) {
 				for (int i = 0; i < list_length; i++) {
 					int pi_pos = *((int*)list_get(pi_list, i));
-					log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",pi_pos);
-					usleep(config_fs.RETARDO_ACCESO  * 1000);
+					log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", pi_pos);
+					usleep(config_fs.RETARDO_ACCESO * 1000);
 					log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: %i - Bloque File System: %i ", file_name, pi_pos, pi_pos);
 					for (int j = pi_pos * config_fs.block_size; j < (pi_pos * config_fs.block_size) + config_fs.block_size; j++) {
 						config_fs.block_file[j] = '\0';
@@ -233,8 +241,8 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 					bitarray_clean_bit(config_fs.bitmap, pi_pos);
 					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 0 - LIBRE", pi_pos);
 				}
-				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
-				usleep(config_fs.RETARDO_ACCESO  * 1000);
+				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+				usleep(config_fs.RETARDO_ACCESO * 1000);
 				log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 1- Bloque File System: %i ", file_name, PUNTERO_INDIRECTO);
 				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
@@ -252,8 +260,8 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 			if (strcmp(puntero_indirecto_char, "") != 0) {
 				for (int i = 0; i < list_length; i++) {
 					int pi_pos = *((int*)list_get(pi_list, i));
-					log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",pi_pos);
-					usleep(config_fs.RETARDO_ACCESO  * 1000);
+					log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", pi_pos);
+					usleep(config_fs.RETARDO_ACCESO * 1000);
 					log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: %i - Bloque File System: %i ", file_name, pi_pos, pi_pos);
 					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", pi_pos);
 					bitarray_clean_bit(config_fs.bitmap, pi_pos);
@@ -262,8 +270,8 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 						config_fs.block_file[j] = '\0';
 					}
 				}
-				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
-				usleep(config_fs.RETARDO_ACCESO  * 1000);
+				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+				usleep(config_fs.RETARDO_ACCESO * 1000);
 				log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 1 - Bloque File System: %i ", file_name, PUNTERO_INDIRECTO);
 				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
@@ -295,8 +303,8 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 					*pi_pos_ptr = pi_position;
 					list_add(pi_list, pi_pos_ptr);
 				}
-				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
-				usleep(config_fs.RETARDO_ACCESO  * 1000);
+				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+				usleep(config_fs.RETARDO_ACCESO * 1000);
 				log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 1 - Bloque File System: %i ", file_name, PUNTERO_INDIRECTO);
 				set_bf_ip(PUNTERO_INDIRECTO, pi_list);
 			} else if ((count_pi_need) < list_length) {
@@ -304,8 +312,8 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 				for (int i = 0; i < diferencia; i++) {
 					int index = (list_length - i - 1);
 					int ip_eliminar = *((int*)list_get(pi_list, index));
-					log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",ip_eliminar);
-					usleep(config_fs.RETARDO_ACCESO  * 1000);
+					log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", ip_eliminar);
+					usleep(config_fs.RETARDO_ACCESO * 1000);
 					log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: %i - Bloque File System: %i ", file_name, ip_eliminar, ip_eliminar);
 					log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", ip_eliminar);
 					bitarray_clean_bit(config_fs.bitmap, ip_eliminar);
@@ -316,8 +324,8 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 					free(list_get(pi_list, index));
 					list_remove(pi_list, index);
 				}
-				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i",PUNTERO_INDIRECTO);
-				usleep(config_fs.RETARDO_ACCESO  * 1000);
+				log_warning(config_fs.logger, "Comienza retardo acceso a bloque: %i", PUNTERO_INDIRECTO);
+				usleep(config_fs.RETARDO_ACCESO * 1000);
 				log_info(config_fs.logger, "Acceso Bloque - Archivo: %s - Bloque Archivo: 1 - Bloque File System: %i ", file_name, PUNTERO_INDIRECTO);
 				for (int i = PUNTERO_INDIRECTO * config_fs.block_size; i < (PUNTERO_INDIRECTO * config_fs.block_size) + config_fs.block_size; i++) {
 					config_fs.block_file[i] = '\0';
@@ -328,9 +336,9 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 	}
 	config_save(fcb_data);
 	free(size_file_char);
-	if(pd_position_string!=NULL) free(pd_position_string);
-	if(pi_position_string!=NULL) free(pi_position_string);
-	if(pi_list!=NULL) list_destroy_and_destroy_elements(pi_list, free);
+	if (pd_position_string != NULL) free(pd_position_string);
+	if (pi_position_string != NULL) free(pi_position_string);
+	if (pi_list != NULL) list_destroy_and_destroy_elements(pi_list, free);
 }
 
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list) {
@@ -349,7 +357,7 @@ t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 		memcpy(number, config_fs.block_file + i, sizeof(uint32_t));
 		if (*number != 0) {
 			list_add(pi_list, number);
-		}else{
+		} else {
 			free(number);
 		}
 	}
@@ -366,7 +374,7 @@ void open_file(t_instruction* instruction) {
 	char* directorio = getcwd(NULL, 0);
 	char* full_file_path = string_from_format("%s/cfg/%s%s.dat", directorio, config_fs.PATH_FCB, file_name);
 
-	log_info(config_fs.logger, "Abrir Archivo: %s",file_name);
+	log_info(config_fs.logger, "Abrir Archivo: %s", file_name);
 	FILE* fcb = fopen(full_file_path, "r");
 	if (fcb == NULL) {
 		fopen(full_file_path, "w");
@@ -376,18 +384,18 @@ void open_file(t_instruction* instruction) {
 		log_warning(config_fs.logger, "Existía el archivo");
 		fclose(fcb);
 	}
-	log_info(config_fs.logger, "Archivo abierto: %s",file_name);
+	log_info(config_fs.logger, "Archivo abierto: %s", file_name);
 	free(full_file_path);
 	free(directorio);  // liberamos directorio
 }
 void create_file(char* full_file_path, char* file_name) {
-	log_info(config_fs.logger, "Crear Archivo: %s",file_name);
+	log_info(config_fs.logger, "Crear Archivo: %s", file_name);
 	t_config* fcb_data = config_create(full_file_path);
 	if (fcb_data == NULL) {
 		log_warning(config_fs.logger, "Error creando FCB");	 // liberamos full_file_path antes de abortar
 		abort();
 	}
-	log_info(config_fs.logger, "Archivo creado: %s",file_name);
+	log_info(config_fs.logger, "Archivo creado: %s", file_name);
 	config_set_value(fcb_data, "NOMBRE_ARCHIVO", file_name);
 	config_set_value(fcb_data, "TAMANIO_ARCHIVO", "");
 	config_set_value(fcb_data, "PUNTERO_DIRECTO", "");
@@ -397,7 +405,6 @@ void create_file(char* full_file_path, char* file_name) {
 	config_destroy(fcb_data);  // liberamos full_file_path
 }
 
-
 int next_bit_position() {
 	for (int i = 0; i < config_fs.block_count; i++) {
 		if (!bitarray_test_bit(config_fs.bitmap, i)) {
@@ -405,7 +412,7 @@ int next_bit_position() {
 			bitarray_set_bit(config_fs.bitmap, i);
 			log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", i);
 			return i;
-		}else{
+		} else {
 			log_info(config_fs.logger, "Acceso a Bitmap - Bloque: %i - Estado: 1 - OCUPADO", i);
 		}
 	}

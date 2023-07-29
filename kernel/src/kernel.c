@@ -1,8 +1,7 @@
 #include "kernel.h"
 
 int main(int argc, char** argv) {
-	char* config_path = argv[1];
-	t_config* config = start_config(config_path);
+	t_config* config = start_config(argv[1] != NULL ? argv[1] : "default");
 	t_global_config_kernel* gck = new_global_config_kernel(config);
 	t_helper_fs_handler* hfi = s_malloc(sizeof(t_helper_fs_handler));
 	log_warning(gck->logger, "Iniciando el kernel");
@@ -64,9 +63,9 @@ int main(int argc, char** argv) {
 
 		// Recibe el nuevo execution context
 		t_package* package = socket_receive(socket_cpu);
-		if (package != NULL && package->type == EXECUTION_CONTEXT)
+		if (package != NULL && package->type == EXECUTION_CONTEXT) {
 			pcb->execution_context = deserialize_execution_context(package);
-		else {
+		} else {
 			log_error(gck->logger, "No se pudo recibir el Execution Context del proceso %d", pcb->pid);
 			break;
 		}
@@ -101,7 +100,7 @@ int main(int argc, char** argv) {
 					break;
 				}
 				t_package* package = socket_receive(hfi->socket_filesystem);
-				if (package->type != MESSAGE_OK) {
+				if (package == NULL || package->type != MESSAGE_OK) {
 					log_error(gck->logger, "Error al abrir archivo");
 					break;
 				}
@@ -146,14 +145,14 @@ int main(int argc, char** argv) {
 					break;
 				}
 				t_package* package = socket_receive(hfi->socket_filesystem);
-				if (package->type != MESSAGE_OK) {
+				if (package == NULL || package->type != MESSAGE_OK) {
 					log_error(gck->logger, "Error al truncar archivo");
 					break;
 				}
 				log_warning(gck->logger, "PID: %d - Truncar Archivo: %s - Tamaño: %s", pcb->pid, (char*)list_get(kernel_request->args, 0), (char*)list_get(kernel_request->args, 1));
 				break;
 			}
-			case F_READ:  // filename, logical address, bytes count, segment, offset, direcfisica -> NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ADRESS (6)
+			case F_READ:  // filename, logical address, bytes count, segment, offset, dirección física -> NAME(0) POS(1) SIZE(2) PID(3) S_ID(4) OFFSET(5) ADDRESS (6)
 			case F_WRITE: {
 				char* filename = list_get(kernel_request->args, 0);
 				// Se asegura de que el archivo esté abierto por el proceso
@@ -181,6 +180,10 @@ int main(int argc, char** argv) {
 					break;
 				}
 				t_package* package = socket_receive(gck->socket_memory);
+				if (package == NULL) {
+					log_error(gck->logger, "Se desconectó memoria");
+					break;
+				}
 				if (package->type == COMPACT_REQUEST) {
 					if (!queue_is_empty(hfi->file_instructions)) log_warning(gck->logger, "Esperando Fin de Operaciones de FS");
 					while (!queue_is_empty(hfi->file_instructions)) sleep(1);
@@ -192,6 +195,10 @@ int main(int argc, char** argv) {
 					}
 					free(mem_op);
 					t_package* compact_package = socket_receive(gck->socket_memory);
+					if (compact_package == NULL) {
+						log_error(gck->logger, "Se desconectó memoria");
+						break;
+					}
 					t_dictionary* segment_tables = deserialize_all_segments_tables(compact_package);
 					// Cargar todos los nuevos segmentos
 					for (int i = 0; i < list_size(gck->active_pcbs->elements); i++) {
@@ -207,6 +214,10 @@ int main(int argc, char** argv) {
 					}
 					free(compact_package);
 					package = socket_receive(gck->socket_memory);
+					if (package == NULL) {
+						log_error(gck->logger, "Se desconectó memoria");
+						break;
+					}
 				}
 				if (package->type == COMPACT_REQUEST) {
 					log_error(gck->logger, "Error: Solicitud de compactación consecutiva");
@@ -215,14 +226,12 @@ int main(int argc, char** argv) {
 					log_warning(gck->logger, "PID: %d - Estado Anterior: READY - Estado Actual: EXIT", pcb->pid);
 					pcb->state = EXIT_PROCESS;
 				} else if (package->type == MESSAGE_OK) {
-					char* s_base = deserialize_message(package);
 					t_segment* segment = s_malloc(sizeof(t_segment));
-					segment->base = (void*)atoi(s_base);
+					segment->base = deserialize_message(package);
 					segment->s_id = atoi((char*)list_get(kernel_request->args, 0));
 					segment->offset = atoi((char*)list_get(kernel_request->args, 1));
 					list_add(pcb->execution_context->segments_table, segment);
 					log_warning(gck->logger, "PID: %d - Crear Segmento - Id: %s - Tamaño: %s", pcb->pid, (char*)list_get(kernel_request->args, 0), (char*)list_get(kernel_request->args, 1));
-					free(s_base);
 				} else
 					log_error(gck->logger, "Error desconocido al crear segmento");
 				break;

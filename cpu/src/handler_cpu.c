@@ -65,12 +65,13 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			}
 			char* value = deserialize_message(package);
 			set_register(list_get(instruction->args, 0), value, ec->cpu_register);
+			instruction_destroy(mem_op);
 			log_warning(config_cpu.logger, "PID: %d - Acción: LEER - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->address, value);
 			free(value);
 			break;
 		}
 		case MOV_OUT: {	 // Dirección Lógica, Registro (y associated_pa)
-			if (associated_pa == NULL){
+			if (associated_pa == NULL) {
 				ec->kernel_request = instruction_new(EXIT);
 				list_add(ec->kernel_request->args, string_itoa(9));
 				break;
@@ -91,8 +92,7 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 			if (package == NULL) {
 				log_error(config_cpu.logger, "Error al escribir en memoria");
 				break;
-			}
-			if (package->type == SEG_FAULT) {
+			} else if (package->type == SEG_FAULT) {
 				log_error(config_cpu.logger, "Error en memoria: Segmentation Fault");
 				ec->kernel_request = instruction_new(EXIT);
 				list_add(ec->kernel_request->args, string_itoa(9));
@@ -101,6 +101,8 @@ void execute(t_instruction* instruction, t_execution_context* ec, t_physical_add
 				log_error(config_cpu.logger, "Error desconocido en memoria");
 				break;
 			}
+			package_destroy(package);
+			instruction_destroy(mem_op);
 			log_warning(config_cpu.logger, "PID: %d - Acción: ESCRIBIR - Segmento: %d - Dirección Física: %li - Valor: %s", ec->pid, associated_pa->segment, associated_pa->address, value);
 			break;
 		}

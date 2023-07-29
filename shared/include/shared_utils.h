@@ -155,8 +155,6 @@ char* get_full_path(char* path);
 // Safe Memory Allocation. Crashea si no hay más memoria.
 void* s_malloc(size_t size);
 
-void print_execution_context(t_execution_context* execution_context);
-
 // Retorna si un valor está en una lista
 bool is_in_list(t_list* list, char* value);
 
@@ -165,9 +163,6 @@ t_instruction* instruction_new(int32_t op_code);
 
 // Duplica una instrucción
 t_instruction* instruction_duplicate(t_instruction* source);
-
-// Destruye un elemento
-void destroy_element(void* element);
 
 // Elimina una instrucción
 void instruction_destroy(t_instruction* instruction);

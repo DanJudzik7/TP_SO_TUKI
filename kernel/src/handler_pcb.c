@@ -77,16 +77,16 @@ void handle_fs(t_helper_fs_handler* hfi) {
 			continue;
 		}
 		log_warning(hfi->logger, "PID: %d - %s Archivo: %s - Puntero: %s - Dirección Memoria: %s - Tamaño: %s",
-			fi->pcb->pid,
-			fi->instruction->op_code == F_READ ? "Leer" : "Escribir",
-			(char*)list_get(fi->instruction->args, 0),
-			(char*)list_get(fi->instruction->args, 1),
-			(char*)list_get(fi->instruction->args, 6),
-			(char*)list_get(fi->instruction->args, 2)
-		);
+					fi->pcb->pid,
+					fi->instruction->op_code == F_READ ? "Leer" : "Escribir",
+					(char*)list_get(fi->instruction->args, 0),
+					(char*)list_get(fi->instruction->args, 1),
+					(char*)list_get(fi->instruction->args, 6),
+					(char*)list_get(fi->instruction->args, 2));
 		fi->pcb->state = READY;
 		log_warning(hfi->logger, "PID: %d - Estado Anterior: BLOCK - Estado Actual: READY", fi->pcb->pid);
 		package_destroy(package);
 		instruction_destroy(fi->instruction);
+		free(fi);
 	}
 }

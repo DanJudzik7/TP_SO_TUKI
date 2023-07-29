@@ -3,8 +3,7 @@
 extern t_config_memory config_memory;
 
 int main(int argc, char** argv) {
-	char* config_path = argv[1];
-	setup_config(config_path);
+	setup_config(argv[1] != NULL ? argv[1] : "first");
 	log_info(config_memory.logger, "Iniciando Memoria...");
 	int server_memory = socket_initialize_server(config_memory.port);  // Inicializo el socket en el puerto cargado por la config
 	if (server_memory == -1) {
@@ -13,7 +12,7 @@ int main(int argc, char** argv) {
 	}
 	log_warning(config_memory.logger, "Socket de servidor inicializado en puerto %s", config_memory.port);
 
-	// Inicializo la memoria 
+	// Inicializo la memoria
 	void* memory = s_malloc(config_memory.memory_size);
 	memset(memory, 0, config_memory.memory_size);
 	t_memory_structure* memory_structure = new_memory_structure(memory);

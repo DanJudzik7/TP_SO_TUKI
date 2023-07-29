@@ -4,8 +4,7 @@ configuration_cpu config_cpu;
 
 int main(int argc, char** argv) {
 	t_log* logger = start_logger("cpu");
-	char* config_path = argv[1];
-	t_config* config = start_config(config_path);
+	t_config* config = start_config(argv[1] != NULL ? argv[1] : "base");
 
 	log_warning(logger, "Iniciando la CPU");
 	config_cpu.logger = logger;
@@ -44,7 +43,7 @@ int main(int argc, char** argv) {
 			t_execution_context* context = deserialize_execution_context(package);
 			context->kernel_request = NULL;
 			log_info(config_cpu.logger, "Llegó un nuevo Execution Context, se va a ejecutar desde la instrucción %d", context->program_counter);
-			//Inicializo el cronometro del tiempo de ráfaga
+			// Inicializo el cronometro del tiempo de ráfaga
 			config_cpu.burst_time = temporal_create();
 			// Ejecuto mientras no se tenga que desalojar
 			while (context->kernel_request == NULL) {
@@ -58,11 +57,11 @@ int main(int argc, char** argv) {
 				free(pa);
 				context->program_counter++;
 			}
-			//Detengo el cronometro de ráfaga
+			// Detengo el cronometro de ráfaga
 			temporal_stop(config_cpu.burst_time);
-			//Obtengo su tiempo
+			// Obtengo su tiempo
 			context->last_burst_time = temporal_gettime(config_cpu.burst_time);
-			//Lo destruyo para liberar memoria
+			// Lo destruyo para liberar memoria
 			temporal_destroy(config_cpu.burst_time);
 			t_package* package_context = serialize_execution_context(context);
 			if (!socket_send(kernel_socket, package_context)) {

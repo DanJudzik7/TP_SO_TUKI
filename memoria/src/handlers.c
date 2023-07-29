@@ -30,7 +30,7 @@ void handle_modules(t_memory_thread* mt) {
 		t_instruction* instruction = deserialize_instruction(package);
 		pthread_mutex_lock(&memory_access);
 		switch ((t_memory_op)instruction->op_code) {
-			case MEM_READ_ADDRESS: { // s_id, offset, size, pid, origen
+			case MEM_READ_ADDRESS: {  // s_id, offset, size, pid, origen
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
 				int size = atoi(list_get(instruction->args, 2));
@@ -43,7 +43,7 @@ void handle_modules(t_memory_thread* mt) {
 					log_error(config_memory.logger, "Error al enviar resultado al socket %d", mt->socket);
 				break;
 			}
-			case MEM_WRITE_ADDRESS: { // s_id, offset, buffer, pid, origen
+			case MEM_WRITE_ADDRESS: {  // s_id, offset, buffer, pid, origen
 				int s_id = atoi(list_get(instruction->args, 0));
 				int offset = atoi(list_get(instruction->args, 1));
 				char* buffer = list_get(instruction->args, 2);
@@ -82,13 +82,13 @@ void handle_modules(t_memory_thread* mt) {
 				int flag = add_segment(mt->mem_structure, pid, size, s_id);
 				t_package* req_package;
 				switch (flag) {
-					case -1: // Devuelvo solicitud de compactación
+					case -1:  // Devuelvo solicitud de compactación
 						req_package = package_new(COMPACT_REQUEST);
 						break;
-					case -2: // Devuelvo no hay espacio suficiente
+					case -2:  // Devuelvo no hay espacio suficiente
 						req_package = package_new(OUT_OF_MEMORY);
 						break;
-					default: // Devuelvo la base del segmento creado
+					default:  // Devuelvo la base del segmento creado
 						req_package = serialize_message(string_itoa(flag), false);
 						break;
 				}
@@ -118,8 +118,8 @@ void handle_modules(t_memory_thread* mt) {
 			}
 		}
 		package_destroy(package);
-		list_clean_and_destroy_elements(instruction->args, destroy_element);
-		free(instruction);
+		list_clean_and_destroy_elements(instruction->args, free);
+		instruction_destroy(instruction);
 		pthread_mutex_unlock(&memory_access);
 	}
 }

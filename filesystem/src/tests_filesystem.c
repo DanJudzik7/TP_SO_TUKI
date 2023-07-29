@@ -4,7 +4,7 @@ int main() {
 	setup_config(false);
 	printf("Iniciando Tests...\n\n");
 
-	//test_instruction_serializing();
+	// test_instruction_serializing();
 	// test_bf_ip();
 	test_full_file_op();
 	printf("\n\nTests Completados\n");
@@ -55,24 +55,24 @@ void test_full_file_op() {
 
 	t_instruction* ins_rw = instruction_new(F_WRITE);
 	list_add(ins_rw->args, strdup("prueba"));
-	list_add(ins_rw->args, strdup("25")); // Posición Read/Write
-	list_add(ins_rw->args, strdup("32")); // Tamaño Read/Write
-	list_add(ins_rw->args, strdup("64")); // PID
-	list_add(ins_rw->args, strdup("32")); // Segment ID
-	list_add(ins_rw->args, strdup("32")); // Offset
-	list_add(ins_rw->args, strdup("32")); // memoria
+	list_add(ins_rw->args, strdup("25"));  // Posición Read/Write
+	list_add(ins_rw->args, strdup("32"));  // Tamaño Read/Write
+	list_add(ins_rw->args, strdup("64"));  // PID
+	list_add(ins_rw->args, strdup("32"));  // Segment ID
+	list_add(ins_rw->args, strdup("32"));  // Offset
+	list_add(ins_rw->args, strdup("32"));  // memoria
 	list_add(ins_rw->args, strdup("SonyPlaystation5SonyPlaystation4"));
 	process_instruction(ins_rw);
 	instruction_destroy(ins_rw);
 
 	t_instruction* ins_r = instruction_new(F_READ);
 	list_add(ins_r->args, strdup("prueba"));
-	list_add(ins_r->args, strdup("25")); // Posición Read/Write
-	list_add(ins_r->args, strdup("32")); // Tamaño Read/Write
-	list_add(ins_r->args, strdup("64")); // PID
-	list_add(ins_r->args, strdup("32")); // Segment ID
-	list_add(ins_r->args, strdup("32")); // Offset
-	list_add(ins_r->args, strdup("32")); // memoria
+	list_add(ins_r->args, strdup("25"));  // Posición Read/Write
+	list_add(ins_r->args, strdup("32"));  // Tamaño Read/Write
+	list_add(ins_r->args, strdup("64"));  // PID
+	list_add(ins_r->args, strdup("32"));  // Segment ID
+	list_add(ins_r->args, strdup("32"));  // Offset
+	list_add(ins_r->args, strdup("32"));  // memoria
 	list_add(ins_r->args, strdup("SonyPlaystation5SonyPlaystation4"));
 	process_instruction(ins_r);
 	instruction_destroy(ins_r);

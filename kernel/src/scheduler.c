@@ -26,6 +26,7 @@ void long_term_schedule(t_global_config_kernel* gck) {
 				if (list_get(resource_list, j) == pcb) list_remove(resource_list, j);
 			}
 		}
+		list_destroy(resources_names);
 
 		// Destruyo las estructuras
 		t_instruction* mem_op = instruction_new(MEM_END_PROCCESS);
@@ -38,6 +39,7 @@ void long_term_schedule(t_global_config_kernel* gck) {
 			log_error(gck->logger, "Error al eliminar estructuras del proceso");
 			abort();
 		}
+		instruction_destroy(mem_op);
 		pcb->execution_context->segments_table = deserialize_segment_table(package);
 
 		pcb_destroy(pcb);
@@ -60,6 +62,7 @@ void long_term_schedule(t_global_config_kernel* gck) {
 			log_error(gck->logger, "Error al inicializar estructuras del proceso");
 			abort();
 		}
+		instruction_destroy(mem_op);
 		pcb->execution_context->segments_table = deserialize_segment_table(package);
 
 		queue_push(gck->active_pcbs, pcb);
@@ -83,8 +86,7 @@ t_pcb* short_term_scheduler(t_global_config_kernel* gck) {
 	}
 }
 
-void show_queue_ready(t_global_config_kernel* gck){
-
+void show_queue_ready(t_global_config_kernel* gck) {
 	char* pids_list = string_new();
 	for (int i = 0; i < queue_size(gck->active_pcbs); i++) {
 		t_pcb* pcb = list_get(gck->active_pcbs->elements, i);
@@ -92,6 +94,6 @@ void show_queue_ready(t_global_config_kernel* gck){
 		string_append_with_format(&pids_list, "%d", pcb->pid);
 		if (i < queue_size(gck->active_pcbs) - 1) string_append(&pids_list, ", ");
 	}
-	
 	log_warning(gck->logger, "Cola Ready %s: [%s]", gck->algorithm_is_hrrn ? "HRRN" : "FIFO", pids_list);
+	free(pids_list);
 }

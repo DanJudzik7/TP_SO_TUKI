@@ -3,10 +3,10 @@
 extern t_config_memory config_memory;
 
 int main() {
-	setup_config();
+	setup_config("first");
 	printf("Iniciando Tests...\n\n");
 
-	//test_segment_creation();
+	// test_segment_creation();
 	test_compact();
 	// test_rw();
 
@@ -57,12 +57,12 @@ void test_compact() {
 	write_memory(0, 1, 4, "hola", memory_structure, 1, "Test");
 	graph_ram(memory_structure, memory);
 
-	//compact_memory(memory_structure);
-	char* buffer = read_memory(0, 1, 4, memory_structure, 1,"Test");
+	// compact_memory(memory_structure);
+	char* buffer = read_memory(0, 1, 4, memory_structure, 1, "Test");
 	printf("El valor leído es: %s \n", buffer);
-	
+
 	t_package* package = serialize_all_segments_tables(memory_structure);
-	
+
 	// Función para graficar la RAM
 	graph_ram(memory_structure, memory);
 	graph_table_pid_segments(memory_structure->table_pid_segments, memory_structure->segment_zero->base);
@@ -70,7 +70,6 @@ void test_compact() {
 	t_dictionary* all_segments = deserialize_all_segments_tables(package);
 	t_list* segment_table = dictionary_get(all_segments, "0");
 	graph_specific_table_pid_segments(segment_table, 0, 0);
-
 }
 
 void test_rw() {
@@ -80,9 +79,9 @@ void test_rw() {
 
 	express_segment(1, 1, memory_structure);
 	printf("Iniciando escritura");
-	if (write_memory(1, 4, sizeof("hola"), "hola", memory_structure, 1,"TEST")) {
+	if (write_memory(1, 4, sizeof("hola"), "hola", memory_structure, 1, "TEST")) {
 		printf("Se escribió correctamente en memoria");
-		char* buffer = read_memory(1, 4, sizeof("hola"), memory_structure, 1,"TEST");
+		char* buffer = read_memory(1, 4, sizeof("hola"), memory_structure, 1, "TEST");
 		printf("El valor leído es: %s", buffer);
 	} else
 		printf("No se pudo escribir en memoria");
@@ -126,4 +125,33 @@ void graph_ram(t_memory_structure* memory_structure, void* memory_base) {
 void graph_memory(t_memory_structure* memory_struct, void* memory_base) {
 	graph_ram(memory_struct, memory_base);
 	graph_table_pid_segments(memory_struct->table_pid_segments, memory_base);
+}
+
+// Graficar una tabla especifica de tipo table_pid_segments
+void graph_specific_table_pid_segments(t_list* segment_table, int process_id, t_memory_structure* memory_base) {
+	printf("\n|Tabla de segmentos del proceso PID  %i|\n", process_id);
+	printf("--------------------------------------\n");
+	for (int i = 0; i < list_size(segment_table); i++) {
+		t_segment* seg = list_get(segment_table, i);
+		printf("| PID: %i |Segmento: %i | base: %u  | tamaño: %i |\n", process_id, seg->s_id, transform_base_to_decimal(seg->base, memory_base->segment_zero->base), seg->offset);
+	}
+	printf("--------------------------------------\n");
+}
+
+// Graficar la tabla table_pid_segments
+void graph_table_pid_segments(t_dictionary* table_pid_segments, t_memory_structure* memory_base) {
+	t_list* keys = dictionary_keys(table_pid_segments);
+	for (int i = 1; i < list_size(keys); i++) {
+		char* key = string_duplicate(list_get(keys, i));
+		int process_id = atoi(key);
+		t_list* segment_table = dictionary_get(table_pid_segments, key);
+		if (segment_table == NULL) {
+			free(key);	// Liberar la memoria asignada por string_duplicate
+			continue;	// Pasar a la siguiente clave si no se encuentra la tabla de segmentos
+		}
+		graph_specific_table_pid_segments(segment_table, process_id, memory_base);
+		printf("\n");
+		free(key);	// Liberar la memoria asignada por string_duplicate
+	}
+	list_destroy(keys);
 }

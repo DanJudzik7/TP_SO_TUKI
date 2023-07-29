@@ -6,17 +6,13 @@
 int main();
 
 // Crea un segmento
-void express_segment(int PID, int SEGMENTO, t_memory_structure* memory_structure);
+void express_segment(int pid, int segment, t_memory_structure* memory_structure);
 // Test donde creo segmentos, los elimino, y se compactan los contiguos
 void test_segment_creation();
-// Test de compactacion de la mem principal
+// Test de compactación de la mem principal
 void test_compact();
 // Test de lectura y escritura
 void test_rw();
-// Test de instrucciones a memoria
-void test_instruction_memory();
-// Test de buffer de memoria
-void test_buffer();
 // Función para graficar la RAM
 void graph_ram(t_memory_structure* memory_structure, void* memory_base);
 // Función para graficar una tabla especifica de tipo table_pid_segments

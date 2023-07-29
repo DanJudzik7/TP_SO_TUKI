@@ -196,6 +196,7 @@ t_package* serialize_segment(t_segment* segment, void* heap_pointer) {
 	list_add(instruction->args, string_itoa(segment->offset));
 	list_add(instruction->args, string_itoa(segment->s_id));
 	t_package* package = serialize_instruction(instruction);
+	list_clean_and_destroy_elements(instruction->args, (void*)free);
 	instruction_destroy(instruction);
 	return package;
 }
