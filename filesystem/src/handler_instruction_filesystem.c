@@ -177,10 +177,10 @@ char* iterate_block_file(t_instruction* instruction) {
 		log_info(config_fs.logger, "El valor de la cadena leida es: %s", str_read);
 	} else {
 		log_info(config_fs.logger, "Escribio correctamente el Archivo: %s - Puntero: %i - Memoria: %s - Tamaño: %i", file_name, position_read, direccion_memoria, size_read) ;
-		for (int i = 0; i < 240; i++) {
+		/*for (int i = 0; i < 240; i++) {
 			char c = config_fs.block_file[i];
 			printf("Valor en la posición %d: %c\n", i, c);
-		}
+		}*/
 	}
 	free(file_name);
 	free(directorio);
@@ -355,6 +355,7 @@ void resize_block(t_config* fcb_data, int* file_size, char* file_name) {
 		}
 	}
 	config_save(fcb_data);
+	free(size_file_char);
 }
 
 void set_bf_ip(int PUNTERO_INDIRECTO, t_list* pi_list) {
@@ -374,6 +375,8 @@ t_list* get_bf_ip(int PUNTERO_INDIRECTO) {
 		// printf("Valor en la posición %d: %u\n", i, *number);
 		if (*number != 0) {
 			list_add(pi_list, number);
+		}else{
+			free(number);
 		}
 	}
 	return pi_list;

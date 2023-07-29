@@ -16,12 +16,12 @@ void setup_config(bool useMemory) {
 	t_config* superblock = start_superblock();
 	config_fs.block_size = config_get_int_value(superblock, "BLOCK_SIZE");
 	config_fs.block_count = config_get_int_value(superblock, "BLOCK_COUNT");
-
 	config_fs.bitmap = start_bitmap();
 	config_fs.block_file = start_block_file();
 	log_warning(config_fs.logger, "Tamaño de bloque: %d, Cantidad de bloques: %d", config_fs.block_size, config_fs.block_count);
 
 	config_fs.socket_memory = useMemory ? connect_module(config_fs.config, config_fs.logger, "MEMORIA") : -1;
+	free(superblock);
 }
 
 t_config* start_superblock() {
